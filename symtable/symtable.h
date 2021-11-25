@@ -41,17 +41,17 @@ SymTable *allocateSymTable();                                    // Allocate new
 SymTableNode *insertNewEntry(SymTable *symtable, int entryType); // insert new row
 SymTableNode *lookup(SymTable *symtable, int entryType);         // row based search
 
-// TODO: // TODO: reimplement to get attr by index
-void set_attr(SymTable* symtable , int index, char *name, char *val);
+// sets attr by index
+void setAttrByIndex(SymTable *symtable, int index, char *name, char *val);
 
-// Not required for now
-// void set_attr(SymTableNode *entry, char *name, char *val); // add cell to a defined row
+// sets attr by node pointer
+void set_attr(SymTableNode *entry, char *name, char *val); // add cell to a defined row
 
-// TODO: reimplement to get attr by index
-char *get_attr(SymTable* symtable , int index, char *name);
+// gets attr by index
+char *getAttrByIndex(SymTable *symtable, int index, char *name);
 
-// Not required for now
-// char *get_attr(SymTableNode *entry, char *name); // get info from col
+// gets attr by node pointer
+char *get_attr(SymTableNode *entry, char *name); // get info from col
 
 // delete
 void freeUpEntryAttr(SymTableNode *entry);
@@ -59,7 +59,7 @@ void freeUpSymTable(SymTable *symtable);
 
 // NEW DEFINED FUNCTIONS
 // insert a new row in specific place
-SymTableNode* insertEntryByIndex(SymTable *symtable, int index, int entryType);
+SymTableNode *insertEntryByIndex(SymTable *symtable, int index, int entryType);
 
-SymTableNode *getEntryByIndex(SymTable* symtable , int index );
+SymTableNode *getEntryByIndex(SymTable *symtable, int index);
 #endif

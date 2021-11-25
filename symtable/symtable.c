@@ -119,9 +119,9 @@ SymTableNode *lookup(SymTable *symtable, int entryType)
     return p;
 }
 
-void set_attr(int index, char *name, char *val)
+void set_attr(SymTable* symTable, int index, char *name, char *val)
 {
-    SymTableNode *entry = getEntryByIndex(index);
+    SymTableNode *entry = getEntryByIndex(symTable, index);
     if (entry->numOfAttrs == 0)
     {
         AttrNode *rootAttr = (AttrNode *)malloc(sizeof(AttrNode));
@@ -146,9 +146,9 @@ void set_attr(int index, char *name, char *val)
     }
 }
 
-char *get_attr(int index, char *name)
+char *get_attr(SymTable* symtable ,  int index, char *name)
 {
-    SymTableNode *entry = getEntryByIndex(index);
+    SymTableNode *entry = getEntryByIndex(symtable , index);
     if (entry->numOfAttrs > 0)
     {
         // search for an attr of name `name`
@@ -269,19 +269,18 @@ SymTableNode* insertEntryByIndex(SymTable *symtable, int index, int entryType){
     }
 }
 
-void printEntryTypesList(SymTable* symtable){
-    SymTableNode* current = symtable->root;
+void printEntryTypesList(SymTable* symtable) {
+    SymTableNode *current = symtable->root;
     printf("\n");
-    while(current != NULL){
+    while (current != NULL) {
         printf("%d ->", current->entryType);
         current = current->next;
     }
     printf("NULL\n");
 
+}
 
-
-void freeUpEntryAttr(SymTableNode *entry)
-{
+void freeUpEntryAttr(SymTableNode *entry){
     AttrNode *root = entry->rootAttr;
     AttrNode *p = root;
     AttrNode *prev = root;

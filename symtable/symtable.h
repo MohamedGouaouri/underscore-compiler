@@ -42,13 +42,13 @@ SymTableNode *insertNewEntry(SymTable *symtable, int entryType); // insert new r
 SymTableNode *lookup(SymTable *symtable, int entryType);         // row based search
 
 // TODO: // TODO: reimplement to get attr by index
-void set_attr(int index, char *name, char *val);
+void set_attr(SymTable* symtable , int index, char *name, char *val);
 
 // Not required for now
 // void set_attr(SymTableNode *entry, char *name, char *val); // add cell to a defined row
 
 // TODO: reimplement to get attr by index
-char *get_attr(int index, char *name);
+char *get_attr(SymTable* symtable , int index, char *name);
 
 // Not required for now
 // char *get_attr(SymTableNode *entry, char *name); // get info from col

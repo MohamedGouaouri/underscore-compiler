@@ -18,7 +18,7 @@ int main(){
     insertNewEntry(symtable, AFFECT);
     insertNewEntry(symtable, ELSE);
     insertNewEntry(symtable, AFFECT);
-    printf("Hello world");
+    printf("PRINT FIRST INSERTS \n");
     printEntryTypesList(symtable);
     // TEST get Entry By Index
     // Get the AFFECT
@@ -30,7 +30,17 @@ int main(){
     if(nodeNull!=NULL){
         printf("56th SymtableNode entry type is : %d", nodeNull->entryType);
     }
-    printf("Insert Before the root\n");
+    // Insert in the middle
+    insertEntryByIndex(symtable, 2, LOOP_WHILE);
+    // insert before the root
+    insertEntryByIndex(symtable, 0, LOOP_WHILE);
+    // Insert after the tail (error)
+    insertEntryByIndex(symtable, 100, LOOP_WHILE);
+
+    printf("PRINT AFTER INSERTING BY INDEX");
+
+    printEntryTypesList(symtable);
+
 
     return 0;
 }

@@ -39,7 +39,7 @@ typedef struct SymTable
 
 SymTable *allocateSymTable();                                    // Allocate new sym table
 SymTableNode *insertNewEntry(SymTable *symtable, int entryType); // insert new row
-SymTableNode *lookup(SymTable *symtable, char *name);            // row based search
+SymTableNode *lookup(SymTable *symtable, int entryType);         // row based search
 
 // TODO: // TODO: reimplement to get attr by index
 void set_attr(int index, char *name, char *val);

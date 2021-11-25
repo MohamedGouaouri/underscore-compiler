@@ -6,20 +6,27 @@
     void yyerror(const char *s, int line, int col);
 %}
 
-%option yylineno
-%option noyywrap
+/*Used to get the current line number*/
+%option yylineno 
+%option noyywrap 
 %option outfile = "scanner.c"
-%x c_comment
+/*Used for multiline comments*/
+%x c_comment     
 
 UNDERSCORE "_"
 
+/*Reserved keywords*/
 FOR loop
 READ READ
 WRITE WRITE
-IF \?
-ELSE :
 ENTRY entry
 MAIN (\(\)){UNDERSCORE}" entry"(\(\))
+
+IF \?
+ELSE :
+
+/*Identifiers*/
+ID [a-zA-Z][a-zA-Z0-9_]*
 
 ANYTHING .*
 DOT \.
@@ -27,29 +34,6 @@ LINEBREAK "\n"|"\r"
 SEMICOLON ;
 COMMA \,
 
-FUNCTIONDECLARE \(\){UNDERSCORE}
-NUMBERDECLARE \${UNDERSCORE}
-STRINGDECLARE ((\"\")|(\'\')){UNDERSCORE}
-CONSTDECLARE \~{UNDERSCORE}
-BOOLEENDECLARE \?{UNDERSCORE}
-
-STRUCTTYPEDECLARE \{\}{UNDERSCORE}
-STRUCTDECLARE {UNDERSCORE}{ID}
-POINTERDECLARE ((\*)+)(({STRUCTDECLARE})|({NUMBERDECLARE}|{STRINGDECLARE}|{CONSTDECLARE}|{BOOLEENDECLARE}))
-TABLEDECLARE ((\*)*)((\$)|((\"\")|(\'\'))|(\~)|(\?)|(\{\}))((\[\])+){UNDERSCORE}
-
-ADDRESSVALUE &
-POINTERVALUE @
-
-ASSIGNMENT \<\-
-RETURN -\>
-
-DIGIT [0-9]
-NUMBER [1-9]{DIGIT}*
-INTEGER -?{NUMBER}
-REALNUMBER -?["0"{NUMBER}]"\."{DIGIT}+
-
-STRING (\"{ANYTHING}\")|(\'{ANYTHING}\') 
 OPENPARENTHESIS \(
 CLOSEPARENTHESIS \)
 OPENHOOK \{
@@ -57,8 +41,8 @@ CLOSEHOOK \}
 OPENBRACKET \[
 CLOSEBRACKET \]
 
-ID [a-zA-Z][a-zA-Z0-9_]*
 
+/*Logical and arithmetic operators*/
 EQUAL =
 NONEQUAL !=
 AND &&
@@ -75,12 +59,38 @@ DIV \/
 MOD \%
 POWER \^
 
+/*Elementary instructions*/
+ASSIGNMENT \<\-
+RETURN -\>
 
+/*Constant strings and numbers*/
+DIGIT [0-9]
+NUMBER ([1-9]{DIGIT}*|"0")
+INTEGER -?{NUMBER}
+REALNUMBER -?{NUMBER}"\."{DIGIT}+
+STRING (\"{ANYTHING}\")|(\'{ANYTHING}\') 
+
+/*Declarations*/
+FUNCTIONDECLARE \(\){UNDERSCORE}
+NUMBERDECLARE \${UNDERSCORE}
+STRINGDECLARE ((\"\")|(\'\')){UNDERSCORE}
+CONSTDECLARE \~{UNDERSCORE}
+BOOLEENDECLARE \?{UNDERSCORE}
+
+STRUCTTYPEDECLARE \{\}{UNDERSCORE}
+STRUCTDECLARE {UNDERSCORE}{ID}
+POINTERDECLARE ((\*)+)(({STRUCTDECLARE})|({NUMBERDECLARE}|{STRINGDECLARE}|{CONSTDECLARE}|{BOOLEENDECLARE}))
+TABLEDECLARE ((\*)*)((\$)|((\"\")|(\'\'))|(\~)|(\?)|(\{\}))((\[\])+){UNDERSCORE}
+
+/*Pointers*/
+ADDRESSVALUE &
+POINTERVALUE @
+
+/*Comments*/
 INLINECOMMENT #[^_]{ANYTHING}
 
 
 %%
-
 
 
 
@@ -99,6 +109,10 @@ INLINECOMMENT #[^_]{ANYTHING}
     currentColumn+=yyleng;
 }
 
+{ENTRY} {
+    printf("Found the entry '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
 
 {IF} {
     printf("Found an if Condition '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
@@ -111,9 +125,11 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 
-{ENTRY} {
-    printf("Found the entry '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+
+{ID} {
+    printf("Found an identifier '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
     currentColumn+=yyleng;
+
 }
 
 
@@ -133,89 +149,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 
-{FUNCTIONDECLARE} {
-    printf("Found a function declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-} 
 
-{NUMBERDECLARE} {
-    printf("Found a number declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{STRINGDECLARE} {
-    printf("Found a string declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{CONSTDECLARE} {
-
-    printf("Found a constant declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{BOOLEENDECLARE} {
-    printf("Found a booleen declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{STRUCTTYPEDECLARE} {
-    printf("Found a struct type declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{STRUCTDECLARE} {
-    printf("Found a struct declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{POINTERDECLARE} {
-    printf("Found a pointer declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{TABLEDECLARE} {
-    printf("Found a table declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{ADDRESSVALUE} {
-    printf("Found an address value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{POINTERVALUE} {
-    printf("Found a pointer value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{ASSIGNMENT} {
-    printf("Found an assignment  '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{RETURN} {
-    printf("Found a return '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-}
-
-{INTEGER} {
-    printf("Found a constant integer '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
-}
-
-{REALNUMBER} {
-    printf("Found a constant real number '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
-}
-
-
-{STRING} {
-    printf("Found a constant string '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-} 
 
 {OPENPARENTHESIS} {
     printf("Found an opening parenthesis '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
@@ -247,11 +181,6 @@ INLINECOMMENT #[^_]{ANYTHING}
     currentColumn+=yyleng;
 }
 
-{ID} {
-    printf("Found an identifier '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
-}
 
 			
 {EQUAL} {
@@ -330,6 +259,95 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 
+{ASSIGNMENT} {
+    printf("Found an assignment  '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{RETURN} {
+    printf("Found a return '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+
+
+{INTEGER} {
+    printf("Found a constant integer '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+
+}
+
+{REALNUMBER} {
+    printf("Found a constant real number '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+
+}
+
+
+{STRING} {
+    printf("Found a constant string '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+} 
+
+
+{FUNCTIONDECLARE} {
+    printf("Found a function declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+} 
+
+{NUMBERDECLARE} {
+    printf("Found a number declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{STRINGDECLARE} {
+    printf("Found a string declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{CONSTDECLARE} {
+
+    printf("Found a constant declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{BOOLEENDECLARE} {
+    printf("Found a booleen declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{STRUCTTYPEDECLARE} {
+    printf("Found a struct type declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{STRUCTDECLARE} {
+    printf("Found a struct declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{POINTERDECLARE} {
+    printf("Found a pointer declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{TABLEDECLARE} {
+    printf("Found a table declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{ADDRESSVALUE} {
+    printf("Found an address value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+{POINTERVALUE} {
+    printf("Found a pointer value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
+    currentColumn+=yyleng;
+}
+
+
+
 {INLINECOMMENT} {
     yyless(yyleng-2);
     printf("Found an inline comment '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
@@ -341,17 +359,18 @@ INLINECOMMENT #[^_]{ANYTHING}
     currentColumn = 1;
 }
 
+
 #_ { BEGIN(c_comment); yymore(); }
 <c_comment>[^_]* { yymore(); }
 <c_comment>"_"+[^_#]* { yymore(); }
 <c_comment>"_#" { printf("Found a multiline comment '%s'\n", yytext); currentColumn+=yyleng; BEGIN(INITIAL);}
 
 
-
 [ \t]+ {
     currentColumn+=yyleng;
 }
 
+<<EOF>> yyterminate();
 
 . {
     yyerror("Unrecognized character", yylineno, currentColumn);

@@ -59,7 +59,7 @@ void freeUpSymTable(SymTable *symtable);
 
 // NEW DEFINED FUNCTIONS
 // insert a new row in specific place
-void insertEntryByIndex(SymTable *symtable, int index, int entryType);
+SymTableNode* insertEntryByIndex(SymTable *symtable, int index, int entryType);
 
-SymTableNode *getEntryByIndex(int index);
+SymTableNode *getEntryByIndex(SymTable* symtable , int index );
 #endif

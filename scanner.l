@@ -3,7 +3,9 @@
     #include "scanner.h"
     
     int currentColumn = 1;
-    void yyerror(const char *s, int line, int col);
+    int showsuccess = 0;
+    void yysuccess(const char *s, const char *lexeme, int length);
+    void yyerror(const char *s);
 %}
 
 /*Used to get the current line number*/
@@ -95,264 +97,211 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 {FOR} {
-    printf("Found a loop '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("LOOP", yytext, yyleng);
 }
 
 {READ} {
-    printf("Found a read '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("READ", yytext, yyleng);
 }
 
 {WRITE} {
-    printf("Found a write '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("WRITE", yytext, yyleng);
 }
 
 {ENTRY} {
-    printf("Found the entry '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("the main entry", yytext, yyleng);
 }
 
 {IF} {
-    printf("Found an if Condition '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("IF condition", yytext, yyleng);
 }
 
 {ELSE} {
-    printf("Found an else Condition '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ELSE condition", yytext, yyleng);
 }
 
 
 
 {ID} {
-    printf("Found an identifier '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("IDENTIFIER", yytext, yyleng);
 
 }
 
 
 {DOT} {
-    printf("Found a dot '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("DOT", yytext, yyleng);
 }
 
 {COMMA} {
-    printf("Found a comma '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("COMMA", yytext, yyleng);
 }
 
 {SEMICOLON} {
-    printf("Found a semicolon '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SEMICOLON", yytext, yyleng);
 }
 
 
 
 
 {OPENPARENTHESIS} {
-    printf("Found an opening parenthesis '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OPENPARENTHESIS", yytext, yyleng);
 }
 
 {CLOSEPARENTHESIS} {
-    printf("Found a closing parenthesis '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CLOSEPARENTHESIS", yytext, yyleng);
 }
 
 {OPENHOOK} {
-    printf("Found an opening hook '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OPENHOOK", yytext, yyleng);
 }
 
 {CLOSEHOOK} {
-    printf("Found a closing hook '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CLOSEHOOK", yytext, yyleng);
 }
 
 {OPENBRACKET} {
-    printf("Found an opening bracket '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OPENBRACKET", yytext, yyleng);
 }
 
 {CLOSEBRACKET} {
-    printf("Found a closing bracket '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CLOSEBRACKET", yytext, yyleng);
 }
 
 
 			
 {EQUAL} {
-    printf("Found an equality operator'%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("EQU operator", yytext, yyleng);
 }
 
 {NONEQUAL} {
-    printf("Found a non equality operator'%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("NONEQU operator", yytext, yyleng);
 }
 
 {AND} {
-    printf("Found a and operator'%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("AND operator", yytext, yyleng);
 }
 
 {OR} {
-    printf("Found an or operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OR operator", yytext, yyleng);
 }
 
 {NON} {
-    printf("Found a non operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("NON operator", yytext, yyleng);
 }
 
 {INFERIOR} {
-    printf("Found an inferiority operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("INFERIOR sign", yytext, yyleng);
 }
 
 {SUPERIOR} {
-    printf("Found a superiority operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SUPERIOR sign", yytext, yyleng);
 }
 
 {INFERIOREQUAL} {
-    printf("Found an inferiority or equality operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("INFERIOREQUAL sign", yytext, yyleng);
 }
 
 {SUPERIOREQUAL} {
-    printf("Found a superiority or equality operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SUPERIOREQUAL sign", yytext, yyleng);
 }
 
 {ADD} {
-    printf("Found an addition operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ADDITION operator", yytext, yyleng);
 }
 
 {SUB} {
-    printf("Found a substraction operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SUBTRACTION operator", yytext, yyleng);
 }
 
 {MULT} {
-    printf("Found a multiplication operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("MULTIPLICATION operator", yytext, yyleng);
 }
 
 {DIV} {
-    printf("Found a division operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("DIVISION operator", yytext, yyleng);
 }
 
 {MOD} {
-    printf("Found a modulo operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("MODULO operator", yytext, yyleng);
 }
 
 {POWER} {
-    printf("Found a power operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("POWER operator", yytext, yyleng);
 }
 
 
 {ASSIGNMENT} {
-    printf("Found an assignment  '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ASSIGNMENT", yytext, yyleng);
 }
 
 {RETURN} {
-    printf("Found a return '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("RETURN", yytext, yyleng);
 }
 
 
 
 {INTEGER} {
-    printf("Found a constant integer '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
+    yysuccess("constant INTEGER", yytext, yyleng);
 }
 
 {REALNUMBER} {
-    printf("Found a constant real number '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
+    yysuccess("constant REALNUMBER", yytext, yyleng);
 }
 
 
 {STRING} {
-    printf("Found a constant string '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("constant STRING", yytext, yyleng);
 } 
 
 
 {FUNCTIONDECLARE} {
-    printf("Found a function declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("FUNCTION declaration", yytext, yyleng);
 } 
 
 {NUMBERDECLARE} {
-    printf("Found a number declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("NUMBER declaration", yytext, yyleng);
 }
 
 {STRINGDECLARE} {
-    printf("Found a string declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("STRING declaration", yytext, yyleng);
 }
 
 {CONSTDECLARE} {
-
-    printf("Found a constant declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CONSTANT declaration", yytext, yyleng);
 }
 
 {BOOLEENDECLARE} {
-    printf("Found a booleen declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("BOOLEAN declaration", yytext, yyleng);
 }
 
 {STRUCTTYPEDECLARE} {
-    printf("Found a struct type declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("STRUCTTYPE declaration", yytext, yyleng);
 }
 
 {STRUCTDECLARE} {
-    printf("Found a struct declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("STRUCT declaration", yytext, yyleng);
 }
 
 {POINTERDECLARE} {
-    printf("Found a pointer declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("POINTER declaration", yytext, yyleng);
 }
 
 {TABLEDECLARE} {
-    printf("Found a table declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("TABLE declaration", yytext, yyleng);
 }
 
 {ADDRESSVALUE} {
-    printf("Found an address value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ADDRESS value", yytext, yyleng);
 }
 
 {POINTERVALUE} {
-    printf("Found a pointer value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("POITER value", yytext, yyleng);
 }
 
 
 
 {INLINECOMMENT} {
-    yyless(yyleng-2);
-    printf("Found an inline comment '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
+    yysuccess("INLINE comment", "", yyleng);
 }
 
 {LINEBREAK} {
@@ -363,7 +312,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 #_ { BEGIN(c_comment); yymore(); }
 <c_comment>[^_]* { yymore(); }
 <c_comment>"_"+[^_#]* { yymore(); }
-<c_comment>"_#" { printf("Found a multiline comment '%s'\n", yytext); currentColumn+=yyleng; BEGIN(INITIAL);}
+<c_comment>"_#" { yysuccess("MULTILINE comment", yytext, yyleng); BEGIN(INITIAL);}
 
 
 [ \t]+ {
@@ -373,8 +322,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 <<EOF>> yyterminate();
 
 . {
-    yyerror("Unrecognized character", yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yyerror("Unrecognized character");
 }
 
 
@@ -382,25 +330,40 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 int main(int argc, char **argv) {
 
-    
     extern FILE *yyin, *yyout;
   
     yyin = fopen(argv[1], "r");
   
     yyout = fopen("Output.txt", "w");
+
+    if (sscanf (argv[2], "%i", &showsuccess) != 1) {
+        fprintf(stderr, "error - not an integer");
+    }
+    if(showsuccess != 0) showsuccess = 1;
   
     yylex();
 
-    printf("Dernière position %d %d \n", yylineno, currentColumn);
-
+    fclose(yyin);
+    fclose(yyout);
     return 0;
-
 
 }
 
-void yyerror(const char *s, int line, int col) {
+void yysuccess(const char *s, const char *lexeme, int length) {
+    if(showsuccess) {
+        printf("Found %s : ", s);
+        printf("\033[0;32m");
+        printf("'%s'", lexeme); 
+        printf("\033[0m"); 
+        printf(" at Ln %d Col %d \n", yylineno, currentColumn);
+    }
+    currentColumn += length;
+}
+
+void yyerror(const char *s) {
     printf("\033[0;31m"); 
-    printf("%s at Ln %d Col %d \n", s, line, col);
+    printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
     printf("\033[0m"); 
+    currentColumn+=yyleng;
 }
 

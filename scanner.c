@@ -1,6 +1,6 @@
-#line 1 "scanner.c"
+#line 2 "scanner.c"
 
-#line 3 "scanner.c"
+#line 4 "scanner.c"
 
 #define  YY_INT_ALIGNED short int
 
@@ -392,12 +392,12 @@ static const flex_int16_t yy_accept[124] =
        23,    5,   47,    7,    7,    7,   15,   16,   31,   55,
         7,    7,   13,   55,   14,   55,   51,   52,   54,   18,
         0,   36,   48,   50,    0,   38,   19,    0,   36,    0,
-        0,    0,    0,    0,    0,    0,    0,    0,   34,   34,
-       33,    0,   34,   32,   24,   25,   41,    7,    7,    7,
+       34,   34,   33,    0,   34,   32,   24,   25,   41,    0,
+        0,    0,    0,    0,    0,    0,    0,    7,    7,    7,
        43,    7,    7,    0,   20,   40,   51,   52,   53,   52,
-       36,    0,   39,   48,    0,   36,    0,   39,   37,    0,
+       36,    0,   39,   48,    0,   36,    0,   39,   37,   35,
 
-       44,   44,    0,   35,    7,    7,   43,    7,    7,   42,
+        0,   44,   44,    0,    7,    7,   43,    7,    7,   42,
         0,   45,    0,   44,    2,    7,    7,    1,   45,   45,
         3,    4,    0
     } ;
@@ -447,20 +447,20 @@ static const YY_CHAR yy_meta[53] =
 static const flex_int16_t yy_base[136] =
     {   0,
         0,    0,  164,  163,  202,  205,  199,  205,  205,  175,
-      193,  158,   16,  205,  187,  185,  182,  205,   51,  205,
-      205,   34,  205,  205,  176,   43,  205,  205,   41,  205,
-      168,   30,  205,    0,  160,  157,  205,  205,  205,    0,
-      147,  145,  137,  137,  205,   31,    0,   62,  184,  205,
-      179,   67,    0,  205,  146,  205,  205,  172,   61,  142,
-      175,   37,  169,    0,   39,    0,  128,   43,  160,   64,
-      205,   66,   72,  205,  205,  205,  205,    0,  139,  118,
-        0,   94,   89,   57,  205,  205,    0,   68,  205,   74,
-      126,   82,  124,    0,   59,  117,   78,  116,  205,   69,
+      193,  158,   16,  205,  187,  185,  182,  205,  205,  205,
+      205,   34,  205,  205,  176,   41,  205,  205,   40,  205,
+      168,   26,   61,    0,  160,  157,  205,  205,  205,    0,
+      147,  145,  137,  137,  205,   31,    0,   51,  184,  205,
+      179,   58,    0,  205,  146,  205,  205,  172,   59,  142,
+      163,   55,  205,   57,   61,  205,  205,  205,  205,  165,
+       43,  143,   47,    0,    0,   93,   53,    0,  107,  102,
+        0,   86,   88,   57,  205,  205,    0,   67,  205,   78,
+      125,   86,  124,    0,   63,  117,   91,  116,  205,   84,
 
-      205,    0,   88,   90,   93,   88,    0,   76,   76,  205,
-       89,  205,   94,    0,    0,   87,   70,    0,  111,  104,
-        0,    0,  205,  134,  139,  144,  149,  152,  109,  157,
-      161,  166,  108,  169,  172
+       69,  205,    0,   89,   94,   88,    0,   76,   76,  205,
+       80,  205,   97,    0,    0,   87,   68,    0,  109,  103,
+        0,    0,  205,  137,  142,  147,  152,  155,  108,  160,
+      164,  169,  107,  172,  175
     } ;
 
 static const flex_int16_t yy_def[136] =
@@ -471,12 +471,12 @@ static const flex_int16_t yy_def[136] =
       123,  123,  123,  128,  128,  128,  123,  123,  123,  129,
       128,  128,  123,  123,  123,  123,  130,  131,  123,  123,
       125,  125,  132,  123,  123,  123,  123,  127,  127,  123,
-      123,  123,  123,   19,  123,  133,  123,  123,  123,  123,
-      123,  123,  123,  123,  123,  123,  123,  128,  128,  128,
+      123,  123,  123,  123,  123,  123,  123,  123,  123,  123,
+      123,  123,  123,   33,  133,  123,  123,  128,  128,  128,
       134,  128,  128,  123,  123,  123,  130,  131,  123,  131,
       125,  125,  125,  132,  123,  127,  127,  127,  123,  123,
 
-      123,  135,  123,  123,  128,  128,  134,  128,  128,  123,
+      123,  123,  135,  123,  128,  128,  134,  128,  128,  123,
       125,  123,  127,  135,  128,  128,  128,  128,  125,  127,
       128,  128,    0,  123,  123,  123,  123,  123,  123,  123,
       123,  123,  123,  123,  123
@@ -489,22 +489,22 @@ static const flex_int16_t yy_nxt[258] =
        26,   27,   28,   29,   30,   31,   32,   33,   34,   34,
        34,   34,   34,   35,   34,   36,   37,   38,   39,   40,
        41,   42,   34,   34,   34,   34,   34,   34,   43,   44,
-       45,   46,   55,   69,   70,   56,   61,   74,   62,   71,
-       72,   63,   73,   73,   64,   75,   55,   55,   89,   77,
-       86,   96,   91,   55,  123,   55,  101,   65,  101,   55,
-      123,   72,  101,   73,   73,  104,  104,   91,   96,   72,
-       66,   73,   73,   55,   91,   55,  110,   97,  112,   67,
+       45,   46,   55,   61,   62,   56,   66,   89,   64,   63,
+       65,   65,   55,   91,   67,   69,   70,   55,   71,   96,
+       86,   72,   64,  123,   65,   65,  100,  100,   64,   55,
+       65,   65,  102,   55,  123,   91,  102,   73,   74,   55,
+       90,   91,  102,   55,   92,   97,  110,   93,   98,   55,
 
-       98,   90,   68,   92,   96,   55,   93,  123,  101,  104,
-      104,  102,   81,   90,   96,  113,   91,  122,  121,  111,
-      118,  117,  116,  115,   55,   92,   96,   96,  119,   91,
-       97,   91,  109,  120,   47,   47,   47,   47,   47,   51,
-      108,   51,   51,   51,   53,   53,   53,   53,   53,   58,
-      106,   58,   58,   58,   78,   78,   78,   87,   87,   87,
-       87,   88,   88,   88,   88,   88,   94,  105,   94,   94,
-       94,  107,  107,  107,  114,  114,  114,   72,  103,  100,
-      100,   99,   96,   95,   91,   49,   85,   84,   83,   82,
-       80,   79,   76,   72,   60,   59,   57,   54,   52,   50,
+       75,   96,  112,  100,  100,   55,  123,   96,  102,   76,
+      103,   81,   77,   96,   91,  122,   92,   90,  121,  119,
+      118,  117,  116,  111,  115,   55,   96,   96,  113,   91,
+       91,  109,  108,   97,  106,  105,  120,   47,   47,   47,
+       47,   47,   51,  104,   51,   51,   51,   53,   53,   53,
+       53,   53,   58,  101,   58,   58,   58,   78,   78,   78,
+       87,   87,   87,   87,   88,   88,   88,   88,   88,   94,
+      101,   94,   94,   94,  107,  107,  107,  114,  114,  114,
+       64,   99,   96,   95,   91,   49,   85,   84,   83,   82,
+       80,   79,   68,   64,   60,   59,   57,   54,   52,   50,
 
        49,  123,   48,   48,    5,  123,  123,  123,  123,  123,
       123,  123,  123,  123,  123,  123,  123,  123,  123,  123,
@@ -521,20 +521,20 @@ static const flex_int16_t yy_chk[258] =
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
         1,    1,    1,    1,    1,    1,    1,    1,    1,    1,
-        1,    1,   13,   22,   22,   13,   19,   29,   19,   22,
-       26,   19,   26,   26,   19,   29,   32,   46,   48,   32,
-       46,   59,   52,   62,   88,   65,   62,   19,   65,   68,
-       90,   70,   68,   70,   70,   72,   72,   92,   97,   73,
-       19,   73,   73,   84,  111,   95,   84,   59,   95,   19,
+        1,    1,   13,   22,   22,   13,   29,   48,   26,   22,
+       26,   26,   32,   52,   29,   32,   33,   46,   33,   59,
+       46,   33,   62,   88,   62,   62,   64,   64,   65,   71,
+       65,   65,   71,   73,   90,  111,   73,   33,   33,   77,
+       48,   92,   77,   84,   52,   59,   84,   52,   59,   95,
 
-       59,   48,   19,   52,  113,  100,   52,   88,  100,  104,
-      104,  133,  129,   90,  120,   97,  119,  117,  116,   92,
-      109,  108,  106,  105,  103,  111,   98,   96,  111,   93,
-      113,   91,   83,  113,  124,  124,  124,  124,  124,  125,
-       82,  125,  125,  125,  126,  126,  126,  126,  126,  127,
-       80,  127,  127,  127,  128,  128,  128,  130,  130,  130,
-      130,  131,  131,  131,  131,  131,  132,   79,  132,  132,
-      132,  134,  134,  134,  135,  135,  135,   69,   67,   63,
+       33,   97,   95,  100,  100,  101,   88,  113,  101,   33,
+      133,  129,   33,  120,  119,  117,  111,   90,  116,  111,
+      109,  108,  106,   92,  105,  104,   98,   96,   97,   93,
+       91,   83,   82,  113,   80,   79,  113,  124,  124,  124,
+      124,  124,  125,   76,  125,  125,  125,  126,  126,  126,
+      126,  126,  127,   72,  127,  127,  127,  128,  128,  128,
+      130,  130,  130,  130,  131,  131,  131,  131,  131,  132,
+       70,  132,  132,  132,  134,  134,  134,  135,  135,  135,
        61,   60,   58,   55,   51,   49,   44,   43,   42,   41,
        36,   35,   31,   25,   17,   16,   15,   12,   11,   10,
 
@@ -574,8 +574,10 @@ char *yytext;
     #include "scanner.h"
     
     int currentColumn = 1;
-    void yyerror(const char *s, int line, int col);
-#line 578 "scanner.c"
+    int showsuccess = 0;
+    void yysuccess(const char *s, const char *lexeme, int length);
+    void yyerror(const char *s);
+#line 581 "scanner.c"
 /*Used to get the current line number*/
 /*Used for multiline comments*/
      
@@ -587,7 +589,7 @@ char *yytext;
 /*Declarations*/
 /*Pointers*/
 /*Comments*/
-#line 590 "scanner.c"
+#line 593 "scanner.c"
 
 #define INITIAL 0
 #define c_comment 1
@@ -805,12 +807,12 @@ YY_DECL
 		}
 
 	{
-#line 93 "scanner.l"
+#line 95 "scanner.l"
 
 
 
 
-#line 813 "scanner.c"
+#line 816 "scanner.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -885,451 +887,397 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 97 "scanner.l"
+#line 99 "scanner.l"
 {
-    printf("Found a loop '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("LOOP", yytext, yyleng);
 }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 102 "scanner.l"
+#line 103 "scanner.l"
 {
-    printf("Found a read '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("READ", yytext, yyleng);
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
 #line 107 "scanner.l"
 {
-    printf("Found a write '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("WRITE", yytext, yyleng);
 }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 112 "scanner.l"
+#line 111 "scanner.l"
 {
-    printf("Found the entry '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("the main entry", yytext, yyleng);
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 117 "scanner.l"
+#line 115 "scanner.l"
 {
-    printf("Found an if Condition '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("IF condition", yytext, yyleng);
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 122 "scanner.l"
+#line 119 "scanner.l"
 {
-    printf("Found an else Condition '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ELSE condition", yytext, yyleng);
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 129 "scanner.l"
+#line 125 "scanner.l"
 {
-    printf("Found an identifier '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("IDENTIFIER", yytext, yyleng);
 
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 136 "scanner.l"
+#line 131 "scanner.l"
 {
-    printf("Found a dot '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("DOT", yytext, yyleng);
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 141 "scanner.l"
+#line 135 "scanner.l"
 {
-    printf("Found a comma '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("COMMA", yytext, yyleng);
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 146 "scanner.l"
+#line 139 "scanner.l"
 {
-    printf("Found a semicolon '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SEMICOLON", yytext, yyleng);
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 154 "scanner.l"
+#line 146 "scanner.l"
 {
-    printf("Found an opening parenthesis '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OPENPARENTHESIS", yytext, yyleng);
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 159 "scanner.l"
+#line 150 "scanner.l"
 {
-    printf("Found a closing parenthesis '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CLOSEPARENTHESIS", yytext, yyleng);
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 164 "scanner.l"
+#line 154 "scanner.l"
 {
-    printf("Found an opening hook '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OPENHOOK", yytext, yyleng);
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 169 "scanner.l"
+#line 158 "scanner.l"
 {
-    printf("Found a closing hook '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CLOSEHOOK", yytext, yyleng);
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 174 "scanner.l"
+#line 162 "scanner.l"
 {
-    printf("Found an opening bracket '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OPENBRACKET", yytext, yyleng);
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 179 "scanner.l"
+#line 166 "scanner.l"
 {
-    printf("Found a closing bracket '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CLOSEBRACKET", yytext, yyleng);
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 186 "scanner.l"
+#line 172 "scanner.l"
 {
-    printf("Found an equality operator'%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("EQU operator", yytext, yyleng);
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 191 "scanner.l"
+#line 176 "scanner.l"
 {
-    printf("Found a non equality operator'%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("NONEQU operator", yytext, yyleng);
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 196 "scanner.l"
+#line 180 "scanner.l"
 {
-    printf("Found a and operator'%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("AND operator", yytext, yyleng);
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 201 "scanner.l"
+#line 184 "scanner.l"
 {
-    printf("Found an or operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("OR operator", yytext, yyleng);
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 206 "scanner.l"
+#line 188 "scanner.l"
 {
-    printf("Found a non operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("NON operator", yytext, yyleng);
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 211 "scanner.l"
+#line 192 "scanner.l"
 {
-    printf("Found an inferiority operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("INFERIOR sign", yytext, yyleng);
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 216 "scanner.l"
+#line 196 "scanner.l"
 {
-    printf("Found a superiority operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SUPERIOR sign", yytext, yyleng);
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 221 "scanner.l"
+#line 200 "scanner.l"
 {
-    printf("Found an inferiority or equality operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("INFERIOREQUAL sign", yytext, yyleng);
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 226 "scanner.l"
+#line 204 "scanner.l"
 {
-    printf("Found a superiority or equality operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SUPERIOREQUAL sign", yytext, yyleng);
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 231 "scanner.l"
+#line 208 "scanner.l"
 {
-    printf("Found an addition operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ADDITION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 236 "scanner.l"
+#line 212 "scanner.l"
 {
-    printf("Found a substraction operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("SUBTRACTION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 241 "scanner.l"
+#line 216 "scanner.l"
 {
-    printf("Found a multiplication operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("MULTIPLICATION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 246 "scanner.l"
+#line 220 "scanner.l"
 {
-    printf("Found a division operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("DIVISION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 251 "scanner.l"
+#line 224 "scanner.l"
 {
-    printf("Found a modulo operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("MODULO operator", yytext, yyleng);
 }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 256 "scanner.l"
+#line 228 "scanner.l"
 {
-    printf("Found a power operator '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("POWER operator", yytext, yyleng);
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 262 "scanner.l"
+#line 233 "scanner.l"
 {
-    printf("Found an assignment  '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ASSIGNMENT", yytext, yyleng);
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 267 "scanner.l"
+#line 237 "scanner.l"
 {
-    printf("Found a return '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("RETURN", yytext, yyleng);
 }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 274 "scanner.l"
+#line 243 "scanner.l"
 {
-    printf("Found a constant integer '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
+    yysuccess("constant INTEGER", yytext, yyleng);
 }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 280 "scanner.l"
+#line 247 "scanner.l"
 {
-    printf("Found a constant real number '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
+    yysuccess("constant REALNUMBER", yytext, yyleng);
 }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 287 "scanner.l"
+#line 252 "scanner.l"
 {
-    printf("Found a constant string '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("constant STRING", yytext, yyleng);
 } 
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 293 "scanner.l"
+#line 257 "scanner.l"
 {
-    printf("Found a function declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("FUNCTION declaration", yytext, yyleng);
 } 
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 298 "scanner.l"
+#line 261 "scanner.l"
 {
-    printf("Found a number declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("NUMBER declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 303 "scanner.l"
+#line 265 "scanner.l"
 {
-    printf("Found a string declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("STRING declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 308 "scanner.l"
+#line 269 "scanner.l"
 {
-
-    printf("Found a constant declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("CONSTANT declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 314 "scanner.l"
+#line 273 "scanner.l"
 {
-    printf("Found a booleen declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("BOOLEAN declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 319 "scanner.l"
+#line 277 "scanner.l"
 {
-    printf("Found a struct type declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("STRUCTTYPE declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 324 "scanner.l"
+#line 281 "scanner.l"
 {
-    printf("Found a struct declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("STRUCT declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 329 "scanner.l"
+#line 285 "scanner.l"
 {
-    printf("Found a pointer declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("POINTER declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 334 "scanner.l"
+#line 289 "scanner.l"
 {
-    printf("Found a table declaration '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("TABLE declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 339 "scanner.l"
+#line 293 "scanner.l"
 {
-    printf("Found an address value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("ADDRESS value", yytext, yyleng);
 }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 344 "scanner.l"
+#line 297 "scanner.l"
 {
-    printf("Found a pointer value '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yysuccess("POITER value", yytext, yyleng);
 }
 	YY_BREAK
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 351 "scanner.l"
+#line 303 "scanner.l"
 {
-    yyless(yyleng-2);
-    printf("Found an inline comment '%s' at Ln %d Col %d \n", yytext, yylineno, currentColumn);
-    currentColumn+=yyleng;
-
+    yysuccess("INLINE comment", "", yyleng);
 }
 	YY_BREAK
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 358 "scanner.l"
+#line 307 "scanner.l"
 {
     currentColumn = 1;
 }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 363 "scanner.l"
+#line 312 "scanner.l"
 { BEGIN(c_comment); yymore(); }
 	YY_BREAK
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 364 "scanner.l"
+#line 313 "scanner.l"
 { yymore(); }
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 365 "scanner.l"
+#line 314 "scanner.l"
 { yymore(); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 366 "scanner.l"
-{ printf("Found a multiline comment '%s'\n", yytext); currentColumn+=yyleng; BEGIN(INITIAL);}
+#line 315 "scanner.l"
+{ yysuccess("MULTILINE comment", yytext, yyleng); BEGIN(INITIAL);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 369 "scanner.l"
+#line 318 "scanner.l"
 {
     currentColumn+=yyleng;
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(c_comment):
-#line 373 "scanner.l"
+#line 322 "scanner.l"
 yyterminate();
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 375 "scanner.l"
+#line 324 "scanner.l"
 {
-    yyerror("Unrecognized character", yylineno, currentColumn);
-    currentColumn+=yyleng;
+    yyerror("Unrecognized character");
 }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 381 "scanner.l"
+#line 329 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1332 "scanner.c"
+#line 1281 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2344,31 +2292,46 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 381 "scanner.l"
+#line 329 "scanner.l"
 
 
 int main(int argc, char **argv) {
 
-    
     extern FILE *yyin, *yyout;
   
     yyin = fopen(argv[1], "r");
   
     yyout = fopen("Output.txt", "w");
+
+    if (argc>=3 && sscanf (argv[2], "%i", &showsuccess) != 1) {
+        fprintf(stderr, "error - not an integer");
+    }
+    if(showsuccess != 0) showsuccess = 1;
   
     yylex();
 
-    printf("Dernière position %d %d \n", yylineno, currentColumn);
-
+    fclose(yyin);
+    fclose(yyout);
     return 0;
-
 
 }
 
-void yyerror(const char *s, int line, int col) {
+void yysuccess(const char *s, const char *lexeme, int length) {
+    if(showsuccess) {
+        printf("Found %s : ", s);
+        printf("\033[0;32m");
+        printf("'%s'", lexeme); 
+        printf("\033[0m"); 
+        printf(" at Ln %d Col %d \n", yylineno, currentColumn);
+    }
+    currentColumn += length;
+}
+
+void yyerror(const char *s) {
     printf("\033[0;31m"); 
-    printf("%s at Ln %d Col %d \n", s, line, col);
+    printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
     printf("\033[0m"); 
+    currentColumn+=yyleng;
 }
 
 

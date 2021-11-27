@@ -1,7 +1,6 @@
 
-#define _READ 0
-#define _WRITE 1
-#define _LOOP 2
+#define _READ 1
+#define _WRITE 2
 
 #define _IF 3
 #define _ELSE 4
@@ -55,6 +54,10 @@
 #define _DIV 44
 #define _MOD 45
 #define _POWER 46
+
+
+#define _LOOP 47
+#define _LOOPf 48
 
 
 #define _EOF 47

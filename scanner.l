@@ -18,7 +18,7 @@
 UNDERSCORE "_"
 
 /*Reserved keywords*/
-FOR loop
+LOOP loop
 READ READ
 WRITE WRITE
 ENTRY entry
@@ -81,8 +81,8 @@ BOOLEENDECLARE \?{UNDERSCORE}
 
 STRUCTTYPEDECLARE \{\}{UNDERSCORE}
 STRUCTDECLARE {UNDERSCORE}{ID}
-POINTERDECLARE ((\*)+)(({STRUCTDECLARE})|({NUMBERDECLARE}|{STRINGDECLARE}|{CONSTDECLARE}|{BOOLEENDECLARE}))
-TABLEDECLARE ((\*)*)((\$)|((\"\")|(\'\'))|(\~)|(\?)|(\{\}))((\[\])+){UNDERSCORE}
+POINTERDECLARE ((\@)+)(({STRUCTDECLARE})|({NUMBERDECLARE}|{STRINGDECLARE}|{CONSTDECLARE}|{BOOLEENDECLARE}))
+TABLEDECLARE ((\@)*)((\$)|((\"\")|(\'\'))|(\~)|(\?)|(\{\}))((\[\])+){UNDERSCORE}
 
 /*Pointers*/
 ADDRESSVALUE &
@@ -96,7 +96,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 
-{FOR} {
+{LOOP} {
     yysuccess("LOOP", yytext, yyleng);
 }
 
@@ -336,7 +336,7 @@ int main(int argc, char **argv) {
   
     yyout = fopen("Output.txt", "w");
 
-    if (sscanf (argv[2], "%i", &showsuccess) != 1) {
+    if (argc>=3 && sscanf (argv[2], "%i", &showsuccess) != 1) {
         fprintf(stderr, "error - not an integer");
     }
     if(showsuccess != 0) showsuccess = 1;

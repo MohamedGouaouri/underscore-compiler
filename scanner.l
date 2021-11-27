@@ -27,6 +27,9 @@ MAIN (\(\)){UNDERSCORE}" entry"(\(\))
 IF \?
 ELSE :
 
+BREAK break
+CONTINUE continue
+
 /*Identifiers*/
 ID [a-zA-Z][a-zA-Z0-9_]*
 
@@ -120,6 +123,13 @@ INLINECOMMENT #[^_]{ANYTHING}
     yysuccess("ELSE condition", yytext, yyleng);
 }
 
+{BREAK} {
+    yysuccess("Loop break", yytext, yyleng);
+}
+
+{CONTINUE} {
+    yysuccess("Loop continue", yytext, yyleng);
+}
 
 
 {ID} {

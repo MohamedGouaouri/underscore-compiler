@@ -55,6 +55,7 @@
 #define _DIV 44
 #define _MOD 45
 #define _POWER 46
+#define _BREAK 47
+#define _CONTINUE 48
 
-
-#define _EOF 47
+#define _EOF 49

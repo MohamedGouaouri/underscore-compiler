@@ -572,12 +572,17 @@ char *yytext;
 #line 1 "scanner.l"
 #line 3 "scanner.l"
     #include "scanner.h"
+    #include "symtable.h"
     
     int currentColumn = 1;
     int showsuccess = 0;
+    SymTable* symt;
+
+
     void yysuccess(const char *s, const char *lexeme, int length);
     void yyerror(const char *s);
-#line 581 "scanner.c"
+    void showLexicalError();
+#line 586 "scanner.c"
 /*Used to get the current line number*/
 /*Used for multiline comments*/
      
@@ -589,7 +594,7 @@ char *yytext;
 /*Declarations*/
 /*Pointers*/
 /*Comments*/
-#line 593 "scanner.c"
+#line 598 "scanner.c"
 
 #define INITIAL 0
 #define c_comment 1
@@ -807,12 +812,12 @@ YY_DECL
 		}
 
 	{
-#line 95 "scanner.l"
+#line 100 "scanner.l"
 
 
 
 
-#line 816 "scanner.c"
+#line 821 "scanner.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -887,330 +892,346 @@ do_action:	/* This label is used only to access EOF actions. */
 
 case 1:
 YY_RULE_SETUP
-#line 99 "scanner.l"
+#line 104 "scanner.l"
 {
-    yysuccess("LOOP", yytext, yyleng);
+    //yysuccess("LOOP", yytext, yyleng);
+
+    SymTableNode* node = insertNewEntry(symt, _LOOP);
+
+    printf("%d", node->entryType);
+
+    return _LOOP;
+     
 }
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 103 "scanner.l"
+#line 115 "scanner.l"
 {
     yysuccess("READ", yytext, yyleng);
 }
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 107 "scanner.l"
+#line 119 "scanner.l"
 {
     yysuccess("WRITE", yytext, yyleng);
 }
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 111 "scanner.l"
+#line 123 "scanner.l"
 {
     yysuccess("the main entry", yytext, yyleng);
 }
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 115 "scanner.l"
+#line 127 "scanner.l"
 {
     yysuccess("IF condition", yytext, yyleng);
 }
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 119 "scanner.l"
+#line 131 "scanner.l"
 {
     yysuccess("ELSE condition", yytext, yyleng);
 }
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 125 "scanner.l"
+#line 137 "scanner.l"
 {
     yysuccess("IDENTIFIER", yytext, yyleng);
+
+    SymTableNode* node = insertNewEntry(symt, _ID);
+
+    set_attr(node, "name", yytext );
+
+    printf("%d", node->entryType);
+    printf("%s", get_attr(node, "name"));
+
+    return _ID;
 
 }
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 131 "scanner.l"
+#line 152 "scanner.l"
 {
     yysuccess("DOT", yytext, yyleng);
 }
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 135 "scanner.l"
+#line 156 "scanner.l"
 {
     yysuccess("COMMA", yytext, yyleng);
 }
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 139 "scanner.l"
+#line 160 "scanner.l"
 {
     yysuccess("SEMICOLON", yytext, yyleng);
 }
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 146 "scanner.l"
+#line 167 "scanner.l"
 {
     yysuccess("OPENPARENTHESIS", yytext, yyleng);
 }
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 150 "scanner.l"
+#line 171 "scanner.l"
 {
     yysuccess("CLOSEPARENTHESIS", yytext, yyleng);
 }
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 154 "scanner.l"
+#line 175 "scanner.l"
 {
     yysuccess("OPENHOOK", yytext, yyleng);
 }
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 158 "scanner.l"
+#line 179 "scanner.l"
 {
     yysuccess("CLOSEHOOK", yytext, yyleng);
 }
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 162 "scanner.l"
+#line 183 "scanner.l"
 {
     yysuccess("OPENBRACKET", yytext, yyleng);
 }
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 166 "scanner.l"
+#line 187 "scanner.l"
 {
     yysuccess("CLOSEBRACKET", yytext, yyleng);
 }
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 172 "scanner.l"
+#line 193 "scanner.l"
 {
     yysuccess("EQU operator", yytext, yyleng);
 }
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 176 "scanner.l"
+#line 197 "scanner.l"
 {
     yysuccess("NONEQU operator", yytext, yyleng);
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 180 "scanner.l"
+#line 201 "scanner.l"
 {
     yysuccess("AND operator", yytext, yyleng);
 }
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 184 "scanner.l"
+#line 205 "scanner.l"
 {
     yysuccess("OR operator", yytext, yyleng);
 }
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 188 "scanner.l"
+#line 209 "scanner.l"
 {
     yysuccess("NON operator", yytext, yyleng);
 }
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 192 "scanner.l"
+#line 213 "scanner.l"
 {
     yysuccess("INFERIOR sign", yytext, yyleng);
 }
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 196 "scanner.l"
+#line 217 "scanner.l"
 {
     yysuccess("SUPERIOR sign", yytext, yyleng);
 }
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 200 "scanner.l"
+#line 221 "scanner.l"
 {
     yysuccess("INFERIOREQUAL sign", yytext, yyleng);
 }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 204 "scanner.l"
+#line 225 "scanner.l"
 {
     yysuccess("SUPERIOREQUAL sign", yytext, yyleng);
 }
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 208 "scanner.l"
+#line 229 "scanner.l"
 {
     yysuccess("ADDITION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 212 "scanner.l"
+#line 233 "scanner.l"
 {
     yysuccess("SUBTRACTION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 216 "scanner.l"
+#line 237 "scanner.l"
 {
     yysuccess("MULTIPLICATION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 220 "scanner.l"
+#line 241 "scanner.l"
 {
     yysuccess("DIVISION operator", yytext, yyleng);
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 224 "scanner.l"
+#line 245 "scanner.l"
 {
     yysuccess("MODULO operator", yytext, yyleng);
 }
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 228 "scanner.l"
+#line 249 "scanner.l"
 {
     yysuccess("POWER operator", yytext, yyleng);
 }
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 233 "scanner.l"
+#line 254 "scanner.l"
 {
     yysuccess("ASSIGNMENT", yytext, yyleng);
 }
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 237 "scanner.l"
+#line 258 "scanner.l"
 {
     yysuccess("RETURN", yytext, yyleng);
 }
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 243 "scanner.l"
+#line 264 "scanner.l"
 {
     yysuccess("constant INTEGER", yytext, yyleng);
 }
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 247 "scanner.l"
+#line 268 "scanner.l"
 {
     yysuccess("constant REALNUMBER", yytext, yyleng);
 }
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 252 "scanner.l"
+#line 273 "scanner.l"
 {
     yysuccess("constant STRING", yytext, yyleng);
 } 
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 257 "scanner.l"
+#line 278 "scanner.l"
 {
     yysuccess("FUNCTION declaration", yytext, yyleng);
 } 
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 261 "scanner.l"
+#line 282 "scanner.l"
 {
     yysuccess("NUMBER declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 265 "scanner.l"
+#line 286 "scanner.l"
 {
     yysuccess("STRING declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 40:
 YY_RULE_SETUP
-#line 269 "scanner.l"
+#line 290 "scanner.l"
 {
     yysuccess("CONSTANT declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 41:
 YY_RULE_SETUP
-#line 273 "scanner.l"
+#line 294 "scanner.l"
 {
     yysuccess("BOOLEAN declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 42:
 YY_RULE_SETUP
-#line 277 "scanner.l"
+#line 298 "scanner.l"
 {
     yysuccess("STRUCTTYPE declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 43:
 YY_RULE_SETUP
-#line 281 "scanner.l"
+#line 302 "scanner.l"
 {
     yysuccess("STRUCT declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 44:
 YY_RULE_SETUP
-#line 285 "scanner.l"
+#line 306 "scanner.l"
 {
     yysuccess("POINTER declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 45:
 YY_RULE_SETUP
-#line 289 "scanner.l"
+#line 310 "scanner.l"
 {
     yysuccess("TABLE declaration", yytext, yyleng);
 }
 	YY_BREAK
 case 46:
 YY_RULE_SETUP
-#line 293 "scanner.l"
+#line 314 "scanner.l"
 {
     yysuccess("ADDRESS value", yytext, yyleng);
 }
 	YY_BREAK
 case 47:
 YY_RULE_SETUP
-#line 297 "scanner.l"
+#line 318 "scanner.l"
 {
     yysuccess("POITER value", yytext, yyleng);
 }
@@ -1218,7 +1239,7 @@ YY_RULE_SETUP
 case 48:
 /* rule 48 can match eol */
 YY_RULE_SETUP
-#line 303 "scanner.l"
+#line 323 "scanner.l"
 {
     yysuccess("INLINE comment", "", yyleng);
 }
@@ -1226,58 +1247,60 @@ YY_RULE_SETUP
 case 49:
 /* rule 49 can match eol */
 YY_RULE_SETUP
-#line 307 "scanner.l"
+#line 327 "scanner.l"
 {
     currentColumn = 1;
 }
 	YY_BREAK
 case 50:
 YY_RULE_SETUP
-#line 312 "scanner.l"
+#line 332 "scanner.l"
 { BEGIN(c_comment); yymore(); }
 	YY_BREAK
 case 51:
 /* rule 51 can match eol */
 YY_RULE_SETUP
-#line 313 "scanner.l"
+#line 333 "scanner.l"
 { yymore(); }
 	YY_BREAK
 case 52:
 /* rule 52 can match eol */
 YY_RULE_SETUP
-#line 314 "scanner.l"
+#line 334 "scanner.l"
 { yymore(); }
 	YY_BREAK
 case 53:
 YY_RULE_SETUP
-#line 315 "scanner.l"
+#line 335 "scanner.l"
 { yysuccess("MULTILINE comment", yytext, yyleng); BEGIN(INITIAL);}
 	YY_BREAK
 case 54:
 YY_RULE_SETUP
-#line 318 "scanner.l"
+#line 338 "scanner.l"
 {
     currentColumn+=yyleng;
 }
 	YY_BREAK
 case YY_STATE_EOF(INITIAL):
 case YY_STATE_EOF(c_comment):
-#line 322 "scanner.l"
+#line 342 "scanner.l"
 yyterminate();
 	YY_BREAK
 case 55:
 YY_RULE_SETUP
-#line 324 "scanner.l"
+#line 344 "scanner.l"
 {
     yyerror("Unrecognized character");
+    showLexicalError();
+    yyterminate();
 }
 	YY_BREAK
 case 56:
 YY_RULE_SETUP
-#line 329 "scanner.l"
+#line 351 "scanner.l"
 ECHO;
 	YY_BREAK
-#line 1281 "scanner.c"
+#line 1304 "scanner.c"
 
 	case YY_END_OF_BUFFER:
 		{
@@ -2292,7 +2315,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 329 "scanner.l"
+#line 351 "scanner.l"
 
 
 int main(int argc, char **argv) {
@@ -2307,11 +2330,17 @@ int main(int argc, char **argv) {
         fprintf(stderr, "error - not an integer");
     }
     if(showsuccess != 0) showsuccess = 1;
+
+    symt = allocateSymTable();
   
     yylex();
 
+
     fclose(yyin);
     fclose(yyout);
+
+    freeUpSymTable(symt);
+    
     return 0;
 
 }
@@ -2329,9 +2358,31 @@ void yysuccess(const char *s, const char *lexeme, int length) {
 
 void yyerror(const char *s) {
     printf("\033[0;31m"); 
-    printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
+    //printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
     printf("\033[0m"); 
-    currentColumn+=yyleng;
 }
+
+void showLexicalError() {
+
+    char line[256], introError[80]; 
+
+    fseek(yyin, 0, SEEK_SET);
+    
+    int i = 0; 
+
+    while (fgets(line, sizeof(line), yyin)) { 
+        i++; 
+        if(i == yylineno) break;  
+    } 
+        
+    sprintf(introError, "Lexical error in Line %d : Unrecognized character : ", yylineno);
+    printf("%s%s", introError, line);  
+    int j=1;
+    while(j<currentColumn+strlen(introError)) { printf(" "); j++; }
+    printf("^\n");
+
+
+}
+
 
 

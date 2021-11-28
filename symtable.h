@@ -7,7 +7,7 @@
 #define _NAME_ATTR "name"
 #define _VALUE_ATTR "value"
 #define _LENGTH_ATTR "length"
-#define _TYPE_ATTRE "type" // Might be useful later
+#define _TYPE_ATTR "type" // Might be useful later
 
 // define symtablenode
 

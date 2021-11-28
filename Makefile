@@ -6,7 +6,7 @@ SYMTABLE_TEST_SOURCES = tests/test.c symtable.c
 SYMTABLE_TEST_FILE = tests/testfile
 
 LEX_SCANNER = scanner.l
-SCANNER_SOURCES = scanner.c
+SCANNER_SOURCES = scanner.c symtable.c
 SCANNER_OUT = tests/scanner
 # Symtable build
 

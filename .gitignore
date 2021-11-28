@@ -53,3 +53,4 @@ dkms.conf
 .idea/
 out/
 tests/
+scanner.c

@@ -312,7 +312,6 @@ INLINECOMMENT #[^_]{ANYTHING}
     SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
     // insert rea lnumber value
     set_attr(node, _VALUE_ATTR, yytext);
-    printf("%s\n", get_attr(node, _VALUE_ATTR));
 }
 
 
@@ -324,7 +323,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 
     // convert int length to char length
     char len[MAX_STRING_LENGTH];
-    sprintf(len, "%d", yyleng);
+    sprintf(len, "%d", yyleng-2);
     set_attr(node, _LENGTH_ATTR, len);
 } 
 

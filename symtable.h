@@ -4,12 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define TRUE 1
-#define FALSE 0
+#define _NAME_ATTR "name"
+#define _VALUE_ATTR "value"
+#define _LENGTH_ATTR "length"
+#define _TYPE_ATTR "type" // Might be useful later
 
 // define symtablenode
 
-// the column
 typedef struct AttrNode
 {
     char *name;
@@ -17,7 +18,6 @@ typedef struct AttrNode
     struct AttrNode *next;
 } AttrNode;
 
-// our rows of symtable
 typedef struct SymTableNode
 {
     int entryType; // concerns macro (token id)

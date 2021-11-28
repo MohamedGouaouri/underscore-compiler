@@ -1,8 +1,18 @@
 
 %{
+    #include <stdio.h>
+    #include <stdlib.h>
+    #include <string.h>
     #include "scanner.h"
     #include "symtable.h"
-    
+
+    // specified  because when I convert
+    // the string length to its char representation 
+    // I get an error
+    #define MAX_STRING_LENGTH 255
+
+    SymTable* symt;
+
     int currentColumn = 1;
     int showsuccess = 0;
 
@@ -30,6 +40,9 @@ MAIN (\(\)){UNDERSCORE}" entry"(\(\))
 
 IF \?
 ELSE :
+
+BREAK break
+CONTINUE continue
 
 /*Identifiers*/
 ID [a-zA-Z][a-zA-Z0-9_]*
@@ -102,47 +115,65 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {LOOP} {
     yysuccess("LOOP", yytext, yyleng);
-     
+    insertNewEntry(symt, _LOOP);
 }
 
 {READ} {
     yysuccess("READ", yytext, yyleng);
+    insertNewEntry(symt, _READ);
 }
 
 {WRITE} {
     yysuccess("WRITE", yytext, yyleng);
+    insertNewEntry(symt, _WRITE);
 }
 
 {ENTRY} {
     yysuccess("the main entry", yytext, yyleng);
+    insertNewEntry(symt, _ENTRY);
 }
 
 {IF} {
     yysuccess("IF condition", yytext, yyleng);
+    insertNewEntry(symt, _IF);
 }
 
 {ELSE} {
     yysuccess("ELSE condition", yytext, yyleng);
+    insertNewEntry(symt, _ELSE);
 }
 
+{BREAK} {
+    yysuccess("Loop break", yytext, yyleng);
+    insertNewEntry(symt, _BREAK);
+}
+
+{CONTINUE} {
+    yysuccess("Loop continue", yytext, yyleng);
+    insertNewEntry(symt, _CONTINUE);
+}
 
 
 {ID} {
     yysuccess("IDENTIFIER", yytext, yyleng);
-
+    SymTableNode* node = insertNewEntry(symt, _ID);
+    set_attr(node, _NAME_ATTR, yytext);
 }
 
 
 {DOT} {
     yysuccess("DOT", yytext, yyleng);
+    insertNewEntry(symt, _DOT);
 }
 
 {COMMA} {
     yysuccess("COMMA", yytext, yyleng);
+    insertNewEntry(symt, _COMMA);
 }
 
 {SEMICOLON} {
     yysuccess("SEMICOLON", yytext, yyleng);
+    insertNewEntry(symt, _SEMICOLON);
 }
 
 
@@ -150,157 +181,208 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {OPENPARENTHESIS} {
     yysuccess("OPENPARENTHESIS", yytext, yyleng);
+    insertNewEntry(symt, _OPENPARENTHESIS);
 }
 
 {CLOSEPARENTHESIS} {
     yysuccess("CLOSEPARENTHESIS", yytext, yyleng);
+    insertNewEntry(symt, _CLOSEPARENTHESIS);
 }
 
 {OPENHOOK} {
     yysuccess("OPENHOOK", yytext, yyleng);
+    insertNewEntry(symt, _ENTRY);
 }
 
 {CLOSEHOOK} {
     yysuccess("CLOSEHOOK", yytext, yyleng);
+    insertNewEntry(symt, _OPENHOOK);
 }
 
 {OPENBRACKET} {
     yysuccess("OPENBRACKET", yytext, yyleng);
+    insertNewEntry(symt, _OPENBRACKET);
 }
 
 {CLOSEBRACKET} {
     yysuccess("CLOSEBRACKET", yytext, yyleng);
+    insertNewEntry(symt, _CLOSEBRACKET);
 }
 
 
 			
 {EQUAL} {
     yysuccess("EQU operator", yytext, yyleng);
+    insertNewEntry(symt, _EQUAL);
 }
 
 {NONEQUAL} {
     yysuccess("NONEQU operator", yytext, yyleng);
+    insertNewEntry(symt, _NONEQUAL);
 }
 
 {AND} {
     yysuccess("AND operator", yytext, yyleng);
+    insertNewEntry(symt, _AND);
 }
 
 {OR} {
     yysuccess("OR operator", yytext, yyleng);
+    insertNewEntry(symt, _OR);
 }
 
 {NON} {
     yysuccess("NON operator", yytext, yyleng);
+    insertNewEntry(symt, _NON);
 }
 
 {INFERIOR} {
     yysuccess("INFERIOR sign", yytext, yyleng);
+    insertNewEntry(symt, _INFERIOR);
 }
 
 {SUPERIOR} {
     yysuccess("SUPERIOR sign", yytext, yyleng);
+    insertNewEntry(symt, _SUPERIOR);
 }
 
 {INFERIOREQUAL} {
     yysuccess("INFERIOREQUAL sign", yytext, yyleng);
+    insertNewEntry(symt, _INFERIOREQUAL);
 }
 
 {SUPERIOREQUAL} {
     yysuccess("SUPERIOREQUAL sign", yytext, yyleng);
+    insertNewEntry(symt, _SUPERIOREQUAL);
 }
 
 {ADD} {
     yysuccess("ADDITION operator", yytext, yyleng);
+    insertNewEntry(symt, _ADD);
 }
 
 {SUB} {
     yysuccess("SUBTRACTION operator", yytext, yyleng);
+    insertNewEntry(symt, _SUB);
+
 }
 
 {MULT} {
     yysuccess("MULTIPLICATION operator", yytext, yyleng);
+    insertNewEntry(symt, _MULT);
 }
 
 {DIV} {
     yysuccess("DIVISION operator", yytext, yyleng);
+    insertNewEntry(symt, _DIV);
 }
 
 {MOD} {
     yysuccess("MODULO operator", yytext, yyleng);
+    insertNewEntry(symt, _MOD);
 }
 
 {POWER} {
     yysuccess("POWER operator", yytext, yyleng);
+    insertNewEntry(symt, _POWER);
 }
 
 
 {ASSIGNMENT} {
     yysuccess("ASSIGNMENT", yytext, yyleng);
+    insertNewEntry(symt, _ASSIGNMENT);
 }
 
 {RETURN} {
     yysuccess("RETURN", yytext, yyleng);
+    insertNewEntry(symt, _RETURN);
 }
 
 
 
 {INTEGER} {
     yysuccess("constant INTEGER", yytext, yyleng);
+    SymTableNode* node = insertNewEntry(symt, _INTEGER);
+    // insert integer value
+    set_attr(node, _VALUE_ATTR, yytext);
 }
 
 {REALNUMBER} {
     yysuccess("constant REALNUMBER", yytext, yyleng);
+    SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
+    // insert rea lnumber value
+    set_attr(node, _VALUE_ATTR, yytext);
+    printf("%s\n", get_attr(node, _VALUE_ATTR));
 }
 
 
 {STRING} {
     yysuccess("constant STRING", yytext, yyleng);
+    SymTableNode* node = insertNewEntry(symt, _STRING);
+    // insert string value & length
+    set_attr(node, _VALUE_ATTR, yytext);
+
+    // convert int length to char length
+    char len[MAX_STRING_LENGTH];
+    sprintf(len, "%d", yyleng);
+    set_attr(node, _LENGTH_ATTR, len);
 } 
 
 
 {FUNCTIONDECLARE} {
     yysuccess("FUNCTION declaration", yytext, yyleng);
+    insertNewEntry(symt, _FUNCTIONDECLARE);
+
 } 
 
 {NUMBERDECLARE} {
     yysuccess("NUMBER declaration", yytext, yyleng);
+    insertNewEntry(symt, _NUMBERDECLARE);
 }
 
 {STRINGDECLARE} {
     yysuccess("STRING declaration", yytext, yyleng);
+    insertNewEntry(symt, _STRINGDECLARE);
 }
 
 {CONSTDECLARE} {
     yysuccess("CONSTANT declaration", yytext, yyleng);
+    insertNewEntry(symt, _CONSTDECLARE);
 }
 
 {BOOLEENDECLARE} {
     yysuccess("BOOLEAN declaration", yytext, yyleng);
+    insertNewEntry(symt, _BOOLEENDECLARE);
 }
 
 {STRUCTTYPEDECLARE} {
     yysuccess("STRUCTTYPE declaration", yytext, yyleng);
+    insertNewEntry(symt, _STRUCTTYPEDECLARE);
 }
 
 {STRUCTDECLARE} {
     yysuccess("STRUCT declaration", yytext, yyleng);
+    insertNewEntry(symt, _STRUCTDECLARE);
 }
 
 {POINTERDECLARE} {
     yysuccess("POINTER declaration", yytext, yyleng);
+    insertNewEntry(symt, _POINTERDECLARE);
 }
 
 {TABLEDECLARE} {
     yysuccess("TABLE declaration", yytext, yyleng);
+    insertNewEntry(symt, _TABLEDECLARE);
 }
 
 {ADDRESSVALUE} {
     yysuccess("ADDRESS value", yytext, yyleng);
+    insertNewEntry(symt, _ADDRESSVALUE);
 }
 
 {POINTERVALUE} {
     yysuccess("POITER value", yytext, yyleng);
+    insertNewEntry(symt, _POINTERVALUE);
 }
 
 
@@ -346,9 +428,18 @@ int main(int argc, char **argv) {
         fprintf(stderr, "error - not an integer");
     }
     if(showsuccess != 0) showsuccess = 1;
+    
+    // alocate the symbols table
+    symt = allocateSymTable();
 
+    // tokenize the source program
     yylex();
 
+    // free the symbol table.
+    // logically it will maintained in memory until
+    // the compiler finishes everything
+    // but here we are doing just the first step
+    freeUpSymTable(symt);
     fclose(yyin);
     fclose(yyout);
     return 0;

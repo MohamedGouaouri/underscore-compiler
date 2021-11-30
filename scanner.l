@@ -15,8 +15,11 @@
 
     int currentColumn = 1;
     int showsuccess = 0;
+
+
     void yysuccess(const char *s, const char *lexeme, int length);
     void yyerror(const char *s);
+    void showLexicalError();
 %}
 
 /*Used to get the current line number*/
@@ -309,7 +312,6 @@ INLINECOMMENT #[^_]{ANYTHING}
     SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
     // insert rea lnumber value
     set_attr(node, _VALUE_ATTR, yytext);
-    printf("%s\n", get_attr(node, _VALUE_ATTR));
 }
 
 
@@ -321,7 +323,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 
     // convert int length to char length
     char len[MAX_STRING_LENGTH];
-    sprintf(len, "%d", yyleng);
+    sprintf(len, "%d", yyleng-2);
     set_attr(node, _LENGTH_ATTR, len);
 } 
 
@@ -383,7 +385,6 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 
-
 {INLINECOMMENT} {
     yysuccess("INLINE comment", "", yyleng);
 }
@@ -407,6 +408,8 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 . {
     yyerror("Unrecognized character");
+    showLexicalError();
+    yyterminate();
 }
 
 
@@ -455,8 +458,30 @@ void yysuccess(const char *s, const char *lexeme, int length) {
 
 void yyerror(const char *s) {
     printf("\033[0;31m"); 
-    printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
+    //printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
     printf("\033[0m"); 
-    currentColumn+=yyleng;
 }
+
+void showLexicalError() {
+
+    char line[256], introError[80]; 
+
+    fseek(yyin, 0, SEEK_SET);
+    
+    int i = 0; 
+
+    while (fgets(line, sizeof(line), yyin)) { 
+        i++; 
+        if(i == yylineno) break;  
+    } 
+        
+    sprintf(introError, "Lexical error in Line %d : Unrecognized character : ", yylineno);
+    printf("%s%s", introError, line);  
+    int j=1;
+    while(j<currentColumn+strlen(introError)) { printf(" "); j++; }
+    printf("^\n");
+
+
+}
+
 

@@ -54,3 +54,4 @@ dkms.conf
 out/
 tests/
 scanner.c
+scan

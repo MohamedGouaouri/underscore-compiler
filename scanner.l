@@ -188,12 +188,12 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {OPENHOOK} {
     yysuccess("OPENHOOK", yytext, yyleng);
-    insertNewEntry(symt, _ENTRY);
+    insertNewEntry(symt, _OPENHOOK);
 }
 
 {CLOSEHOOK} {
     yysuccess("CLOSEHOOK", yytext, yyleng);
-    insertNewEntry(symt, _OPENHOOK);
+    insertNewEntry(symt, _CLOSEHOOK);
 }
 
 {OPENBRACKET} {

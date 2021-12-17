@@ -60,4 +60,7 @@
 #define _BREAK 49
 #define _CONTINUE 50
 
-#define _EOF 51
+#define _TRUE 51
+#define _FALSE 52
+
+#define _EOF 53

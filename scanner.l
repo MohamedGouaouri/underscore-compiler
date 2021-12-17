@@ -44,6 +44,11 @@ ELSE :
 BREAK break
 CONTINUE continue
 
+/*true/false*/
+TRUE true
+FALSE false
+
+
 /*Identifiers*/
 ID [a-zA-Z][a-zA-Z0-9_]*
 
@@ -151,6 +156,16 @@ INLINECOMMENT #[^_]{ANYTHING}
 {CONTINUE} {
     yysuccess("Loop continue", yytext, yyleng);
     insertNewEntry(symt, _CONTINUE);
+}
+
+{TRUE} {
+    yysuccess("TRUE continue", yytext, yyleng);
+    insertNewEntry(symt, _TRUE);
+}
+
+{FALSE} {
+    yysuccess("FALSE", yytext, yyleng);
+    insertNewEntry(symt, _FALSE);
 }
 
 

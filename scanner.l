@@ -92,7 +92,7 @@ DIGIT [0-9]
 NUMBER ([1-9]{DIGIT}*|"0")
 INTEGER -?{NUMBER}
 REALNUMBER -?{NUMBER}"\."{DIGIT}+
-STRING (\"[^\"\"]*\")|(\'{ANYTHING}\') 
+STRING (\"[^\n\"\"]*\")|(\'{ANYTHING}\') 
 
 /*Declarations*/
 FUNCTIONDECLARE \(\){UNDERSCORE}

@@ -9,14 +9,17 @@ SymTable *allocateSymTable()
     return symtable;
 }
 
-SymTableNode *insertNewEntry(SymTable *symtable, int entryType)
+SymTableNode *insertNewEntry(SymTable *symtable, int symType, char *symName)
 {
+
+    // The symbol does not exist
     if (symtable->currentSize == 0)
     {
         // empty table
         SymTableNode *root = (SymTableNode *)malloc(sizeof(SymTableNode));
         SymTableNode *tail = root;
-        root->entryType = entryType;
+        root->symType = symType;
+        strcpy(root->symName, symName);
         root->next = NULL;
         root->numOfAttrs = 0;
         root->rootAttr = NULL;
@@ -29,11 +32,19 @@ SymTableNode *insertNewEntry(SymTable *symtable, int entryType)
     else
     {
         // non empty table
+        // check if the symName exists
+
+        SymTableNode *foundNode = lookup(symtable, symName);
+        if (foundNode != NULL)
+        {
+            return foundNode;
+        }
         // get last node
         SymTableNode *tail = symtable->tail;
         // create new Entry
         SymTableNode *newEntry = (SymTableNode *)malloc(sizeof(SymTableNode));
-        newEntry->entryType = entryType;
+        newEntry->symType = symType;
+        strcpy(newEntry->symName, symName);
         newEntry->next = NULL;
         newEntry->numOfAttrs = 0;
         newEntry->rootAttr = NULL;
@@ -47,13 +58,13 @@ SymTableNode *insertNewEntry(SymTable *symtable, int entryType)
     }
 }
 
-SymTableNode *lookup(SymTable *symtable, int entryType)
+SymTableNode *lookup(SymTable *symtable, char *symName)
 {
     SymTableNode *root = symtable->root;
     SymTableNode *p = root;
     while (p != NULL)
     {
-        if (p->entryType == entryType)
+        if (strcmp(p->symName, symName) == 0)
         {
             return p;
         }
@@ -91,36 +102,6 @@ void set_attr(SymTableNode *entry, char *name, char *val)
     }
 }
 
-void setAttrByIndex(SymTable *symTable, int index, char *name, char *val)
-{
-    SymTableNode *entry = getEntryByIndex(symTable, index);
-    if (entry != NULL)
-    {
-        if (entry->numOfAttrs == 0)
-        {
-            AttrNode *rootAttr = (AttrNode *)malloc(sizeof(AttrNode));
-            strncpy(rootAttr->name, name, 254);
-            strncpy(rootAttr->val, val, 254);
-            rootAttr->next = NULL;
-            entry->rootAttr = rootAttr;
-            entry->tailAttr = rootAttr;
-            entry->numOfAttrs++;
-        }
-        else
-        {
-            AttrNode *tailAttr = entry->tailAttr;
-            // create a new attr entry
-            AttrNode *newAttr = (AttrNode *)malloc(sizeof(AttrNode));
-            strncpy(newAttr->name, name, 254);
-            strncpy(newAttr->val, val, 254);
-            newAttr->next = NULL;
-
-            // setup chaining
-            tailAttr->next = newAttr;
-        }
-    }
-}
-
 char *get_attr(SymTableNode *entry, char *name)
 {
     if (entry != NULL)
@@ -142,123 +123,151 @@ char *get_attr(SymTableNode *entry, char *name)
         }
     }
 }
-char *getAttrByIndex(SymTable *symtable, int index, char *name)
+
+// void setAttrByIndex(SymTable *symTable, int index, char *name, char *val)
+// {
+//     SymTableNode *entry = getEntryByIndex(symTable, index);
+//     if (entry != NULL)
+//     {
+//         if (entry->numOfAttrs == 0)
+//         {
+//             AttrNode *rootAttr = (AttrNode *)malloc(sizeof(AttrNode));
+//             strncpy(rootAttr->name, name, 254);
+//             strncpy(rootAttr->val, val, 254);
+//             rootAttr->next = NULL;
+//             entry->rootAttr = rootAttr;
+//             entry->tailAttr = rootAttr;
+//             entry->numOfAttrs++;
+//         }
+//         else
+//         {
+//             AttrNode *tailAttr = entry->tailAttr;
+//             // create a new attr entry
+//             AttrNode *newAttr = (AttrNode *)malloc(sizeof(AttrNode));
+//             strncpy(newAttr->name, name, 254);
+//             strncpy(newAttr->val, val, 254);
+//             newAttr->next = NULL;
+
+//             // setup chaining
+//             tailAttr->next = newAttr;
+//         }
+//     }
+// }
+
+// char *getAttrByIndex(SymTable *symtable, int index, char *name)
+// {
+//     SymTableNode *entry = getEntryByIndex(symtable, index);
+//     if (entry != NULL)
+//     {
+//         if (entry->numOfAttrs > 0)
+//         {
+//             // search for an attr of name `name`
+//             AttrNode *root = entry->rootAttr;
+//             AttrNode *p = root;
+//             while (p != NULL)
+//             {
+//                 if (strcmp(p->name, name) == 0)
+//                 {
+//                     return p->val;
+//                 }
+//                 p = p->next;
+//             }
+//             return p->val;
+//         }
+//     }
+// }
+
+// SymTableNode *getEntryByIndex(SymTable *symtable, int index)
+// {
+//     SymTableNode *target = symtable->root;
+//     int cpt = 0;
+//     while (cpt != index)
+//     {
+//         // we didnt reach the tail yet
+//         if (target != symtable->tail)
+//         {
+//             target = target->next;
+//         }
+//         else
+//         {
+//             target = NULL;
+//             break;
+//         }
+//         cpt++;
+//     }
+
+//     return target;
+// }
+
+// SymTableNode *insertEntryByIndex(SymTable *symtable, int index, int symType)
+// {
+//     SymTableNode *root = symtable->root;
+//     SymTableNode *tail = symtable->tail;
+//     SymTableNode *beforeInsert = NULL;
+//     SymTableNode *newEntry;
+
+//     // negatove index
+//     if (index < 0)
+//     {
+//         printf("\nERROR : NEGATIVE INDEX !\n");
+//         return NULL;
+//     }
+//     // overflow
+//     if (index >= symtable->currentSize)
+//     {
+//         printf("\nERROR !CANNOT INSERT AFTER THE TAIL !\n");
+//         return NULL;
+//     }
+//     // the new root
+//     else if (index == 0)
+//     {
+//         newEntry = (SymTableNode *)malloc(sizeof(SymTableNode));
+//         newEntry->symType = symType;
+//         newEntry->next = root;
+//         symtable->root = newEntry;
+//         symtable->currentSize++;
+//         return newEntry;
+//     }
+//     // in the bottom ( last line )
+//     else if (index == symtable->currentSize - 1)
+//     {
+//         newEntry = insertNewEntry(symtable, index);
+//         return newEntry;
+//     }
+//     // in the middle
+//     else
+//     {
+//         newEntry = (SymTableNode *)malloc(sizeof(SymTableNode));
+//         newEntry->symType = symType;
+//         SymTableNode *previousNewEntry = getEntryByIndex(symtable, index - 1);
+//         SymTableNode *nextNewEntry = getEntryByIndex(symtable, index);
+//         previousNewEntry->next = newEntry;
+//         newEntry->next = nextNewEntry;
+//         symtable->currentSize++;
+//         return newEntry;
+//     }
+// }
+
+void printSymTable(SymTable *symtable)
 {
-    SymTableNode *entry = getEntryByIndex(symtable, index);
-    if (entry != NULL)
+    SymTableNode *current = symtable->root;
+    AttrNode *p;
+    printf("\n");
+    while (current != NULL)
     {
-        if (entry->numOfAttrs > 0)
+        p = current->rootAttr;
+        printf("(%d | %s) → ", current->symType, current->symName);
+        // printf("(%s | %s)\n", p->name, p->val);
+        while (p != NULL)
         {
-            // search for an attr of name `name`
-            AttrNode *root = entry->rootAttr;
-            AttrNode *p = root;
-            while (p != NULL)
-            {
-                if (strcmp(p->name, name) == 0)
-                {
-                    return p->val;
-                }
-                p = p->next;
-            }
-            return p->val;
+            printf("(%s : %s) → ", p->name, p->val);
+            p = p->next;
         }
+        printf("NULL\n");
+        printf("↓\n");
+        current = current->next;
     }
-}
-
-// Sid Ahmed code
-
-SymTableNode *getEntryByIndex(SymTable *symtable, int index)
-{
-    SymTableNode *target = symtable->root;
-    int cpt = 0;
-    while (cpt != index)
-    {
-        // we didnt reach the tail yet
-        if (target != symtable->tail)
-        {
-            target = target->next;
-        }
-        else
-        {
-            target = NULL;
-            break;
-        }
-        cpt++;
-    }
-
-    return target;
-}
-
-SymTableNode *insertEntryByIndex(SymTable *symtable, int index, int entryType)
-{
-    SymTableNode *root = symtable->root;
-    SymTableNode *tail = symtable->tail;
-    SymTableNode *beforeInsert = NULL;
-    SymTableNode *newEntry;
-
-    // negatove index
-    if (index < 0)
-    {
-        printf("\nERROR : NEGATIVE INDEX !\n");
-        return NULL;
-    }
-    // overflow
-    if (index >= symtable->currentSize)
-    {
-        printf("\nERROR !CANNOT INSERT AFTER THE TAIL !\n");
-        return NULL;
-    }
-    // the new root
-    else if (index == 0)
-    {
-        newEntry = (SymTableNode *)malloc(sizeof(SymTableNode));
-        newEntry->entryType = entryType;
-        newEntry->next = root;
-        symtable->root = newEntry;
-        symtable->currentSize++;
-        return newEntry;
-    }
-    // in the bottom ( last line )
-    else if (index == symtable->currentSize - 1)
-    {
-        newEntry = insertNewEntry(symtable, index);
-        return newEntry;
-    }
-    // in the middle
-    else
-    {
-        newEntry = (SymTableNode *)malloc(sizeof(SymTableNode));
-        newEntry->entryType = entryType;
-        SymTableNode *previousNewEntry = getEntryByIndex(symtable, index - 1);
-        SymTableNode *nextNewEntry = getEntryByIndex(symtable, index);
-        previousNewEntry->next = newEntry;
-        newEntry->next = nextNewEntry;
-        symtable->currentSize++;
-        return newEntry;
-    }
-}
-
-void printEntryTypesList(SymTable *symtable)
-{
-    // SymTableNode *current = symtable->root;
-    // AttrNode *p = current->rootAttr;
-    // printf("\n");
-    // while (current != NULL)
-    // {
-    //     printf("%d -> ", current->entryType);
-    //     p->name[1] = '\0';
-    //     printf("%s\n", strlen(p->name));
-    //     // while (p != NULL)
-    //     // {
-    //     //     printf("%s\n", p->val);
-    //     //     fflush(stdout);
-    //     //     // printf("(%s | %s) -> ", rootAttr->name, rootAttr->val);
-    //     //     p = p->next;
-    //     // }
-    //     printf("\n|");
-    //     current = current->next;
-    //     p = current->rootAttr;
-    // }
+    printf("NULL\n");
 }
 
 void freeUpEntryAttr(SymTableNode *entry)
@@ -296,4 +305,12 @@ void freeUpSymTable(SymTable *symtable)
     }
     free(p);
     symtable->currentSize--;
+}
+
+typedef int bool;
+#define true 1
+#define false 0
+bool symbol_exists(SymTable *symtable, char *symName)
+{
+    return lookup(symtable, symName) == NULL ? false : true;
 }

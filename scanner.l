@@ -5,6 +5,8 @@
 
     extern int currentColumn;
     extern SymTable* symt;
+    
+    extern _YYSTYPE _yylval;
 %}
 
 /*Used to get the current line number*/
@@ -155,8 +157,8 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {ID} {
     yysuccess("IDENTIFIER");
-    SymTableNode* node = insertNewEntry(symt, ID);
-    set_attr(node, _NAME_ATTR, yytext);
+    SymTableNode* node = insertNewEntry(symt, ID, yytext);
+    _yylval.ident = node;
     return ID;
 }
 
@@ -305,6 +307,7 @@ INLINECOMMENT #[^_]{ANYTHING}
     // SymTableNode* node = insertNewEntry(symt, _INTEGER);
     // // insert integer value
     // set_attr(node, _VALUE_ATTR, yytext);
+    _yylval.ival = atoi(yytext);
     return INTEGER;
 }
 
@@ -313,16 +316,19 @@ INLINECOMMENT #[^_]{ANYTHING}
     // SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
     // // insert rea lnumber value
     // set_attr(node, _VALUE_ATTR, yytext);
-
+    _yylval.rval = strtod(yytext, NULL);
     return REALNUMBER;
 }
 
 
 {STRING} {
     yysuccess("constant STRING");
+
     // SymTableNode* node = insertNewEntry(symt, _STRING);
     // // insert string value & length
     // set_attr(node, _VALUE_ATTR, yytext);
+
+    _yylval.ival = yytext;
     return STRING;
 } 
 

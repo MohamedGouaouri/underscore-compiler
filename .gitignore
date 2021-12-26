@@ -52,6 +52,7 @@ Mkfile.old
 dkms.conf
 .idea/
 out/
-tests/
-scanner.c
-scan
+tests/underscore
+scanner.lex.c
+parser.lex.c
+underscore

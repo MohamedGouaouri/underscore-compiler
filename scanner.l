@@ -1,31 +1,16 @@
 
 %{
-    #include <stdio.h>
-    #include <stdlib.h>
-    #include <string.h>
-    #include "scanner.h"
+    #include "parser.tab.h"
     #include "symtable.h"
 
-    // specified  because when I convert
-    // the string length to its char representation 
-    // I get an error
-    #define MAX_STRING_LENGTH 255
-
-    SymTable* symt;
-
-    int currentColumn = 1;
-    int showsuccess = 0;
-
-
-    void yysuccess(const char *s, const char *lexeme, int length);
-    void yyerror(const char *s);
-    void showLexicalError();
+    extern int currentColumn;
+    extern SymTable* symt;
 %}
 
 /*Used to get the current line number*/
 %option yylineno 
 %option noyywrap 
-%option outfile = "scanner.c"
+%option outfile = "scanner.lex.c"
 /*Used for multiline comments*/
 %x c_comment     
 
@@ -36,7 +21,6 @@ LOOP loop
 READ READ
 WRITE WRITE
 ENTRY entry
-MAIN (\(\)){UNDERSCORE}" entry"(\(\))
 
 IF \?
 ELSE :
@@ -119,290 +103,287 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 {LOOP} {
-    yysuccess("LOOP", yytext, yyleng);
-    insertNewEntry(symt, _LOOP);
+    yysuccess("LOOP");
+    return LOOP;
 }
 
 {READ} {
-    yysuccess("READ", yytext, yyleng);
-    insertNewEntry(symt, _READ);
+    yysuccess("READ");
+    return READ;
 }
 
 {WRITE} {
-    yysuccess("WRITE", yytext, yyleng);
-    insertNewEntry(symt, _WRITE);
+    yysuccess("WRITE");
+    return WRITE;
 }
 
 {ENTRY} {
-    yysuccess("the main entry", yytext, yyleng);
-    insertNewEntry(symt, _ENTRY);
+    yysuccess("the main entry");
+    return ENTRY;
 }
 
 {IF} {
-    yysuccess("IF condition", yytext, yyleng);
-    insertNewEntry(symt, _IF);
+    yysuccess("IF condition");
+    return IF;
 }
 
 {ELSE} {
-    yysuccess("ELSE condition", yytext, yyleng);
-    insertNewEntry(symt, _ELSE);
+    yysuccess("ELSE condition");
+    return ELSE;
 }
 
 {BREAK} {
-    yysuccess("Loop break", yytext, yyleng);
-    insertNewEntry(symt, _BREAK);
+    yysuccess("Loop break");
+    return BREAK;
 }
 
 {CONTINUE} {
-    yysuccess("Loop continue", yytext, yyleng);
-    insertNewEntry(symt, _CONTINUE);
+    yysuccess("Loop continue");
+    return CONTINUE;
 }
 
 {TRUE} {
-    yysuccess("TRUE continue", yytext, yyleng);
-    insertNewEntry(symt, _TRUE);
+    yysuccess("TRUE continue");
+    return TRUE;
 }
 
 {FALSE} {
-    yysuccess("FALSE", yytext, yyleng);
-    insertNewEntry(symt, _FALSE);
+    yysuccess("FALSE");
+    return FALSE;
 }
 
 
 {ID} {
-    yysuccess("IDENTIFIER", yytext, yyleng);
-    SymTableNode* node = insertNewEntry(symt, _ID);
+    yysuccess("IDENTIFIER");
+    SymTableNode* node = insertNewEntry(symt, ID);
     set_attr(node, _NAME_ATTR, yytext);
+    return ID;
 }
 
 
 {DOT} {
-    yysuccess("DOT", yytext, yyleng);
-    insertNewEntry(symt, _DOT);
+    yysuccess("DOT");
+    return DOT;
 }
 
 {COMMA} {
-    yysuccess("COMMA", yytext, yyleng);
-    insertNewEntry(symt, _COMMA);
+    yysuccess("COMMA");
+    return COMMA;
 }
 
 {SEMICOLON} {
-    yysuccess("SEMICOLON", yytext, yyleng);
-    insertNewEntry(symt, _SEMICOLON);
+    yysuccess("SEMICOLON");
+    return SEMICOLON;
 }
 
 
 
 
 {OPENPARENTHESIS} {
-    yysuccess("OPENPARENTHESIS", yytext, yyleng);
-    insertNewEntry(symt, _OPENPARENTHESIS);
+    yysuccess("OPENPARENTHESIS");
+    return OPENPARENTHESIS;
 }
 
 {CLOSEPARENTHESIS} {
-    yysuccess("CLOSEPARENTHESIS", yytext, yyleng);
-    insertNewEntry(symt, _CLOSEPARENTHESIS);
+    yysuccess("CLOSEPARENTHESIS");
+    return CLOSEPARENTHESIS;
 }
 
 {OPENHOOK} {
-    yysuccess("OPENHOOK", yytext, yyleng);
-    insertNewEntry(symt, _OPENHOOK);
+    yysuccess("OPENHOOK");
+    return OPENHOOK;
 }
 
 {CLOSEHOOK} {
-    yysuccess("CLOSEHOOK", yytext, yyleng);
-    insertNewEntry(symt, _CLOSEHOOK);
+    yysuccess("CLOSEHOOK");
+    return CLOSEHOOK;
 }
 
 {OPENBRACKET} {
-    yysuccess("OPENBRACKET", yytext, yyleng);
-    insertNewEntry(symt, _OPENBRACKET);
+    yysuccess("OPENBRACKET");
+    return OPENBRACKET;
 }
 
 {CLOSEBRACKET} {
-    yysuccess("CLOSEBRACKET", yytext, yyleng);
-    insertNewEntry(symt, _CLOSEBRACKET);
+    yysuccess("CLOSEBRACKET");
+    return CLOSEBRACKET;
 }
 
 
 			
 {EQUAL} {
-    yysuccess("EQU operator", yytext, yyleng);
-    insertNewEntry(symt, _EQUAL);
+    yysuccess("EQU operator");
+    return EQUAL;
 }
 
 {NONEQUAL} {
-    yysuccess("NONEQU operator", yytext, yyleng);
-    insertNewEntry(symt, _NONEQUAL);
+    yysuccess("NONEQU operator");
+    return NONEQUAL;
 }
 
 {AND} {
-    yysuccess("AND operator", yytext, yyleng);
-    insertNewEntry(symt, _AND);
+    yysuccess("AND operator");
+    return AND;
 }
 
 {OR} {
-    yysuccess("OR operator", yytext, yyleng);
-    insertNewEntry(symt, _OR);
+    yysuccess("OR operator");
+    return OR;
 }
 
 {NON} {
-    yysuccess("NON operator", yytext, yyleng);
-    insertNewEntry(symt, _NON);
+    yysuccess("NON operator");
+    return NON;
 }
 
 {INFERIOR} {
-    yysuccess("INFERIOR sign", yytext, yyleng);
-    insertNewEntry(symt, _INFERIOR);
+    yysuccess("INFERIOR sign");
+    return INFERIOR;
 }
 
 {SUPERIOR} {
-    yysuccess("SUPERIOR sign", yytext, yyleng);
-    insertNewEntry(symt, _SUPERIOR);
+    yysuccess("SUPERIOR sign");
+    return SUPERIOR;
 }
 
 {INFERIOREQUAL} {
-    yysuccess("INFERIOREQUAL sign", yytext, yyleng);
-    insertNewEntry(symt, _INFERIOREQUAL);
+    yysuccess("INFERIOREQUAL sign");
+    return INFERIOREQUAL;
 }
 
 {SUPERIOREQUAL} {
-    yysuccess("SUPERIOREQUAL sign", yytext, yyleng);
-    insertNewEntry(symt, _SUPERIOREQUAL);
+    yysuccess("SUPERIOREQUAL sign");
+    return SUPERIOREQUAL;
 }
 
 {ADD} {
-    yysuccess("ADDITION operator", yytext, yyleng);
-    insertNewEntry(symt, _ADD);
+    yysuccess("ADDITION operator");
+    return ADD;
 }
 
 {SUB} {
-    yysuccess("SUBTRACTION operator", yytext, yyleng);
-    insertNewEntry(symt, _SUB);
+    yysuccess("SUBTRACTION operator");
+    return SUB;
 
 }
 
 {MULT} {
-    yysuccess("MULTIPLICATION operator", yytext, yyleng);
-    insertNewEntry(symt, _MULT);
+    yysuccess("MULTIPLICATION operator");
+    return MULT;
 }
 
 {DIV} {
-    yysuccess("DIVISION operator", yytext, yyleng);
-    insertNewEntry(symt, _DIV);
+    yysuccess("DIVISION operator");
+    return DIV;
 }
 
 {MOD} {
-    yysuccess("MODULO operator", yytext, yyleng);
-    insertNewEntry(symt, _MOD);
+    yysuccess("MODULO operator");
+    return MOD;
 }
 
 {POWER} {
-    yysuccess("POWER operator", yytext, yyleng);
-    insertNewEntry(symt, _POWER);
+    yysuccess("POWER operator");
+    return POWER;
 }
 
 
 {ASSIGNMENT} {
-    yysuccess("ASSIGNMENT", yytext, yyleng);
-    insertNewEntry(symt, _ASSIGNMENT);
+    yysuccess("ASSIGNMENT");
+    return ASSIGNMENT;
 }
 
 {RETURN} {
-    yysuccess("RETURN", yytext, yyleng);
-    insertNewEntry(symt, _RETURN);
+    yysuccess("RETURN");
+    return RETURN;
 }
 
 
 
 {INTEGER} {
-    yysuccess("constant INTEGER", yytext, yyleng);
-    SymTableNode* node = insertNewEntry(symt, _INTEGER);
-    // insert integer value
-    set_attr(node, _VALUE_ATTR, yytext);
+    yysuccess("constant INTEGER");
+    // SymTableNode* node = insertNewEntry(symt, _INTEGER);
+    // // insert integer value
+    // set_attr(node, _VALUE_ATTR, yytext);
+    return INTEGER;
 }
 
 {REALNUMBER} {
-    yysuccess("constant REALNUMBER", yytext, yyleng);
-    SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
-    // insert rea lnumber value
-    set_attr(node, _VALUE_ATTR, yytext);
+    yysuccess("constant REALNUMBER");
+    // SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
+    // // insert rea lnumber value
+    // set_attr(node, _VALUE_ATTR, yytext);
+
+    return REALNUMBER;
 }
 
 
 {STRING} {
-    yysuccess("constant STRING", yytext, yyleng);
-    SymTableNode* node = insertNewEntry(symt, _STRING);
-    // insert string value & length
-    set_attr(node, _VALUE_ATTR, yytext);
-
-    // convert int length to char length
-    char len[MAX_STRING_LENGTH];
-    sprintf(len, "%d", yyleng-2);
-    set_attr(node, _LENGTH_ATTR, len);
+    yysuccess("constant STRING");
+    // SymTableNode* node = insertNewEntry(symt, _STRING);
+    // // insert string value & length
+    // set_attr(node, _VALUE_ATTR, yytext);
+    return STRING;
 } 
 
 
 {FUNCTIONDECLARE} {
-    yysuccess("FUNCTION declaration", yytext, yyleng);
-    insertNewEntry(symt, _FUNCTIONDECLARE);
-
+    yysuccess("FUNCTION declaration");
+    return FUNCTIONDECLARE;
 } 
 
 {NUMBERDECLARE} {
-    yysuccess("NUMBER declaration", yytext, yyleng);
-    insertNewEntry(symt, _NUMBERDECLARE);
+    yysuccess("NUMBER declaration");
+    return NUMBERDECLARE;
 }
 
 {STRINGDECLARE} {
-    yysuccess("STRING declaration", yytext, yyleng);
-    insertNewEntry(symt, _STRINGDECLARE);
+    yysuccess("STRING declaration");
+    return STRINGDECLARE;
 }
 
 {CONSTDECLARE} {
-    yysuccess("CONSTANT declaration", yytext, yyleng);
-    insertNewEntry(symt, _CONSTDECLARE);
+    yysuccess("CONSTANT declaration");
+    return CONSTDECLARE;
 }
 
 {BOOLEENDECLARE} {
-    yysuccess("BOOLEAN declaration", yytext, yyleng);
-    insertNewEntry(symt, _BOOLEENDECLARE);
+    yysuccess("BOOLEAN declaration");
+    return BOOLEENDECLARE;
 }
 
 {STRUCTTYPEDECLARE} {
-    yysuccess("STRUCTTYPE declaration", yytext, yyleng);
-    insertNewEntry(symt, _STRUCTTYPEDECLARE);
+    yysuccess("STRUCTTYPE declaration");
+    return STRUCTTYPEDECLARE;
 }
 
 {STRUCTDECLARE} {
-    yysuccess("STRUCT declaration", yytext, yyleng);
-    insertNewEntry(symt, _STRUCTDECLARE);
+    yysuccess("STRUCT declaration");
+    return STRUCTDECLARE;
 }
 
 {POINTERDECLARE} {
-    yysuccess("POINTER declaration", yytext, yyleng);
-    insertNewEntry(symt, _POINTERDECLARE);
+    yysuccess("POINTER declaration");
+    return POINTERDECLARE;
 }
 
 {TABLEDECLARE} {
-    yysuccess("TABLE declaration", yytext, yyleng);
-    insertNewEntry(symt, _TABLEDECLARE);
+    yysuccess("TABLE declaration");
+    return TABLEDECLARE;
 }
 
 {ADDRESSVALUE} {
-    yysuccess("ADDRESS value", yytext, yyleng);
-    insertNewEntry(symt, _ADDRESSVALUE);
+    yysuccess("ADDRESS value");
+    return ADDRESSVALUE;
 }
 
 {POINTERVALUE} {
-    yysuccess("POITER value", yytext, yyleng);
-    insertNewEntry(symt, _POINTERVALUE);
+    yysuccess("POITER value");
+    return POINTERVALUE;
 }
 
 
-{INLINECOMMENT} {
-    yysuccess("INLINE comment", "", yyleng);
-}
+{INLINECOMMENT} {;}
 
 {LINEBREAK} {
     currentColumn = 1;
@@ -412,7 +393,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 #_ { BEGIN(c_comment); yymore(); }
 <c_comment>[^_]* { yymore(); }
 <c_comment>"_"+[^_#]* { yymore(); }
-<c_comment>"_#" { yysuccess("MULTILINE comment", yytext, yyleng); BEGIN(INITIAL);}
+<c_comment>"_#" {BEGIN(INITIAL);}
 
 
 [ \t]+ {
@@ -427,76 +408,4 @@ INLINECOMMENT #[^_]{ANYTHING}
     yyterminate();
 }
 
-
 %%
-
-int main(int argc, char **argv) {
-
-    extern FILE *yyin, *yyout;
-  
-    yyin = fopen(argv[1], "r");
-  
-    yyout = fopen("Output.txt", "w");
-
-    if (argc>=3 && sscanf (argv[2], "%i", &showsuccess) != 1) {
-        fprintf(stderr, "error - not an integer");
-    }
-    if(showsuccess != 0) showsuccess = 1;
-    
-    // alocate the symbols table
-    symt = allocateSymTable();
-
-    // tokenize the source program
-    yylex();
-
-    // free the symbol table.
-    // logically it will maintained in memory until
-    // the compiler finishes everything
-    // but here we are doing just the first step
-    freeUpSymTable(symt);
-    fclose(yyin);
-    fclose(yyout);
-    return 0;
-
-}
-
-void yysuccess(const char *s, const char *lexeme, int length) {
-    if(showsuccess) {
-        printf("Found %s : ", s);
-        printf("\033[0;32m");
-        printf("'%s'", lexeme); 
-        printf("\033[0m"); 
-        printf(" at Ln %d Col %d \n", yylineno, currentColumn);
-    }
-    currentColumn += length;
-}
-
-void yyerror(const char *s) {
-    printf("\033[0;31m"); 
-    //printf("%s at Ln %d Col %d \n", s, yylineno, currentColumn);
-    printf("\033[0m"); 
-}
-
-void showLexicalError() {
-
-    char line[256], introError[80]; 
-
-    fseek(yyin, 0, SEEK_SET);
-    
-    int i = 0; 
-
-    while (fgets(line, sizeof(line), yyin)) { 
-        i++; 
-        if(i == yylineno) break;  
-    } 
-        
-    sprintf(introError, "Lexical error in Line %d : Unrecognized character : ", yylineno);
-    printf("%s%s", introError, line);  
-    int j=1;
-    while(j<currentColumn+strlen(introError)) { printf(" "); j++; }
-    printf("^\n");
-
-
-}
-
-

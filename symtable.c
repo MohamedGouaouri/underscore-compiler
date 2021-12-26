@@ -69,8 +69,8 @@ void set_attr(SymTableNode *entry, char *name, char *val)
         if (entry->numOfAttrs == 0)
         {
             AttrNode *rootAttr = (AttrNode *)malloc(sizeof(AttrNode));
-            rootAttr->name = name;
-            rootAttr->val = val;
+            strcpy(rootAttr->name, name);
+            strcpy(rootAttr->val, val);
             rootAttr->next = NULL;
             entry->rootAttr = rootAttr;
             entry->tailAttr = rootAttr;
@@ -81,8 +81,8 @@ void set_attr(SymTableNode *entry, char *name, char *val)
             AttrNode *tailAttr = entry->tailAttr;
             // create a new attr entry
             AttrNode *newAttr = (AttrNode *)malloc(sizeof(AttrNode));
-            newAttr->name = name;
-            newAttr->val = val;
+            strcpy(newAttr->name, name);
+            strcpy(newAttr->val, val);
             newAttr->next = NULL;
 
             // setup chaining
@@ -99,8 +99,8 @@ void setAttrByIndex(SymTable *symTable, int index, char *name, char *val)
         if (entry->numOfAttrs == 0)
         {
             AttrNode *rootAttr = (AttrNode *)malloc(sizeof(AttrNode));
-            rootAttr->name = name;
-            rootAttr->val = val;
+            strncpy(rootAttr->name, name, 254);
+            strncpy(rootAttr->val, val, 254);
             rootAttr->next = NULL;
             entry->rootAttr = rootAttr;
             entry->tailAttr = rootAttr;
@@ -111,8 +111,8 @@ void setAttrByIndex(SymTable *symTable, int index, char *name, char *val)
             AttrNode *tailAttr = entry->tailAttr;
             // create a new attr entry
             AttrNode *newAttr = (AttrNode *)malloc(sizeof(AttrNode));
-            newAttr->name = name;
-            newAttr->val = val;
+            strncpy(newAttr->name, name, 254);
+            strncpy(newAttr->val, val, 254);
             newAttr->next = NULL;
 
             // setup chaining
@@ -240,14 +240,25 @@ SymTableNode *insertEntryByIndex(SymTable *symtable, int index, int entryType)
 
 void printEntryTypesList(SymTable *symtable)
 {
-    SymTableNode *current = symtable->root;
-    printf("\n");
-    while (current != NULL)
-    {
-        printf("%d ->", current->entryType);
-        current = current->next;
-    }
-    printf("NULL\n");
+    // SymTableNode *current = symtable->root;
+    // AttrNode *p = current->rootAttr;
+    // printf("\n");
+    // while (current != NULL)
+    // {
+    //     printf("%d -> ", current->entryType);
+    //     p->name[1] = '\0';
+    //     printf("%s\n", strlen(p->name));
+    //     // while (p != NULL)
+    //     // {
+    //     //     printf("%s\n", p->val);
+    //     //     fflush(stdout);
+    //     //     // printf("(%s | %s) -> ", rootAttr->name, rootAttr->val);
+    //     //     p = p->next;
+    //     // }
+    //     printf("\n|");
+    //     current = current->next;
+    //     p = current->rootAttr;
+    // }
 }
 
 void freeUpEntryAttr(SymTableNode *entry)

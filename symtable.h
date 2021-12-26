@@ -13,8 +13,8 @@
 
 typedef struct AttrNode
 {
-    char *name;
-    char *val;
+    char name[255];
+    char val[255];
     struct AttrNode *next;
 } AttrNode;
 

@@ -1,22 +1,10 @@
-# Local build used generally for testing
 
-CC = gcc
-LDFLAGS	= -lfl
-SYMTABLE_TEST_SOURCES = tests/test.c symtable.c
-SYMTABLE_TEST_FILE = tests/testfile
+underscore: scanner.l parser.y
+	flex scanner.l
+	bison -d parser.y
+	gcc scanner.lex.c parser.tab.c ast.c symtable.c -o underscore
+	cp underscore tests/underscore
 
-LEX_SCANNER = scanner.l
-SCANNER_SOURCES = scanner.c symtable.c
-SCANNER_OUT = tests/scanner
-# Symtable build
-
-symtabletest: $(SYMTABLE_TEST_FILE)
-	./$(SYMTABLE_TEST_FILE)
-
-$(SYMTABLE_TEST_FILE): $(SYMTABLE_TEST_SOURCES)
-	$(CC) $(SYMTABLE_TEST_SOURCES) -o $(SYMTABLE_TEST_FILE)
-
-# scanner build
-scanner: $(SCANNER_SOURCES)
-	flex $(LEX_SCANNER)
-	$(CC) $(SCANNER_SOURCES) -o $(SCANNER_OUT) $(LDFLAGS)
+clean: scanner.lex.c parser.tab.c underscore
+	rm scanner.lex.c parser.tab.c underscore
+	rm tests/underscore

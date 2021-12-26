@@ -57,3 +57,6 @@ scanner.lex.c
 parser.tab.c
 parser.tab.h
 underscore
+parser.pdf
+parser.png
+parser.ps

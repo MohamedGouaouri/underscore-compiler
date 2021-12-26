@@ -328,7 +328,7 @@ INLINECOMMENT #[^_]{ANYTHING}
     // // insert string value & length
     // set_attr(node, _VALUE_ATTR, yytext);
 
-    _yylval.ival = yytext;
+    _yylval.string = yytext;
     return STRING;
 } 
 

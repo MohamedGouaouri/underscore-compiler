@@ -54,5 +54,6 @@ dkms.conf
 out/
 tests/underscore
 scanner.lex.c
-parser.lex.c
+parser.tab.c
+parser.tab.h
 underscore

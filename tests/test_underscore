@@ -1,0 +1,70 @@
+
+
+# A sample test program to test the first part of our grammar
+# Uncomment and run test
+
+#_ Testcase 1: Expected: Failure
+()_ []_ f($_ n, {}_ s){
+
+}
+_#
+
+()_ $[]_ f($_ n, {}_ s){
+
+}
+
+
+
+#_Testcase 3: Expected: Success
+()_ $[]_ f($_ n, {}_ s){
+
+}
+
+()_ $[]_ g(""_ s, {}[]_ t){
+
+}
+_#
+
+
+#_ Testcase 4: Expected: Success
+()_ f($_ a, $_ b){
+
+}
+_#
+
+#_ Testcase 5: Expected: Failure
+()_ f($_ a, $_ b)
+
+}
+_#
+
+#_ Testcase 6: Expected: Failure
+()_ f($_ a, _ b){
+
+}
+_#
+
+#_ Testcase 7: Expected: Success
+()_ f($_ a, $_ b, ""_ c){
+
+}
+_#
+
+#_ Testcase 8: Expected: Failure
+()_ f($_ a, $_ b){
+
+
+_#
+
+
+#_ Testcase 9: Expected: Failure
+f($_ a, $_ b){
+
+}
+_#
+
+#_ Testcase 10: Expected: Failure
+()_ f($_ a, $_ b, ){
+
+}
+_#

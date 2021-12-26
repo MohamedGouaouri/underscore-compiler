@@ -1,0 +1,91 @@
+
+# Some exmples to test
+# It includes
+# 1. Function declarations
+# 2. Variable declarations
+# 3. Variable assignment
+# 4. If statements
+# 5. While and For loops
+# 6. Expression:
+#   6-1. Mathematical expressions
+#   6-2. Function calls
+# 7. Function returns
+
+
+# Sum of array elements
+()_ $_ sum($_[]_ array, $_ length){
+    $_ sum <- 0;
+    loop ($_ i <- 0; i < length; i <- i+1){
+        sum <- sum + array[i];
+    }
+    -> sum;
+}
+
+# Recursive factorial function
+()_ $_ fact($_ n){
+    ? (n <= 1){
+        -> 1;
+    }
+    :() {
+        -> n * fact(n - 1);
+    }
+}
+
+# Check if string is palindrome
+()_ ?_ checkIsPlaindrome(""_ string, $_ length){
+    ?_ isPalindrome <- false;
+    $_ i <- 0;
+    $_ j <- length - 1;
+    loop (isPalindrome && i <= j){
+        ? (string[i] != string[j]){
+            isPalindrome <- false;
+        }
+        i <- i + 1;
+        j <- j - 1;
+    }
+    -> isPalindrome;
+}
+
+
+# Struct example
+()_ structs(){
+    {}_ student1 {
+        $_ id,
+        ""_ name,
+        $_ age,
+        $_ default <- 10
+    };
+
+    {}_ student2 {
+        $_ id,
+        ""_ name,
+        $_ age,
+        $_ default <- 10
+    };
+
+    student1.id <- 1;
+    student1.name <- "a";
+
+    student2.id <- student1.id + 1;
+    student2.name <- "b";
+
+}
+
+()_  pointers(){
+    @$_ a;
+    @a <- 100;
+    $_ @b;
+    @b <- 200;
+
+    @a <- @b;
+
+    WRITE(@a);
+}
+
+
+
+#_ Main function _#
+
+()_ entry(){
+    # Your calls here
+}

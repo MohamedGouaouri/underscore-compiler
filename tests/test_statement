@@ -1,0 +1,84 @@
+# We'll use an id whenever we need to fill the space of an expression
+# ends of if statements (elif) not detected properly (either a little too late or a little too early)
+
+#_
+()_ $_ f($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
+
+    $_ sum <- 10 + (100 ^ 10) - g(10, 9);
+    ?_ found <- false;
+    ""_ name <- "Souaad";
+    {}_ student {""_ name, $_ gpa};
+
+    student.name <- name;
+    student.rank <- 9;
+    loop($_ i <- 10; i < 100; i <- i + 1) {
+        break;
+        sum <- sum;
+        ? ((f(10) = 0) && (g(10) = true) || true) {
+            found <- true;
+        }
+        break;
+    }
+    
+}
+_#
+#_
+()_ $_ f($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
+
+
+    loop(cond) {
+        sum <- sum;
+        ? (cond1) {
+            break;
+        }
+        : () {
+            continue;
+        }
+    }
+
+    thatMethod(sum, difference);
+
+    thatOtherMethod();
+
+    -> sum ;
+    break; ## Syntax error normally
+
+}
+_#
+#_
+()_ thatMothod($_ s, $_ d) {
+
+    READ(s);
+
+    WRITE(s);
+
+    s <- s;
+
+    -> d;
+
+}
+_#
+
+#_
+()_ thatMothod($_ s, $_ d) {
+    $_ x;
+
+   ? (cond){
+       f(1);
+       loop (){
+           $_ y
+       }
+        y <- x + 1;
+
+   }
+
+    ? (){
+
+    }
+
+}
+_#
+
+()_ f($_ i,){
+
+}

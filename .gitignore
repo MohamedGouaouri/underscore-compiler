@@ -52,7 +52,7 @@ Mkfile.old
 dkms.conf
 .idea/
 out/
-tests/underscore
+tests/
 scanner.lex.c
 parser.tab.c
 parser.tab.h
@@ -61,3 +61,4 @@ parser.pdf
 parser.png
 parser.ps
 parser.dot
+.vscode/*

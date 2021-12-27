@@ -71,6 +71,9 @@ typedef enum ast_node_type
 typedef struct ast_node
 {
     /* data */
+    int id; // for dataviz
+    char *label;
+
     int index; // used to track the occupied positions in childre field
     ast_node_type node_type;
     struct ast_node *children[MAX_CHILDREN];
@@ -85,6 +88,9 @@ ast_node *add_child(ast_node *node, ast_node_type node_type);
 ast_node *get_child(ast_node *node, int index);
 bool is_leaf(ast_node *node);
 size_t number_of_children(ast_node *node);
-void destroy_ast(ast_node *root, size_t num_of_children);
+void destroy_ast(ast_node *root, int num_of_children);
+
+void main_ast_print(ast_node *tree, FILE *stream);
+void aux_ast_print(ast_node *node, FILE *stream, char *label);
 
 #endif

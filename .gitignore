@@ -52,7 +52,6 @@ Mkfile.old
 dkms.conf
 .idea/
 out/
-tests/
 scanner.lex.c
 parser.tab.c
 parser.tab.h

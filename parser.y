@@ -105,11 +105,11 @@
 %nonassoc INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
 %left ADD SUB
 %left MULT DIV MOD
-%nonassoc NOT
+%nonassoc NON
 %nonassoc ADDRESSVALUE POINTERVALUE
 %left DOT OPENBRACKET CLOSEBRACKET
+%left POWER
 %left OPENPARENTHESIS CLOSEPARENTHESIS
-
 
 
 %%
@@ -162,9 +162,9 @@ statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
 		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess("Déclaration d'un type structure.");}
 		| assign SEMICOLON {yysuccess("Assignment.");}
         
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("while loop.");}
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
+        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("while loop.");}
+		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
+		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
         
         | ifstmt {yysuccess("Simplest if statement.");}
 		| ifstmt elsestmt {yysuccess("If else statement.");}
@@ -179,11 +179,11 @@ statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess("Print output.");}
         ;
 
-loop_bloc: statement loop_bloc
+/* loop_bloc: statement loop_bloc
         | loop_bloc BREAK ";" loop_bloc
         | loop_bloc CONTINUE ";" loop_bloc
         |
-        ;
+        ; */
 
 type_declare: NUMBERDECLARE
 		    | STRINGDECLARE
@@ -235,7 +235,24 @@ expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
 	| NON expression
 	| POINTERVALUE var_exp
 	| ADDRESSVALUE var_exp
-	| expression operator expression {yysuccess("EXPRESSION : OPERATION WITH 2 OPERATORS");}
+
+	| expression EQUAL expression
+    | expression NONEQUAL expression
+    | expression OR expression
+    | expression AND expression
+
+    | expression INFERIOR expression
+    | expression INFERIOREQUAL expression
+    | expression SUPERIOR expression
+    | expression SUPERIOREQUAL expression
+
+    | expression ADD expression
+    | expression SUB expression
+    | expression MULT expression
+    | expression DIV expression
+    | expression MOD expression
+    | expression POWER expression
+
 	| const
 	| variable
 	;
@@ -243,7 +260,7 @@ expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
 
 
 const :  INTEGER
-	|  REALNUMBER
+	    |  REALNUMBER
         |  STRING
         |  TRUE
         | FALSE
@@ -258,22 +275,6 @@ var_exp : ID
 	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
 	;
 
-operator :  EQUAL
-	|  NONEQUAL
-	|  AND
-	| OR
-	| NON
-        | INFERIOR
-        | SUPERIOR
-        | INFERIOREQUAL
-        | SUPERIOREQUAL
-        | ADD
-        | SUB
-        | MULT
-        | DIV
-        | MOD
-        | POWER
-        ;
 
 
 

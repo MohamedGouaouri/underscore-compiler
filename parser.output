@@ -1,0 +1,4091 @@
+Terminals unused in grammar
+
+    ENTRY
+    NOT
+
+
+State 116 conflicts: 15 shift/reduce
+State 161 conflicts: 15 shift/reduce
+State 197 conflicts: 2 shift/reduce
+State 208 conflicts: 2 shift/reduce
+State 209 conflicts: 2 shift/reduce
+
+
+Grammar
+
+    0 $accept: underscore $end
+
+    1 underscore: %empty
+    2           | underscore func
+
+    3 func: FUNCTIONDECLARE ret ID "(" params_eps ")" body
+
+    4 ret: %empty
+    5    | srt
+    6    | crt
+
+    7 srt: NUMBERDECLARE
+    8    | STRINGDECLARE
+    9    | BOOLEENDECLARE
+
+   10 crt: TABLEDECLARE
+   11    | STRUCTTYPEDECLARE
+
+   12 params_eps: %empty
+   13           | params
+
+   14 params: param comma_params
+
+   15 comma_params: %empty
+   16             | "," params
+
+   17 param: type ID
+
+   18 type: srt
+   19     | crt
+
+   20 body: "{" bloc "}"
+
+   21 bloc: statement bloc
+   22     | %empty
+
+   23 statement: declare ";"
+   24          | STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | assign ";"
+   26          | LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | ifstmt
+   30          | ifstmt elsestmt
+   31          | ifstmt elifstmt
+   32          | ifstmt elifstmt elsestmt
+   33          | RETURN expression ";"
+   34          | ID "(" ")" ";"
+   35          | ID "(" call_param ")" ";"
+   36          | READ "(" ID ")" ";"
+   37          | WRITE "(" expression ")" ";"
+
+   38 loop_bloc: statement loop_bloc
+   39          | loop_bloc BREAK ";" loop_bloc
+   40          | loop_bloc CONTINUE ";" loop_bloc
+   41          | %empty
+
+   42 type_declare: NUMBERDECLARE
+   43             | STRINGDECLARE
+   44             | CONSTDECLARE NUMBERDECLARE
+   45             | CONSTDECLARE STRINGDECLARE
+   46             | BOOLEENDECLARE
+   47             | POINTERDECLARE
+   48             | TABLEDECLARE
+   49             | STRUCTDECLARE
+
+   50 just_declare: type_declare ID
+
+   51 init_declare: just_declare ASSIGNMENT expression
+
+   52 declare: just_declare
+   53        | init_declare
+
+   54 struct_fields: declare
+   55              | declare "," struct_fields
+   56              | %empty
+
+   57 assign: var ASSIGNMENT expression
+   58       | ID "[" expression "]" ASSIGNMENT expression
+   59       | "&" var ASSIGNMENT expression
+   60       | "@" var ASSIGNMENT expression
+
+   61 ifstmt: IF "(" expression ")" body
+
+   62 elifstmt: ELSE "(" expression ")" body
+   63         | elifstmt ELSE "(" expression ")" body
+
+   64 elsestmt: ELSE "(" ")" body
+
+   65 call_param: expression
+   66           | expression "," call_param
+
+   67 accessfield: ID
+   68            | ID "." accessfield
+
+   69 var: ID
+   70    | ID "." accessfield
+
+   71 expression: "(" expression ")"
+   72           | "!" expression
+   73           | "@" var_exp
+   74           | "&" var_exp
+   75           | expression operator expression
+   76           | const
+   77           | variable
+
+   78 const: INTEGER
+   79      | REALNUMBER
+   80      | STRING
+   81      | TRUE
+   82      | FALSE
+
+   83 variable: var_exp
+   84         | ID "(" call_param ")"
+
+   85 var_exp: ID
+   86        | ID "." accessfield
+   87        | ID "[" expression "]"
+
+   88 operator: "="
+   89         | "!="
+   90         | "&&"
+   91         | "||"
+   92         | "!"
+   93         | "<"
+   94         | ">"
+   95         | "<="
+   96         | ">="
+   97         | "+"
+   98         | "-"
+   99         | "*"
+  100         | "/"
+  101         | "%"
+  102         | "^"
+
+
+Terminals, with rules where they appear
+
+    $end (0) 0
+    error (256)
+    ENTRY (258)
+    LOOP (259) 26 27 28
+    IF (260) 61
+    ELSE (261) 62 63 64
+    READ (262) 36
+    WRITE (263) 37
+    BREAK (264) 39
+    CONTINUE (265) 40
+    ID (266) 3 17 24 34 35 36 50 58 67 68 69 70 84 85 86 87
+    FUNCTIONDECLARE (267) 3
+    NUMBERDECLARE (268) 7 42 44
+    STRINGDECLARE (269) 8 43 45
+    CONSTDECLARE (270) 44 45
+    BOOLEENDECLARE (271) 9 46
+    STRUCTTYPEDECLARE (272) 11 24
+    STRUCTDECLARE (273) 49
+    TABLEDECLARE (274) 10 48
+    POINTERDECLARE (275) 47
+    "&" (276) 59 74
+    "@" (277) 60 73
+    "{" (278) 20 24 26 27 28
+    "}" (279) 20 24 26 27 28
+    "(" (280) 3 26 27 28 34 35 36 37 61 62 63 64 71 84
+    ")" (281) 3 26 27 28 34 35 36 37 61 62 63 64 71 84
+    "[" (282) 58 87
+    "]" (283) 58 87
+    "=" (284) 88
+    "!=" (285) 89
+    "&&" (286) 90
+    "||" (287) 91
+    "!" (288) 72 92
+    "<" (289) 93
+    ">" (290) 94
+    "<=" (291) 95
+    ">=" (292) 96
+    "+" (293) 97
+    "-" (294) 98
+    "*" (295) 99
+    "/" (296) 100
+    "%" (297) 101
+    "^" (298) 102
+    "." (299) 68 70 86
+    "," (300) 16 55 66
+    ";" (301) 23 24 25 27 28 33 34 35 36 37 39 40
+    ASSIGNMENT (302) 51 57 58 59 60
+    RETURN (303) 33
+    INTEGER (304) 78
+    REALNUMBER (305) 79
+    STRING (306) 80
+    TRUE (307) 81
+    FALSE (308) 82
+    NOT (309)
+
+
+Nonterminals, with rules where they appear
+
+    $accept (55)
+        on left: 0
+    underscore (56)
+        on left: 1 2
+        on right: 0 2
+    func (57)
+        on left: 3
+        on right: 2
+    ret (58)
+        on left: 4 5 6
+        on right: 3
+    srt (59)
+        on left: 7 8 9
+        on right: 5 18
+    crt (60)
+        on left: 10 11
+        on right: 6 19
+    params_eps (61)
+        on left: 12 13
+        on right: 3
+    params (62)
+        on left: 14
+        on right: 13 16
+    comma_params (63)
+        on left: 15 16
+        on right: 14
+    param (64)
+        on left: 17
+        on right: 14
+    type (65)
+        on left: 18 19
+        on right: 17
+    body (66)
+        on left: 20
+        on right: 3 61 62 63 64
+    bloc (67)
+        on left: 21 22
+        on right: 20 21
+    statement (68)
+        on left: 23 24 25 26 27 28 29 30 31 32 33 34 35 36 37
+        on right: 21 38
+    loop_bloc (69)
+        on left: 38 39 40 41
+        on right: 26 27 28 38 39 40
+    type_declare (70)
+        on left: 42 43 44 45 46 47 48 49
+        on right: 50
+    just_declare (71)
+        on left: 50
+        on right: 51 52
+    init_declare (72)
+        on left: 51
+        on right: 28 53
+    declare (73)
+        on left: 52 53
+        on right: 23 54 55
+    struct_fields (74)
+        on left: 54 55 56
+        on right: 24 55
+    assign (75)
+        on left: 57 58 59 60
+        on right: 25 27 28
+    ifstmt (76)
+        on left: 61
+        on right: 29 30 31 32
+    elifstmt (77)
+        on left: 62 63
+        on right: 31 32 63
+    elsestmt (78)
+        on left: 64
+        on right: 30 32
+    call_param (79)
+        on left: 65 66
+        on right: 35 66 84
+    accessfield (80)
+        on left: 67 68
+        on right: 68 70 86
+    var (81)
+        on left: 69 70
+        on right: 57 59 60
+    expression (82)
+        on left: 71 72 73 74 75 76 77
+        on right: 26 27 28 33 37 51 57 58 59 60 61 62 63 65 66 71 72 75 87
+    const (83)
+        on left: 78 79 80 81 82
+        on right: 76
+    variable (84)
+        on left: 83 84
+        on right: 77
+    var_exp (85)
+        on left: 85 86 87
+        on right: 73 74 83
+    operator (86)
+        on left: 88 89 90 91 92 93 94 95 96 97 98 99 100 101 102
+        on right: 75
+
+
+State 0
+
+    0 $accept: . underscore $end
+    1 underscore: . %empty
+    2           | . underscore func
+
+    $default  reduce using rule 1 (underscore)
+
+    underscore  go to state 1
+
+
+State 1
+
+    0 $accept: underscore . $end
+    2 underscore: underscore . func
+    3 func: . FUNCTIONDECLARE ret ID "(" params_eps ")" body
+
+    $end             shift, and go to state 2
+    FUNCTIONDECLARE  shift, and go to state 3
+
+    func  go to state 4
+
+
+State 2
+
+    0 $accept: underscore $end .
+
+    $default  accept
+
+
+State 3
+
+    3 func: FUNCTIONDECLARE . ret ID "(" params_eps ")" body
+    4 ret: . %empty  [ID]
+    5    | . srt
+    6    | . crt
+    7 srt: . NUMBERDECLARE
+    8    | . STRINGDECLARE
+    9    | . BOOLEENDECLARE
+   10 crt: . TABLEDECLARE
+   11    | . STRUCTTYPEDECLARE
+
+    NUMBERDECLARE      shift, and go to state 5
+    STRINGDECLARE      shift, and go to state 6
+    BOOLEENDECLARE     shift, and go to state 7
+    STRUCTTYPEDECLARE  shift, and go to state 8
+    TABLEDECLARE       shift, and go to state 9
+
+    $default  reduce using rule 4 (ret)
+
+    ret  go to state 10
+    srt  go to state 11
+    crt  go to state 12
+
+
+State 4
+
+    2 underscore: underscore func .
+
+    $default  reduce using rule 2 (underscore)
+
+
+State 5
+
+    7 srt: NUMBERDECLARE .
+
+    $default  reduce using rule 7 (srt)
+
+
+State 6
+
+    8 srt: STRINGDECLARE .
+
+    $default  reduce using rule 8 (srt)
+
+
+State 7
+
+    9 srt: BOOLEENDECLARE .
+
+    $default  reduce using rule 9 (srt)
+
+
+State 8
+
+   11 crt: STRUCTTYPEDECLARE .
+
+    $default  reduce using rule 11 (crt)
+
+
+State 9
+
+   10 crt: TABLEDECLARE .
+
+    $default  reduce using rule 10 (crt)
+
+
+State 10
+
+    3 func: FUNCTIONDECLARE ret . ID "(" params_eps ")" body
+
+    ID  shift, and go to state 13
+
+
+State 11
+
+    5 ret: srt .
+
+    $default  reduce using rule 5 (ret)
+
+
+State 12
+
+    6 ret: crt .
+
+    $default  reduce using rule 6 (ret)
+
+
+State 13
+
+    3 func: FUNCTIONDECLARE ret ID . "(" params_eps ")" body
+
+    "("  shift, and go to state 14
+
+
+State 14
+
+    3 func: FUNCTIONDECLARE ret ID "(" . params_eps ")" body
+    7 srt: . NUMBERDECLARE
+    8    | . STRINGDECLARE
+    9    | . BOOLEENDECLARE
+   10 crt: . TABLEDECLARE
+   11    | . STRUCTTYPEDECLARE
+   12 params_eps: . %empty  [")"]
+   13           | . params
+   14 params: . param comma_params
+   17 param: . type ID
+   18 type: . srt
+   19     | . crt
+
+    NUMBERDECLARE      shift, and go to state 5
+    STRINGDECLARE      shift, and go to state 6
+    BOOLEENDECLARE     shift, and go to state 7
+    STRUCTTYPEDECLARE  shift, and go to state 8
+    TABLEDECLARE       shift, and go to state 9
+
+    $default  reduce using rule 12 (params_eps)
+
+    srt         go to state 15
+    crt         go to state 16
+    params_eps  go to state 17
+    params      go to state 18
+    param       go to state 19
+    type        go to state 20
+
+
+State 15
+
+   18 type: srt .
+
+    $default  reduce using rule 18 (type)
+
+
+State 16
+
+   19 type: crt .
+
+    $default  reduce using rule 19 (type)
+
+
+State 17
+
+    3 func: FUNCTIONDECLARE ret ID "(" params_eps . ")" body
+
+    ")"  shift, and go to state 21
+
+
+State 18
+
+   13 params_eps: params .
+
+    $default  reduce using rule 13 (params_eps)
+
+
+State 19
+
+   14 params: param . comma_params
+   15 comma_params: . %empty  [")"]
+   16             | . "," params
+
+    ","  shift, and go to state 22
+
+    $default  reduce using rule 15 (comma_params)
+
+    comma_params  go to state 23
+
+
+State 20
+
+   17 param: type . ID
+
+    ID  shift, and go to state 24
+
+
+State 21
+
+    3 func: FUNCTIONDECLARE ret ID "(" params_eps ")" . body
+   20 body: . "{" bloc "}"
+
+    "{"  shift, and go to state 25
+
+    body  go to state 26
+
+
+State 22
+
+    7 srt: . NUMBERDECLARE
+    8    | . STRINGDECLARE
+    9    | . BOOLEENDECLARE
+   10 crt: . TABLEDECLARE
+   11    | . STRUCTTYPEDECLARE
+   14 params: . param comma_params
+   16 comma_params: "," . params
+   17 param: . type ID
+   18 type: . srt
+   19     | . crt
+
+    NUMBERDECLARE      shift, and go to state 5
+    STRINGDECLARE      shift, and go to state 6
+    BOOLEENDECLARE     shift, and go to state 7
+    STRUCTTYPEDECLARE  shift, and go to state 8
+    TABLEDECLARE       shift, and go to state 9
+
+    srt     go to state 15
+    crt     go to state 16
+    params  go to state 27
+    param   go to state 19
+    type    go to state 20
+
+
+State 23
+
+   14 params: param comma_params .
+
+    $default  reduce using rule 14 (params)
+
+
+State 24
+
+   17 param: type ID .
+
+    $default  reduce using rule 17 (param)
+
+
+State 25
+
+   20 body: "{" . bloc "}"
+   21 bloc: . statement bloc
+   22     | . %empty  ["}"]
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 22 (bloc)
+
+    bloc          go to state 44
+    statement     go to state 45
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 26
+
+    3 func: FUNCTIONDECLARE ret ID "(" params_eps ")" body .
+
+    $default  reduce using rule 3 (func)
+
+
+State 27
+
+   16 comma_params: "," params .
+
+    $default  reduce using rule 16 (comma_params)
+
+
+State 28
+
+   26 statement: LOOP . "(" expression ")" "{" loop_bloc "}"
+   27          | LOOP . "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | LOOP . "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+
+    "("  shift, and go to state 53
+
+
+State 29
+
+   61 ifstmt: IF . "(" expression ")" body
+
+    "("  shift, and go to state 54
+
+
+State 30
+
+   36 statement: READ . "(" ID ")" ";"
+
+    "("  shift, and go to state 55
+
+
+State 31
+
+   37 statement: WRITE . "(" expression ")" ";"
+
+    "("  shift, and go to state 56
+
+
+State 32
+
+   34 statement: ID . "(" ")" ";"
+   35          | ID . "(" call_param ")" ";"
+   58 assign: ID . "[" expression "]" ASSIGNMENT expression
+   69 var: ID .  [ASSIGNMENT]
+   70    | ID . "." accessfield
+
+    "("  shift, and go to state 57
+    "["  shift, and go to state 58
+    "."  shift, and go to state 59
+
+    $default  reduce using rule 69 (var)
+
+
+State 33
+
+   42 type_declare: NUMBERDECLARE .
+
+    $default  reduce using rule 42 (type_declare)
+
+
+State 34
+
+   43 type_declare: STRINGDECLARE .
+
+    $default  reduce using rule 43 (type_declare)
+
+
+State 35
+
+   44 type_declare: CONSTDECLARE . NUMBERDECLARE
+   45             | CONSTDECLARE . STRINGDECLARE
+
+    NUMBERDECLARE  shift, and go to state 60
+    STRINGDECLARE  shift, and go to state 61
+
+
+State 36
+
+   46 type_declare: BOOLEENDECLARE .
+
+    $default  reduce using rule 46 (type_declare)
+
+
+State 37
+
+   24 statement: STRUCTTYPEDECLARE . ID "{" struct_fields "}" ";"
+
+    ID  shift, and go to state 62
+
+
+State 38
+
+   49 type_declare: STRUCTDECLARE .
+
+    $default  reduce using rule 49 (type_declare)
+
+
+State 39
+
+   48 type_declare: TABLEDECLARE .
+
+    $default  reduce using rule 48 (type_declare)
+
+
+State 40
+
+   47 type_declare: POINTERDECLARE .
+
+    $default  reduce using rule 47 (type_declare)
+
+
+State 41
+
+   59 assign: "&" . var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    ID  shift, and go to state 63
+
+    var  go to state 64
+
+
+State 42
+
+   60 assign: "@" . var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    ID  shift, and go to state 63
+
+    var  go to state 65
+
+
+State 43
+
+   33 statement: RETURN . expression ";"
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 76
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 44
+
+   20 body: "{" bloc . "}"
+
+    "}"  shift, and go to state 80
+
+
+State 45
+
+   21 bloc: . statement bloc
+   21     | statement . bloc
+   22     | . %empty  ["}"]
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 22 (bloc)
+
+    bloc          go to state 81
+    statement     go to state 45
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 46
+
+   50 just_declare: type_declare . ID
+
+    ID  shift, and go to state 82
+
+
+State 47
+
+   51 init_declare: just_declare . ASSIGNMENT expression
+   52 declare: just_declare .  ["}", ",", ";"]
+
+    ASSIGNMENT  shift, and go to state 83
+
+    $default  reduce using rule 52 (declare)
+
+
+State 48
+
+   53 declare: init_declare .
+
+    $default  reduce using rule 53 (declare)
+
+
+State 49
+
+   23 statement: declare . ";"
+
+    ";"  shift, and go to state 84
+
+
+State 50
+
+   25 statement: assign . ";"
+
+    ";"  shift, and go to state 85
+
+
+State 51
+
+   29 statement: ifstmt .  [LOOP, IF, READ, WRITE, BREAK, CONTINUE, ID, NUMBERDECLARE, STRINGDECLARE, CONSTDECLARE, BOOLEENDECLARE, STRUCTTYPEDECLARE, STRUCTDECLARE, TABLEDECLARE, POINTERDECLARE, "&", "@", "}", RETURN]
+   30          | ifstmt . elsestmt
+   31          | ifstmt . elifstmt
+   32          | ifstmt . elifstmt elsestmt
+   62 elifstmt: . ELSE "(" expression ")" body
+   63         | . elifstmt ELSE "(" expression ")" body
+   64 elsestmt: . ELSE "(" ")" body
+
+    ELSE  shift, and go to state 86
+
+    $default  reduce using rule 29 (statement)
+
+    elifstmt  go to state 87
+    elsestmt  go to state 88
+
+
+State 52
+
+   57 assign: var . ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 89
+
+
+State 53
+
+   26 statement: LOOP "(" . expression ")" "{" loop_bloc "}"
+   27          | LOOP "(" . assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | LOOP "(" . init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID              shift, and go to state 90
+    NUMBERDECLARE   shift, and go to state 33
+    STRINGDECLARE   shift, and go to state 34
+    CONSTDECLARE    shift, and go to state 35
+    BOOLEENDECLARE  shift, and go to state 36
+    STRUCTDECLARE   shift, and go to state 38
+    TABLEDECLARE    shift, and go to state 39
+    POINTERDECLARE  shift, and go to state 40
+    "&"             shift, and go to state 91
+    "@"             shift, and go to state 92
+    "("             shift, and go to state 69
+    "!"             shift, and go to state 70
+    INTEGER         shift, and go to state 71
+    REALNUMBER      shift, and go to state 72
+    STRING          shift, and go to state 73
+    TRUE            shift, and go to state 74
+    FALSE           shift, and go to state 75
+
+    type_declare  go to state 46
+    just_declare  go to state 93
+    init_declare  go to state 94
+    assign        go to state 95
+    var           go to state 52
+    expression    go to state 96
+    const         go to state 77
+    variable      go to state 78
+    var_exp       go to state 79
+
+
+State 54
+
+   61 ifstmt: IF "(" . expression ")" body
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 97
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 55
+
+   36 statement: READ "(" . ID ")" ";"
+
+    ID  shift, and go to state 98
+
+
+State 56
+
+   37 statement: WRITE "(" . expression ")" ";"
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 99
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 57
+
+   34 statement: ID "(" . ")" ";"
+   35          | ID "(" . call_param ")" ";"
+   65 call_param: . expression
+   66           | . expression "," call_param
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    ")"         shift, and go to state 100
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    call_param  go to state 101
+    expression  go to state 102
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 58
+
+   58 assign: ID "[" . expression "]" ASSIGNMENT expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 103
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 59
+
+   67 accessfield: . ID
+   68            | . ID "." accessfield
+   70 var: ID "." . accessfield
+
+    ID  shift, and go to state 104
+
+    accessfield  go to state 105
+
+
+State 60
+
+   44 type_declare: CONSTDECLARE NUMBERDECLARE .
+
+    $default  reduce using rule 44 (type_declare)
+
+
+State 61
+
+   45 type_declare: CONSTDECLARE STRINGDECLARE .
+
+    $default  reduce using rule 45 (type_declare)
+
+
+State 62
+
+   24 statement: STRUCTTYPEDECLARE ID . "{" struct_fields "}" ";"
+
+    "{"  shift, and go to state 106
+
+
+State 63
+
+   69 var: ID .  [ASSIGNMENT]
+   70    | ID . "." accessfield
+
+    "."  shift, and go to state 59
+
+    $default  reduce using rule 69 (var)
+
+
+State 64
+
+   59 assign: "&" var . ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 107
+
+
+State 65
+
+   60 assign: "@" var . ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 108
+
+
+State 66
+
+   84 variable: ID . "(" call_param ")"
+   85 var_exp: ID .  ["}", ")", "]", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^", ",", ";"]
+   86        | ID . "." accessfield
+   87        | ID . "[" expression "]"
+
+    "("  shift, and go to state 109
+    "["  shift, and go to state 110
+    "."  shift, and go to state 111
+
+    $default  reduce using rule 85 (var_exp)
+
+
+State 67
+
+   74 expression: "&" . var_exp
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID  shift, and go to state 112
+
+    var_exp  go to state 113
+
+
+State 68
+
+   73 expression: "@" . var_exp
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID  shift, and go to state 112
+
+    var_exp  go to state 114
+
+
+State 69
+
+   71 expression: . "(" expression ")"
+   71           | "(" . expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 115
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 70
+
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   72           | "!" . expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 116
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 71
+
+   78 const: INTEGER .
+
+    $default  reduce using rule 78 (const)
+
+
+State 72
+
+   79 const: REALNUMBER .
+
+    $default  reduce using rule 79 (const)
+
+
+State 73
+
+   80 const: STRING .
+
+    $default  reduce using rule 80 (const)
+
+
+State 74
+
+   81 const: TRUE .
+
+    $default  reduce using rule 81 (const)
+
+
+State 75
+
+   82 const: FALSE .
+
+    $default  reduce using rule 82 (const)
+
+
+State 76
+
+   33 statement: RETURN expression . ";"
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+    ";"   shift, and go to state 132
+
+    operator  go to state 133
+
+
+State 77
+
+   76 expression: const .
+
+    $default  reduce using rule 76 (expression)
+
+
+State 78
+
+   77 expression: variable .
+
+    $default  reduce using rule 77 (expression)
+
+
+State 79
+
+   83 variable: var_exp .
+
+    $default  reduce using rule 83 (variable)
+
+
+State 80
+
+   20 body: "{" bloc "}" .
+
+    $default  reduce using rule 20 (body)
+
+
+State 81
+
+   21 bloc: statement bloc .
+
+    $default  reduce using rule 21 (bloc)
+
+
+State 82
+
+   50 just_declare: type_declare ID .
+
+    $default  reduce using rule 50 (just_declare)
+
+
+State 83
+
+   51 init_declare: just_declare ASSIGNMENT . expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 134
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 84
+
+   23 statement: declare ";" .
+
+    $default  reduce using rule 23 (statement)
+
+
+State 85
+
+   25 statement: assign ";" .
+
+    $default  reduce using rule 25 (statement)
+
+
+State 86
+
+   62 elifstmt: ELSE . "(" expression ")" body
+   64 elsestmt: ELSE . "(" ")" body
+
+    "("  shift, and go to state 135
+
+
+State 87
+
+   31 statement: ifstmt elifstmt .  [LOOP, IF, READ, WRITE, BREAK, CONTINUE, ID, NUMBERDECLARE, STRINGDECLARE, CONSTDECLARE, BOOLEENDECLARE, STRUCTTYPEDECLARE, STRUCTDECLARE, TABLEDECLARE, POINTERDECLARE, "&", "@", "}", RETURN]
+   32          | ifstmt elifstmt . elsestmt
+   63 elifstmt: elifstmt . ELSE "(" expression ")" body
+   64 elsestmt: . ELSE "(" ")" body
+
+    ELSE  shift, and go to state 136
+
+    $default  reduce using rule 31 (statement)
+
+    elsestmt  go to state 137
+
+
+State 88
+
+   30 statement: ifstmt elsestmt .
+
+    $default  reduce using rule 30 (statement)
+
+
+State 89
+
+   57 assign: var ASSIGNMENT . expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 138
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 90
+
+   58 assign: ID . "[" expression "]" ASSIGNMENT expression
+   69 var: ID .  [ASSIGNMENT]
+   70    | ID . "." accessfield
+   84 variable: ID . "(" call_param ")"
+   85 var_exp: ID .  [")", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^"]
+   86        | ID . "." accessfield
+   87        | ID . "[" expression "]"
+
+    "("  shift, and go to state 109
+    "["  shift, and go to state 139
+    "."  shift, and go to state 140
+
+    ASSIGNMENT  reduce using rule 69 (var)
+    $default    reduce using rule 85 (var_exp)
+
+
+State 91
+
+   59 assign: "&" . var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+   74 expression: "&" . var_exp
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID  shift, and go to state 141
+
+    var      go to state 64
+    var_exp  go to state 113
+
+
+State 92
+
+   60 assign: "@" . var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+   73 expression: "@" . var_exp
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID  shift, and go to state 141
+
+    var      go to state 65
+    var_exp  go to state 114
+
+
+State 93
+
+   51 init_declare: just_declare . ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 83
+
+
+State 94
+
+   28 statement: LOOP "(" init_declare . ";" expression ";" assign ")" "{" loop_bloc "}"
+
+    ";"  shift, and go to state 142
+
+
+State 95
+
+   27 statement: LOOP "(" assign . ";" expression ";" assign ")" "{" loop_bloc "}"
+
+    ";"  shift, and go to state 143
+
+
+State 96
+
+   26 statement: LOOP "(" expression . ")" "{" loop_bloc "}"
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    ")"   shift, and go to state 144
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 97
+
+   61 ifstmt: IF "(" expression . ")" body
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    ")"   shift, and go to state 145
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 98
+
+   36 statement: READ "(" ID . ")" ";"
+
+    ")"  shift, and go to state 146
+
+
+State 99
+
+   37 statement: WRITE "(" expression . ")" ";"
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    ")"   shift, and go to state 147
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 100
+
+   34 statement: ID "(" ")" . ";"
+
+    ";"  shift, and go to state 148
+
+
+State 101
+
+   35 statement: ID "(" call_param . ")" ";"
+
+    ")"  shift, and go to state 149
+
+
+State 102
+
+   65 call_param: expression .  [")"]
+   66           | expression . "," call_param
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+    ","   shift, and go to state 150
+
+    $default  reduce using rule 65 (call_param)
+
+    operator  go to state 133
+
+
+State 103
+
+   58 assign: ID "[" expression . "]" ASSIGNMENT expression
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "]"   shift, and go to state 151
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 104
+
+   67 accessfield: ID .  ["}", ")", "]", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^", ",", ";", ASSIGNMENT]
+   68            | ID . "." accessfield
+
+    "."  shift, and go to state 152
+
+    $default  reduce using rule 67 (accessfield)
+
+
+State 105
+
+   70 var: ID "." accessfield .
+
+    $default  reduce using rule 70 (var)
+
+
+State 106
+
+   24 statement: STRUCTTYPEDECLARE ID "{" . struct_fields "}" ";"
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   54 struct_fields: . declare
+   55              | . declare "," struct_fields
+   56              | . %empty  ["}"]
+
+    NUMBERDECLARE   shift, and go to state 33
+    STRINGDECLARE   shift, and go to state 34
+    CONSTDECLARE    shift, and go to state 35
+    BOOLEENDECLARE  shift, and go to state 36
+    STRUCTDECLARE   shift, and go to state 38
+    TABLEDECLARE    shift, and go to state 39
+    POINTERDECLARE  shift, and go to state 40
+
+    $default  reduce using rule 56 (struct_fields)
+
+    type_declare   go to state 46
+    just_declare   go to state 47
+    init_declare   go to state 48
+    declare        go to state 153
+    struct_fields  go to state 154
+
+
+State 107
+
+   59 assign: "&" var ASSIGNMENT . expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 155
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 108
+
+   60 assign: "@" var ASSIGNMENT . expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 156
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 109
+
+   65 call_param: . expression
+   66           | . expression "," call_param
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   84         | ID "(" . call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    call_param  go to state 157
+    expression  go to state 102
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 110
+
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+   87        | ID "[" . expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 158
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 111
+
+   67 accessfield: . ID
+   68            | . ID "." accessfield
+   86 var_exp: ID "." . accessfield
+
+    ID  shift, and go to state 104
+
+    accessfield  go to state 159
+
+
+State 112
+
+   85 var_exp: ID .  ["}", ")", "]", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^", ",", ";"]
+   86        | ID . "." accessfield
+   87        | ID . "[" expression "]"
+
+    "["  shift, and go to state 110
+    "."  shift, and go to state 111
+
+    $default  reduce using rule 85 (var_exp)
+
+
+State 113
+
+   74 expression: "&" var_exp .
+
+    $default  reduce using rule 74 (expression)
+
+
+State 114
+
+   73 expression: "@" var_exp .
+
+    $default  reduce using rule 73 (expression)
+
+
+State 115
+
+   71 expression: "(" expression . ")"
+   75           | expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    ")"   shift, and go to state 160
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 116
+
+   72 expression: "!" expression .  ["}", ")", "]", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^", ",", ";"]
+   75           | expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    "="       [reduce using rule 72 (expression)]
+    "!="      [reduce using rule 72 (expression)]
+    "&&"      [reduce using rule 72 (expression)]
+    "||"      [reduce using rule 72 (expression)]
+    "!"       [reduce using rule 72 (expression)]
+    "<"       [reduce using rule 72 (expression)]
+    ">"       [reduce using rule 72 (expression)]
+    "<="      [reduce using rule 72 (expression)]
+    ">="      [reduce using rule 72 (expression)]
+    "+"       [reduce using rule 72 (expression)]
+    "-"       [reduce using rule 72 (expression)]
+    "*"       [reduce using rule 72 (expression)]
+    "/"       [reduce using rule 72 (expression)]
+    "%"       [reduce using rule 72 (expression)]
+    "^"       [reduce using rule 72 (expression)]
+    $default  reduce using rule 72 (expression)
+
+    operator  go to state 133
+
+
+State 117
+
+   88 operator: "=" .
+
+    $default  reduce using rule 88 (operator)
+
+
+State 118
+
+   89 operator: "!=" .
+
+    $default  reduce using rule 89 (operator)
+
+
+State 119
+
+   90 operator: "&&" .
+
+    $default  reduce using rule 90 (operator)
+
+
+State 120
+
+   91 operator: "||" .
+
+    $default  reduce using rule 91 (operator)
+
+
+State 121
+
+   92 operator: "!" .
+
+    $default  reduce using rule 92 (operator)
+
+
+State 122
+
+   93 operator: "<" .
+
+    $default  reduce using rule 93 (operator)
+
+
+State 123
+
+   94 operator: ">" .
+
+    $default  reduce using rule 94 (operator)
+
+
+State 124
+
+   95 operator: "<=" .
+
+    $default  reduce using rule 95 (operator)
+
+
+State 125
+
+   96 operator: ">=" .
+
+    $default  reduce using rule 96 (operator)
+
+
+State 126
+
+   97 operator: "+" .
+
+    $default  reduce using rule 97 (operator)
+
+
+State 127
+
+   98 operator: "-" .
+
+    $default  reduce using rule 98 (operator)
+
+
+State 128
+
+   99 operator: "*" .
+
+    $default  reduce using rule 99 (operator)
+
+
+State 129
+
+  100 operator: "/" .
+
+    $default  reduce using rule 100 (operator)
+
+
+State 130
+
+  101 operator: "%" .
+
+    $default  reduce using rule 101 (operator)
+
+
+State 131
+
+  102 operator: "^" .
+
+    $default  reduce using rule 102 (operator)
+
+
+State 132
+
+   33 statement: RETURN expression ";" .
+
+    $default  reduce using rule 33 (statement)
+
+
+State 133
+
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   75           | expression operator . expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 161
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 134
+
+   51 init_declare: just_declare ASSIGNMENT expression .  ["}", ",", ";"]
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    $default  reduce using rule 51 (init_declare)
+
+    operator  go to state 133
+
+
+State 135
+
+   62 elifstmt: ELSE "(" . expression ")" body
+   64 elsestmt: ELSE "(" . ")" body
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    ")"         shift, and go to state 162
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 163
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 136
+
+   63 elifstmt: elifstmt ELSE . "(" expression ")" body
+   64 elsestmt: ELSE . "(" ")" body
+
+    "("  shift, and go to state 164
+
+
+State 137
+
+   32 statement: ifstmt elifstmt elsestmt .
+
+    $default  reduce using rule 32 (statement)
+
+
+State 138
+
+   57 assign: var ASSIGNMENT expression .  [")", ";"]
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    $default  reduce using rule 57 (assign)
+
+    operator  go to state 133
+
+
+State 139
+
+   58 assign: ID "[" . expression "]" ASSIGNMENT expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+   87        | ID "[" . expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 165
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 140
+
+   67 accessfield: . ID
+   68            | . ID "." accessfield
+   70 var: ID "." . accessfield
+   86 var_exp: ID "." . accessfield
+
+    ID  shift, and go to state 104
+
+    accessfield  go to state 166
+
+
+State 141
+
+   69 var: ID .  [ASSIGNMENT]
+   70    | ID . "." accessfield
+   85 var_exp: ID .  [")", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^"]
+   86        | ID . "." accessfield
+   87        | ID . "[" expression "]"
+
+    "["  shift, and go to state 110
+    "."  shift, and go to state 140
+
+    ASSIGNMENT  reduce using rule 69 (var)
+    $default    reduce using rule 85 (var_exp)
+
+
+State 142
+
+   28 statement: LOOP "(" init_declare ";" . expression ";" assign ")" "{" loop_bloc "}"
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 167
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 143
+
+   27 statement: LOOP "(" assign ";" . expression ";" assign ")" "{" loop_bloc "}"
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 168
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 144
+
+   26 statement: LOOP "(" expression ")" . "{" loop_bloc "}"
+
+    "{"  shift, and go to state 169
+
+
+State 145
+
+   20 body: . "{" bloc "}"
+   61 ifstmt: IF "(" expression ")" . body
+
+    "{"  shift, and go to state 25
+
+    body  go to state 170
+
+
+State 146
+
+   36 statement: READ "(" ID ")" . ";"
+
+    ";"  shift, and go to state 171
+
+
+State 147
+
+   37 statement: WRITE "(" expression ")" . ";"
+
+    ";"  shift, and go to state 172
+
+
+State 148
+
+   34 statement: ID "(" ")" ";" .
+
+    $default  reduce using rule 34 (statement)
+
+
+State 149
+
+   35 statement: ID "(" call_param ")" . ";"
+
+    ";"  shift, and go to state 173
+
+
+State 150
+
+   65 call_param: . expression
+   66           | . expression "," call_param
+   66           | expression "," . call_param
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    call_param  go to state 174
+    expression  go to state 102
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 151
+
+   58 assign: ID "[" expression "]" . ASSIGNMENT expression
+
+    ASSIGNMENT  shift, and go to state 175
+
+
+State 152
+
+   67 accessfield: . ID
+   68            | . ID "." accessfield
+   68            | ID "." . accessfield
+
+    ID  shift, and go to state 104
+
+    accessfield  go to state 176
+
+
+State 153
+
+   54 struct_fields: declare .  ["}"]
+   55              | declare . "," struct_fields
+
+    ","  shift, and go to state 177
+
+    $default  reduce using rule 54 (struct_fields)
+
+
+State 154
+
+   24 statement: STRUCTTYPEDECLARE ID "{" struct_fields . "}" ";"
+
+    "}"  shift, and go to state 178
+
+
+State 155
+
+   59 assign: "&" var ASSIGNMENT expression .  [")", ";"]
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    $default  reduce using rule 59 (assign)
+
+    operator  go to state 133
+
+
+State 156
+
+   60 assign: "@" var ASSIGNMENT expression .  [")", ";"]
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    $default  reduce using rule 60 (assign)
+
+    operator  go to state 133
+
+
+State 157
+
+   84 variable: ID "(" call_param . ")"
+
+    ")"  shift, and go to state 179
+
+
+State 158
+
+   75 expression: expression . operator expression
+   87 var_exp: ID "[" expression . "]"
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "]"   shift, and go to state 180
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 159
+
+   86 var_exp: ID "." accessfield .
+
+    $default  reduce using rule 86 (var_exp)
+
+
+State 160
+
+   71 expression: "(" expression ")" .
+
+    $default  reduce using rule 71 (expression)
+
+
+State 161
+
+   75 expression: expression . operator expression
+   75           | expression operator expression .  ["}", ")", "]", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^", ",", ";"]
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    "="       [reduce using rule 75 (expression)]
+    "!="      [reduce using rule 75 (expression)]
+    "&&"      [reduce using rule 75 (expression)]
+    "||"      [reduce using rule 75 (expression)]
+    "!"       [reduce using rule 75 (expression)]
+    "<"       [reduce using rule 75 (expression)]
+    ">"       [reduce using rule 75 (expression)]
+    "<="      [reduce using rule 75 (expression)]
+    ">="      [reduce using rule 75 (expression)]
+    "+"       [reduce using rule 75 (expression)]
+    "-"       [reduce using rule 75 (expression)]
+    "*"       [reduce using rule 75 (expression)]
+    "/"       [reduce using rule 75 (expression)]
+    "%"       [reduce using rule 75 (expression)]
+    "^"       [reduce using rule 75 (expression)]
+    $default  reduce using rule 75 (expression)
+
+    operator  go to state 133
+
+
+State 162
+
+   20 body: . "{" bloc "}"
+   64 elsestmt: ELSE "(" ")" . body
+
+    "{"  shift, and go to state 25
+
+    body  go to state 181
+
+
+State 163
+
+   62 elifstmt: ELSE "(" expression . ")" body
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    ")"   shift, and go to state 182
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 164
+
+   63 elifstmt: elifstmt ELSE "(" . expression ")" body
+   64 elsestmt: ELSE "(" . ")" body
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    ")"         shift, and go to state 162
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 183
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 165
+
+   58 assign: ID "[" expression . "]" ASSIGNMENT expression
+   75 expression: expression . operator expression
+   87 var_exp: ID "[" expression . "]"
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "]"   shift, and go to state 184
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 166
+
+   70 var: ID "." accessfield .  [ASSIGNMENT]
+   86 var_exp: ID "." accessfield .  [")", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^"]
+
+    ASSIGNMENT  reduce using rule 70 (var)
+    $default    reduce using rule 86 (var_exp)
+
+
+State 167
+
+   28 statement: LOOP "(" init_declare ";" expression . ";" assign ")" "{" loop_bloc "}"
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+    ";"   shift, and go to state 185
+
+    operator  go to state 133
+
+
+State 168
+
+   27 statement: LOOP "(" assign ";" expression . ";" assign ")" "{" loop_bloc "}"
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+    ";"   shift, and go to state 186
+
+    operator  go to state 133
+
+
+State 169
+
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   26          | LOOP "(" expression ")" "{" . loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   38 loop_bloc: . statement loop_bloc
+   39          | . loop_bloc BREAK ";" loop_bloc
+   40          | . loop_bloc CONTINUE ";" loop_bloc
+   41          | . %empty  [BREAK, CONTINUE, "}"]
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 41 (loop_bloc)
+
+    statement     go to state 187
+    loop_bloc     go to state 188
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 170
+
+   61 ifstmt: IF "(" expression ")" body .
+
+    $default  reduce using rule 61 (ifstmt)
+
+
+State 171
+
+   36 statement: READ "(" ID ")" ";" .
+
+    $default  reduce using rule 36 (statement)
+
+
+State 172
+
+   37 statement: WRITE "(" expression ")" ";" .
+
+    $default  reduce using rule 37 (statement)
+
+
+State 173
+
+   35 statement: ID "(" call_param ")" ";" .
+
+    $default  reduce using rule 35 (statement)
+
+
+State 174
+
+   66 call_param: expression "," call_param .
+
+    $default  reduce using rule 66 (call_param)
+
+
+State 175
+
+   58 assign: ID "[" expression "]" ASSIGNMENT . expression
+   71 expression: . "(" expression ")"
+   72           | . "!" expression
+   73           | . "@" var_exp
+   74           | . "&" var_exp
+   75           | . expression operator expression
+   76           | . const
+   77           | . variable
+   78 const: . INTEGER
+   79      | . REALNUMBER
+   80      | . STRING
+   81      | . TRUE
+   82      | . FALSE
+   83 variable: . var_exp
+   84         | . ID "(" call_param ")"
+   85 var_exp: . ID
+   86        | . ID "." accessfield
+   87        | . ID "[" expression "]"
+
+    ID          shift, and go to state 66
+    "&"         shift, and go to state 67
+    "@"         shift, and go to state 68
+    "("         shift, and go to state 69
+    "!"         shift, and go to state 70
+    INTEGER     shift, and go to state 71
+    REALNUMBER  shift, and go to state 72
+    STRING      shift, and go to state 73
+    TRUE        shift, and go to state 74
+    FALSE       shift, and go to state 75
+
+    expression  go to state 189
+    const       go to state 77
+    variable    go to state 78
+    var_exp     go to state 79
+
+
+State 176
+
+   68 accessfield: ID "." accessfield .
+
+    $default  reduce using rule 68 (accessfield)
+
+
+State 177
+
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   54 struct_fields: . declare
+   55              | . declare "," struct_fields
+   55              | declare "," . struct_fields
+   56              | . %empty  ["}"]
+
+    NUMBERDECLARE   shift, and go to state 33
+    STRINGDECLARE   shift, and go to state 34
+    CONSTDECLARE    shift, and go to state 35
+    BOOLEENDECLARE  shift, and go to state 36
+    STRUCTDECLARE   shift, and go to state 38
+    TABLEDECLARE    shift, and go to state 39
+    POINTERDECLARE  shift, and go to state 40
+
+    $default  reduce using rule 56 (struct_fields)
+
+    type_declare   go to state 46
+    just_declare   go to state 47
+    init_declare   go to state 48
+    declare        go to state 153
+    struct_fields  go to state 190
+
+
+State 178
+
+   24 statement: STRUCTTYPEDECLARE ID "{" struct_fields "}" . ";"
+
+    ";"  shift, and go to state 191
+
+
+State 179
+
+   84 variable: ID "(" call_param ")" .
+
+    $default  reduce using rule 84 (variable)
+
+
+State 180
+
+   87 var_exp: ID "[" expression "]" .
+
+    $default  reduce using rule 87 (var_exp)
+
+
+State 181
+
+   64 elsestmt: ELSE "(" ")" body .
+
+    $default  reduce using rule 64 (elsestmt)
+
+
+State 182
+
+   20 body: . "{" bloc "}"
+   62 elifstmt: ELSE "(" expression ")" . body
+
+    "{"  shift, and go to state 25
+
+    body  go to state 192
+
+
+State 183
+
+   63 elifstmt: elifstmt ELSE "(" expression . ")" body
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    ")"   shift, and go to state 193
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    operator  go to state 133
+
+
+State 184
+
+   58 assign: ID "[" expression "]" . ASSIGNMENT expression
+   87 var_exp: ID "[" expression "]" .  [")", "=", "!=", "&&", "||", "!", "<", ">", "<=", ">=", "+", "-", "*", "/", "%", "^"]
+
+    ASSIGNMENT  shift, and go to state 175
+
+    $default  reduce using rule 87 (var_exp)
+
+
+State 185
+
+   28 statement: LOOP "(" init_declare ";" expression ";" . assign ")" "{" loop_bloc "}"
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    ID   shift, and go to state 194
+    "&"  shift, and go to state 41
+    "@"  shift, and go to state 42
+
+    assign  go to state 195
+    var     go to state 52
+
+
+State 186
+
+   27 statement: LOOP "(" assign ";" expression ";" . assign ")" "{" loop_bloc "}"
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    ID   shift, and go to state 194
+    "&"  shift, and go to state 41
+    "@"  shift, and go to state 42
+
+    assign  go to state 196
+    var     go to state 52
+
+
+State 187
+
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   38 loop_bloc: . statement loop_bloc
+   38          | statement . loop_bloc
+   39          | . loop_bloc BREAK ";" loop_bloc
+   40          | . loop_bloc CONTINUE ";" loop_bloc
+   41          | . %empty  [BREAK, CONTINUE, "}"]
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 41 (loop_bloc)
+
+    statement     go to state 187
+    loop_bloc     go to state 197
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 188
+
+   26 statement: LOOP "(" expression ")" "{" loop_bloc . "}"
+   39 loop_bloc: loop_bloc . BREAK ";" loop_bloc
+   40          | loop_bloc . CONTINUE ";" loop_bloc
+
+    BREAK     shift, and go to state 198
+    CONTINUE  shift, and go to state 199
+    "}"       shift, and go to state 200
+
+
+State 189
+
+   58 assign: ID "[" expression "]" ASSIGNMENT expression .  [")", ";"]
+   75 expression: expression . operator expression
+   88 operator: . "="
+   89         | . "!="
+   90         | . "&&"
+   91         | . "||"
+   92         | . "!"
+   93         | . "<"
+   94         | . ">"
+   95         | . "<="
+   96         | . ">="
+   97         | . "+"
+   98         | . "-"
+   99         | . "*"
+  100         | . "/"
+  101         | . "%"
+  102         | . "^"
+
+    "="   shift, and go to state 117
+    "!="  shift, and go to state 118
+    "&&"  shift, and go to state 119
+    "||"  shift, and go to state 120
+    "!"   shift, and go to state 121
+    "<"   shift, and go to state 122
+    ">"   shift, and go to state 123
+    "<="  shift, and go to state 124
+    ">="  shift, and go to state 125
+    "+"   shift, and go to state 126
+    "-"   shift, and go to state 127
+    "*"   shift, and go to state 128
+    "/"   shift, and go to state 129
+    "%"   shift, and go to state 130
+    "^"   shift, and go to state 131
+
+    $default  reduce using rule 58 (assign)
+
+    operator  go to state 133
+
+
+State 190
+
+   55 struct_fields: declare "," struct_fields .
+
+    $default  reduce using rule 55 (struct_fields)
+
+
+State 191
+
+   24 statement: STRUCTTYPEDECLARE ID "{" struct_fields "}" ";" .
+
+    $default  reduce using rule 24 (statement)
+
+
+State 192
+
+   62 elifstmt: ELSE "(" expression ")" body .
+
+    $default  reduce using rule 62 (elifstmt)
+
+
+State 193
+
+   20 body: . "{" bloc "}"
+   63 elifstmt: elifstmt ELSE "(" expression ")" . body
+
+    "{"  shift, and go to state 25
+
+    body  go to state 201
+
+
+State 194
+
+   58 assign: ID . "[" expression "]" ASSIGNMENT expression
+   69 var: ID .  [ASSIGNMENT]
+   70    | ID . "." accessfield
+
+    "["  shift, and go to state 58
+    "."  shift, and go to state 59
+
+    $default  reduce using rule 69 (var)
+
+
+State 195
+
+   28 statement: LOOP "(" init_declare ";" expression ";" assign . ")" "{" loop_bloc "}"
+
+    ")"  shift, and go to state 202
+
+
+State 196
+
+   27 statement: LOOP "(" assign ";" expression ";" assign . ")" "{" loop_bloc "}"
+
+    ")"  shift, and go to state 203
+
+
+State 197
+
+   38 loop_bloc: statement loop_bloc .  [BREAK, CONTINUE, "}"]
+   39          | loop_bloc . BREAK ";" loop_bloc
+   40          | loop_bloc . CONTINUE ";" loop_bloc
+
+    BREAK     shift, and go to state 198
+    CONTINUE  shift, and go to state 199
+
+    BREAK     [reduce using rule 38 (loop_bloc)]
+    CONTINUE  [reduce using rule 38 (loop_bloc)]
+    $default  reduce using rule 38 (loop_bloc)
+
+
+State 198
+
+   39 loop_bloc: loop_bloc BREAK . ";" loop_bloc
+
+    ";"  shift, and go to state 204
+
+
+State 199
+
+   40 loop_bloc: loop_bloc CONTINUE . ";" loop_bloc
+
+    ";"  shift, and go to state 205
+
+
+State 200
+
+   26 statement: LOOP "(" expression ")" "{" loop_bloc "}" .
+
+    $default  reduce using rule 26 (statement)
+
+
+State 201
+
+   63 elifstmt: elifstmt ELSE "(" expression ")" body .
+
+    $default  reduce using rule 63 (elifstmt)
+
+
+State 202
+
+   28 statement: LOOP "(" init_declare ";" expression ";" assign ")" . "{" loop_bloc "}"
+
+    "{"  shift, and go to state 206
+
+
+State 203
+
+   27 statement: LOOP "(" assign ";" expression ";" assign ")" . "{" loop_bloc "}"
+
+    "{"  shift, and go to state 207
+
+
+State 204
+
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   38 loop_bloc: . statement loop_bloc
+   39          | . loop_bloc BREAK ";" loop_bloc
+   39          | loop_bloc BREAK ";" . loop_bloc
+   40          | . loop_bloc CONTINUE ";" loop_bloc
+   41          | . %empty  [BREAK, CONTINUE, "}"]
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 41 (loop_bloc)
+
+    statement     go to state 187
+    loop_bloc     go to state 208
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 205
+
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   38 loop_bloc: . statement loop_bloc
+   39          | . loop_bloc BREAK ";" loop_bloc
+   40          | . loop_bloc CONTINUE ";" loop_bloc
+   40          | loop_bloc CONTINUE ";" . loop_bloc
+   41          | . %empty  [BREAK, CONTINUE, "}"]
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 41 (loop_bloc)
+
+    statement     go to state 187
+    loop_bloc     go to state 209
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 206
+
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   28          | LOOP "(" init_declare ";" expression ";" assign ")" "{" . loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   38 loop_bloc: . statement loop_bloc
+   39          | . loop_bloc BREAK ";" loop_bloc
+   40          | . loop_bloc CONTINUE ";" loop_bloc
+   41          | . %empty  [BREAK, CONTINUE, "}"]
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 41 (loop_bloc)
+
+    statement     go to state 187
+    loop_bloc     go to state 210
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 207
+
+   23 statement: . declare ";"
+   24          | . STRUCTTYPEDECLARE ID "{" struct_fields "}" ";"
+   25          | . assign ";"
+   26          | . LOOP "(" expression ")" "{" loop_bloc "}"
+   27          | . LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}"
+   27          | LOOP "(" assign ";" expression ";" assign ")" "{" . loop_bloc "}"
+   28          | . LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}"
+   29          | . ifstmt
+   30          | . ifstmt elsestmt
+   31          | . ifstmt elifstmt
+   32          | . ifstmt elifstmt elsestmt
+   33          | . RETURN expression ";"
+   34          | . ID "(" ")" ";"
+   35          | . ID "(" call_param ")" ";"
+   36          | . READ "(" ID ")" ";"
+   37          | . WRITE "(" expression ")" ";"
+   38 loop_bloc: . statement loop_bloc
+   39          | . loop_bloc BREAK ";" loop_bloc
+   40          | . loop_bloc CONTINUE ";" loop_bloc
+   41          | . %empty  [BREAK, CONTINUE, "}"]
+   42 type_declare: . NUMBERDECLARE
+   43             | . STRINGDECLARE
+   44             | . CONSTDECLARE NUMBERDECLARE
+   45             | . CONSTDECLARE STRINGDECLARE
+   46             | . BOOLEENDECLARE
+   47             | . POINTERDECLARE
+   48             | . TABLEDECLARE
+   49             | . STRUCTDECLARE
+   50 just_declare: . type_declare ID
+   51 init_declare: . just_declare ASSIGNMENT expression
+   52 declare: . just_declare
+   53        | . init_declare
+   57 assign: . var ASSIGNMENT expression
+   58       | . ID "[" expression "]" ASSIGNMENT expression
+   59       | . "&" var ASSIGNMENT expression
+   60       | . "@" var ASSIGNMENT expression
+   61 ifstmt: . IF "(" expression ")" body
+   69 var: . ID
+   70    | . ID "." accessfield
+
+    LOOP               shift, and go to state 28
+    IF                 shift, and go to state 29
+    READ               shift, and go to state 30
+    WRITE              shift, and go to state 31
+    ID                 shift, and go to state 32
+    NUMBERDECLARE      shift, and go to state 33
+    STRINGDECLARE      shift, and go to state 34
+    CONSTDECLARE       shift, and go to state 35
+    BOOLEENDECLARE     shift, and go to state 36
+    STRUCTTYPEDECLARE  shift, and go to state 37
+    STRUCTDECLARE      shift, and go to state 38
+    TABLEDECLARE       shift, and go to state 39
+    POINTERDECLARE     shift, and go to state 40
+    "&"                shift, and go to state 41
+    "@"                shift, and go to state 42
+    RETURN             shift, and go to state 43
+
+    $default  reduce using rule 41 (loop_bloc)
+
+    statement     go to state 187
+    loop_bloc     go to state 211
+    type_declare  go to state 46
+    just_declare  go to state 47
+    init_declare  go to state 48
+    declare       go to state 49
+    assign        go to state 50
+    ifstmt        go to state 51
+    var           go to state 52
+
+
+State 208
+
+   39 loop_bloc: loop_bloc . BREAK ";" loop_bloc
+   39          | loop_bloc BREAK ";" loop_bloc .  [BREAK, CONTINUE, "}"]
+   40          | loop_bloc . CONTINUE ";" loop_bloc
+
+    BREAK     shift, and go to state 198
+    CONTINUE  shift, and go to state 199
+
+    BREAK     [reduce using rule 39 (loop_bloc)]
+    CONTINUE  [reduce using rule 39 (loop_bloc)]
+    $default  reduce using rule 39 (loop_bloc)
+
+
+State 209
+
+   39 loop_bloc: loop_bloc . BREAK ";" loop_bloc
+   40          | loop_bloc . CONTINUE ";" loop_bloc
+   40          | loop_bloc CONTINUE ";" loop_bloc .  [BREAK, CONTINUE, "}"]
+
+    BREAK     shift, and go to state 198
+    CONTINUE  shift, and go to state 199
+
+    BREAK     [reduce using rule 40 (loop_bloc)]
+    CONTINUE  [reduce using rule 40 (loop_bloc)]
+    $default  reduce using rule 40 (loop_bloc)
+
+
+State 210
+
+   28 statement: LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc . "}"
+   39 loop_bloc: loop_bloc . BREAK ";" loop_bloc
+   40          | loop_bloc . CONTINUE ";" loop_bloc
+
+    BREAK     shift, and go to state 198
+    CONTINUE  shift, and go to state 199
+    "}"       shift, and go to state 212
+
+
+State 211
+
+   27 statement: LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc . "}"
+   39 loop_bloc: loop_bloc . BREAK ";" loop_bloc
+   40          | loop_bloc . CONTINUE ";" loop_bloc
+
+    BREAK     shift, and go to state 198
+    CONTINUE  shift, and go to state 199
+    "}"       shift, and go to state 213
+
+
+State 212
+
+   28 statement: LOOP "(" init_declare ";" expression ";" assign ")" "{" loop_bloc "}" .
+
+    $default  reduce using rule 28 (statement)
+
+
+State 213
+
+   27 statement: LOOP "(" assign ";" expression ";" assign ")" "{" loop_bloc "}" .
+
+    $default  reduce using rule 27 (statement)

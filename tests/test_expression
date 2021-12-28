@@ -1,0 +1,33 @@
+# We'll use an id whenever we need to fill the space of an expression
+# ends of if statements (elif) not detected properly (either a little too late or a little too early)
+
+# Recursive factorial function
+()_ $_ fact($_ n){
+    ? (n <= 1){
+        -> 1;
+    }
+    :() {
+        -> n * fact(n - 1);
+    }
+}
+
+()_ $_ add($_ a , $_b , $_c){
+    -> a+b+c;
+}
+
+()_ ?_ entry_test(){
+    # Your calls here
+    $_ sum <- 10 + (100 ^ 10) ;
+    ?_ found <- false;
+    ""_ name <- "Souaad";
+    {}_ student {""_ name, $_ gpa};
+# {}_ student {""_ name, $_ gpa , {}_ another_infos { $_ age } };
+    $_ student_gpa <- student.gpa ;
+    $[]_ array_numbers ;
+    array_numbers [ sum + ( student.gpa.age ) ] <- !found;
+    WRITE( array_numbers[ sum + 2 ]) ;
+    WRITE( student_gpa );
+    $_ fact_5 <- fact(5);
+    WRITE( add( sum , sum * ( sum+2 ) , @found ) );
+    -> true;
+}

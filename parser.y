@@ -19,7 +19,8 @@
 %}
 
 
-%define parse.error detailed
+
+//%define parse.error detailed
 
 %union {
     char* string;
@@ -93,6 +94,23 @@
 
 %token TRUE
 %token FALSE
+
+// Lof
+//Comparison
+%left COMMA
+%nonassoc ASSIGNMENT
+%left OR
+%left AND
+%nonassoc EQUAL NONEQUAL
+%nonassoc INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
+%left ADD SUB
+%left MULT DIV MOD
+%nonassoc NOT
+%nonassoc ADDRESSVALUE POINTERVALUE
+%left DOT OPENBRACKET CLOSEBRACKET
+%left OPENPARENTHESIS CLOSEPARENTHESIS
+
+
 
 %%
 
@@ -212,7 +230,54 @@ var: ID
    | ID DOT accessfield
    ;
 
-expression: ID;
+//General formuala for experession
+expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
+	| NON expression
+	| POINTERVALUE var_exp
+	| ADDRESSVALUE var_exp
+	| expression operator expression {yysuccess("EXPRESSION : OPERATION WITH 2 OPERATORS");}
+	| const
+	| variable
+	;
+
+
+
+const :  INTEGER
+	|  REALNUMBER
+        |  STRING
+        |  TRUE
+        | FALSE
+        ;
+
+variable : var_exp
+	| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
+	;
+
+var_exp : ID
+	| ID DOT accessfield {yysuccess("EXPRESSION : OBJECT  ACCESS");}
+	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
+	;
+
+operator :  EQUAL
+	|  NONEQUAL
+	|  AND
+	| OR
+	| NON
+        | INFERIOR
+        | SUPERIOR
+        | INFERIOREQUAL
+        | SUPERIOREQUAL
+        | ADD
+        | SUB
+        | MULT
+        | DIV
+        | MOD
+        | POWER
+        ;
+
+
+
+
 
 %%
 

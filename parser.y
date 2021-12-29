@@ -21,7 +21,7 @@
 
 
 
-//%define parse.error detailed
+%define parse.error verbose
 
 %union {
     char* string;
@@ -117,6 +117,7 @@
 
 underscore: /*eps*/ 
         | underscore func
+        | error func {yyerrok;}
         ;
 
 func: FUNCTIONDECLARE ret ID OPENPARENTHESIS params_eps CLOSEPARENTHESIS body {
@@ -157,15 +158,17 @@ body: OPENHOOK bloc CLOSEHOOK
 
 bloc: statement bloc {yysuccess(1,"Block.");}
      | {yysuccess(1,"Emptyness.");} 
+     | error bloc {yyerror("wrong statement inside block."); yyerrok;}
      ;
 
 statement: declare SEMICOLON {yysuccess(1,"Simple declaration / with assign.");}
 		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess(1,"Déclaration d'un type structure.");}
 		| assign SEMICOLON {yysuccess(1,"Assignment.");}
         
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("while loop.");}
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
+        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "while loop.");}
+		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with assignment.");}
+		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with declaration+assignment.");}
+        //| LOOP OPENPARENTHESIS error CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;}
         
         | ifstmt {yysuccess(1,"Simplest if statement.");}
 		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
@@ -179,7 +182,7 @@ statement: declare SEMICOLON {yysuccess(1,"Simple declaration / with assign.");}
         | READ OPENPARENTHESIS ID CLOSEPARENTHESIS SEMICOLON {yysuccess(1,"Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1,"Print output.");}
 
-        | error SEMICOLON
+        | error SEMICOLON {yyerror("wrong statement"); yyerrok;}
         ;
 
 /* loop_bloc: statement loop_bloc
@@ -197,10 +200,16 @@ type_declare: NUMBERDECLARE
 			| TABLEDECLARE
 			| STRUCTDECLARE
             ;
+            
 just_declare: type_declare ID
             ;
 init_declare: just_declare ASSIGNMENT expression
+            | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
             ;
+values_eps: 
+          | call_param /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
+          ;
+
 declare: just_declare
 	   | init_declare
        ;
@@ -209,7 +218,7 @@ struct_fields: declare
              |   // added by mohammed in C we can have an empty struct like this struct name{};
              ;
 
-assign: var ASSIGNMENT expression
+assign: var ASSIGNMENT expression {yysuccess(1, "assign");}
 	  | ID OPENBRACKET expression CLOSEBRACKET ASSIGNMENT expression
 	  | ADDRESSVALUE var ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression
@@ -235,6 +244,7 @@ var: ID
 
 //General formuala for experession
 expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
+    | OPENPARENTHESIS error CLOSEPARENTHESIS
 	| NON expression
 	| POINTERVALUE var_exp
 	| ADDRESSVALUE var_exp
@@ -270,16 +280,13 @@ const :  INTEGER
         ;
 
 variable : var_exp
-	| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
+	| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS {yysuccess(1,"EXPRESSION : FUNCTION CALL");}
 	;
 
 var_exp : ID
-	| ID DOT accessfield {yysuccess("EXPRESSION : OBJECT  ACCESS");}
-	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
+	| ID DOT accessfield {yysuccess(1,"EXPRESSION : OBJECT  ACCESS");}
+	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess(1,"EXPRESSION : ARRAY ACCESS");}
 	;
-
-
-
 
 
 
@@ -289,12 +296,12 @@ var_exp : ID
 
 
 void yyerror(char *s){
-    fprintf(stdout, "%d: " RED "%s" RESET "\n", yylineno, s);
+    fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
 }
 
 void yysuccess(int i, char *s){
-    if(i) fprintf(stdout, "%d: " GREEN "%s" RESET "\n", yylineno, s);
-    else fprintf(stdout, "%d: " MAGENTA "%s" RESET "\n", yylineno, s);
+    if(i) fprintf(stdout, "%d: " GREEN " %s " RESET "\n", yylineno, s);
+    else fprintf(stdout, "%d: %s\n", yylineno, s);
     currentColumn+=yyleng;
 }
 

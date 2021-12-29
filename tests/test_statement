@@ -23,29 +23,29 @@
 }
 _#
 
-()_ $_ f($_ sumifcond, _ sumifcond1, $_ lastresortsum){
+()_ $_ f($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
 
 
     loop(cond=) {
-        sum <- sum;
+        sum <- sum
         ? (cond1) {
-            break;
+            
         }
         : () {
-            continue;
+            
         }
     }
 
     thatMethod(sum, difference);
 
-    thatOtherMethod();
+    thatOtherMethod(;
 
     -> sum ;
     break; ## Syntax error normally
 
 }
 
-#_
+
 ()_ thatMothod($_ s, $_ d) {
 
     READ(s);
@@ -57,7 +57,7 @@ _#
     -> d;
 
 }
-_#
+
 
 #_
 ()_ thatMothod($_ s, $_ d) {
@@ -78,7 +78,8 @@ _#
 
 }
 _#
-
+#_
 ()_ f($_ i){
     $_ s <- 10 + 11;
 }
+_#

@@ -17,13 +17,18 @@
 
 ()_ ?_ entry_test(){
     # Your calls here
+    
     $_ sum <- 10 + (100 ^ 10) ;
     ?_ found <- false;
     ""_ name <- "Souaad";
     {}_ student {""_ name, $_ gpa};
-# {}_ student {""_ name, $_ gpa , {}_ another_infos { $_ age } };
+    {}_ other_info { $_ age };
+    {}_ student {""_ name, $_ gpa , _other_info ageStruct };
+    _student s1;
+    s1.ageStruct.age <- 20;
+
     $_ student_gpa <- student.gpa ;
-    $[]_ array_numbers ;
+    $[]_ array_numbers <- [1, 2, 3];
     array_numbers [ sum + ( student.gpa.age ) ] <- !found;
     WRITE( array_numbers[ sum + 2 ]) ;
     WRITE( student_gpa );

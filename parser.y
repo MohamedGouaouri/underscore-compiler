@@ -20,7 +20,8 @@
 %}
 
 
-%define parse.error verbose
+
+//%define parse.error detailed
 
 %union {
     char* string;
@@ -95,6 +96,23 @@
 %token TRUE
 %token FALSE
 
+// Lof
+//Comparison
+%left COMMA
+%nonassoc ASSIGNMENT
+%left OR
+%left AND
+%nonassoc EQUAL NONEQUAL
+%nonassoc INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
+%left ADD SUB
+%left MULT DIV MOD
+%nonassoc NON
+%nonassoc ADDRESSVALUE POINTERVALUE
+%left DOT OPENBRACKET CLOSEBRACKET
+%left POWER
+%left OPENPARENTHESIS CLOSEPARENTHESIS
+
+
 %%
 
 underscore: /*eps*/ 
@@ -145,9 +163,9 @@ statement: declare SEMICOLON {yysuccess(1,"Simple declaration / with assign.");}
 		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess(1,"Déclaration d'un type structure.");}
 		| assign SEMICOLON {yysuccess(1,"Assignment.");}
         
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess(1,"while loop.");}
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess(1,"for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess(1,"for loop with declaration+assignment.");}
+        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("while loop.");}
+		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
+		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
         
         | ifstmt {yysuccess(1,"Simplest if statement.");}
 		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
@@ -164,11 +182,11 @@ statement: declare SEMICOLON {yysuccess(1,"Simple declaration / with assign.");}
         | error SEMICOLON
         ;
 
-loop_bloc: statement loop_bloc
+/* loop_bloc: statement loop_bloc
         | loop_bloc BREAK ";" loop_bloc
         | loop_bloc CONTINUE ";" loop_bloc
         |
-        ;
+        ; */
 
 type_declare: NUMBERDECLARE
 		    | STRINGDECLARE
@@ -215,7 +233,55 @@ var: ID
    | ID DOT accessfield
    ;
 
-expression: ID;
+//General formuala for experession
+expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
+	| NON expression
+	| POINTERVALUE var_exp
+	| ADDRESSVALUE var_exp
+
+	| expression EQUAL expression
+    | expression NONEQUAL expression
+    | expression OR expression
+    | expression AND expression
+
+    | expression INFERIOR expression
+    | expression INFERIOREQUAL expression
+    | expression SUPERIOR expression
+    | expression SUPERIOREQUAL expression
+
+    | expression ADD expression
+    | expression SUB expression
+    | expression MULT expression
+    | expression DIV expression
+    | expression MOD expression
+    | expression POWER expression
+
+	| const
+	| variable
+	;
+
+
+
+const :  INTEGER
+	    |  REALNUMBER
+        |  STRING
+        |  TRUE
+        | FALSE
+        ;
+
+variable : var_exp
+	| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
+	;
+
+var_exp : ID
+	| ID DOT accessfield {yysuccess("EXPRESSION : OBJECT  ACCESS");}
+	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
+	;
+
+
+
+
+
 
 %%
 

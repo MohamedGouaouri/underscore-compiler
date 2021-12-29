@@ -6,6 +6,7 @@
     #include "misc.h"
 
     extern int yylineno;
+    extern int yyleng;
     extern FILE *yyin, *yyout;
 
     extern int yylex();
@@ -19,7 +20,7 @@
 %}
 
 
-%define parse.error detailed
+%define parse.error verbose
 
 %union {
     char* string;
@@ -102,7 +103,7 @@ underscore: /*eps*/
 
 func: FUNCTIONDECLARE ret ID OPENPARENTHESIS params_eps CLOSEPARENTHESIS body {
         
-        yysuccess("function ended.");
+        yysuccess(1,"function ended.");
     }
 
 ret: // eps
@@ -136,29 +137,31 @@ type: srt | crt ; // just for now it must be expanded to your type
 body: OPENHOOK bloc CLOSEHOOK
     ;
 
-bloc: statement bloc {yysuccess("Block.");}
-     | {yysuccess("Emptyness.");} 
+bloc: statement bloc {yysuccess(1,"Block.");}
+     | {yysuccess(1,"Emptyness.");} 
      ;
 
-statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
-		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess("Déclaration d'un type structure.");}
-		| assign SEMICOLON {yysuccess("Assignment.");}
+statement: declare SEMICOLON {yysuccess(1,"Simple declaration / with assign.");}
+		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess(1,"Déclaration d'un type structure.");}
+		| assign SEMICOLON {yysuccess(1,"Assignment.");}
         
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("while loop.");}
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
+        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess(1,"while loop.");}
+		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess(1,"for loop with assignment.");}
+		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess(1,"for loop with declaration+assignment.");}
         
-        | ifstmt {yysuccess("Simplest if statement.");}
-		| ifstmt elsestmt {yysuccess("If else statement.");}
-		| ifstmt elifstmt {yysuccess("If elif statement.") ;}
-		| ifstmt elifstmt elsestmt {yysuccess("If elif else statement.");}
+        | ifstmt {yysuccess(1,"Simplest if statement.");}
+		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
+		| ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
+		| ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}
 
-        | RETURN expression SEMICOLON {yysuccess("Return statement.");}
-        | ID OPENPARENTHESIS CLOSEPARENTHESIS SEMICOLON {yysuccess("Call without params statement.");}
-		| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS SEMICOLON {yysuccess("Call with params statement.");}
+        | RETURN expression SEMICOLON {yysuccess(1,"Return statement.");}
+        | ID OPENPARENTHESIS CLOSEPARENTHESIS SEMICOLON {yysuccess(1,"Call without params statement.");}
+		| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1,"Call with params statement.");}
  
-        | READ OPENPARENTHESIS ID CLOSEPARENTHESIS SEMICOLON {yysuccess("Read input.");}
-		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess("Print output.");}
+        | READ OPENPARENTHESIS ID CLOSEPARENTHESIS SEMICOLON {yysuccess(1,"Read input.");}
+		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1,"Print output.");}
+
+        | error SEMICOLON
         ;
 
 loop_bloc: statement loop_bloc
@@ -194,12 +197,12 @@ assign: var ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("if stmt.");}
+ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"if stmt.");}
       ;
-elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif stmt.");}
-        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif elif stmt.");}
+elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif stmt.");}
+        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif elif stmt.");}
         ;
-elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess("else stmt.");}
+elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess(1,"else stmt.");}
         ;
 
 call_param: expression
@@ -223,8 +226,10 @@ void yyerror(char *s){
     fprintf(stdout, "%d: " RED "%s" RESET "\n", yylineno, s);
 }
 
-void yysuccess(char *s){
-    fprintf(stdout, "%d: " GREEN "%s" RESET "\n", yylineno, s);
+void yysuccess(int i, char *s){
+    if(i) fprintf(stdout, "%d: " GREEN "%s" RESET "\n", yylineno, s);
+    else fprintf(stdout, "%d: " MAGENTA "%s" RESET "\n", yylineno, s);
+    currentColumn+=yyleng;
 }
 
 

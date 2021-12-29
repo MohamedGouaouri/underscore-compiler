@@ -22,11 +22,11 @@
     
 }
 _#
-#_
-()_ $_ f($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
+
+()_ $_ f($_ sumifcond, _ sumifcond1, $_ lastresortsum){
 
 
-    loop(cond) {
+    loop(cond=) {
         sum <- sum;
         ? (cond1) {
             break;
@@ -44,7 +44,7 @@ _#
     break; ## Syntax error normally
 
 }
-_#
+
 #_
 ()_ thatMothod($_ s, $_ d) {
 

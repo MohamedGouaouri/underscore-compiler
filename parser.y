@@ -168,7 +168,7 @@ statement: declare SEMICOLON {yysuccess(1,"Simple declaration / with assign.");}
         | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "while loop.");}
 		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with assignment.");}
 		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with declaration+assignment.");}
-        //| LOOP OPENPARENTHESIS error CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;}
+        | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;} 
         
         | ifstmt {yysuccess(1,"Simplest if statement.");}
 		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
@@ -225,11 +225,14 @@ assign: var ASSIGNMENT expression {yysuccess(1, "assign");}
       ;
 
 ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"if stmt.");}
+      | IF error body {yyerror("wrong syntax inside if()."); yyerrok;} 
       ;
 elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif stmt.");}
+        | ELSE error body {yyerror("wrong syntax inside elif()."); yyerrok;} 
         | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif elif stmt.");}
         ;
 elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess(1,"else stmt.");}
+        | ELSE error body {yyerror("wrong syntax inside else()."); yyerrok;} 
         ;
 
 call_param: expression

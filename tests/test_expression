@@ -3,7 +3,7 @@
 
 # Recursive factorial function
 ()_ $_ fact($_ n){
-    ? (n <= 1){
+    ? ((n <= 1){
         -> 1;
     }
     :() {

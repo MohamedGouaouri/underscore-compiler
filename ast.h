@@ -80,9 +80,11 @@ typedef struct ast_node
 {
     int id; // for dataviz
     char *label;
+
     ast_node_val node_val;
     ast_node_type node_type;
     int index; // used to track the occupied positions in childre field
+    struct ast_node *parent;
     struct ast_node *children[MAX_CHILDREN];
 
 } ast_node;
@@ -99,11 +101,13 @@ typedef struct ast
 ast *build_ast(ast_node_type node_type);
 ast_node *add_child(ast *ast, ast_node *node, ast_node_type node_type);
 ast_node *get_child(ast_node *node, int index);
+void set_val(ast_node *node, ast_node_val val);
+
 bool is_leaf(ast_node *node);
 size_t number_of_children(ast_node *node);
 void destroy_ast(ast_node *root, int num_of_children);
 
 void main_ast_print(ast *tree, FILE *stream);
-void aux_ast_print(ast_node *node, FILE *stream, char *label);
+void aux_ast_print(ast_node *node, FILE *stream);
 
 #endif

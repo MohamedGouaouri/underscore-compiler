@@ -68,6 +68,7 @@ ast *build_ast(ast_node_type node_type)
     ast_node *root = (ast_node *)malloc(sizeof(ast_node));
 
     tree->root = root;
+    tree->root->parent = NULL;
     tree->root->node_type = node_type;
     tree->root->index = -1; // initially it's a leaf node
     tree->root->label = stringFromNodeType(node_type);
@@ -99,8 +100,14 @@ ast_node *add_child(ast *tree, ast_node *node, ast_node_type node_type)
     node->index = node->index + 1;
     node->children[where] = new_node; // linking
     new_node->id = tree->number_of_nodes;
-
+    new_node->parent = node;
     return new_node;
+}
+
+void set_val(ast_node *node, ast_node_val val)
+{
+    // node values are only for string, int and reals
+    node->node_val = val;
 }
 
 ast_node *get_child(ast_node *node, int index)
@@ -133,7 +140,7 @@ void destroy_ast(ast_node *node, int num_of_children)
     }
 }
 
-void aux_ast_print(ast_node *node, FILE *stream, char *label)
+void aux_ast_print(ast_node *node, FILE *stream)
 {
     if (is_leaf(node))
     {
@@ -145,7 +152,7 @@ void aux_ast_print(ast_node *node, FILE *stream, char *label)
     {
         fprintf(stream, "    %d[label=%s];\n", node->id, node->label);
         fprintf(stream, "    %d -> %d;\n", node->id, node->children[i]->id);
-        aux_ast_print(node->children[i], stream, node->children[i]->label);
+        aux_ast_print(node->children[i], stream);
     }
 }
 
@@ -157,9 +164,12 @@ void main_ast_print(ast *tree, FILE *stream)
     if (!tree)
         fprintf(stream, "\n");
     else if (is_leaf(tree->root))
+    {
+        fprintf(stream, "    %d[label=%s];\n", tree->root->id, tree->root->label);
         fprintf(stream, "    %d;\n", tree->root->id);
+    }
     else
-        aux_ast_print(tree->root, stream, tree->root->label);
+        aux_ast_print(tree->root, stream);
 
     fprintf(stream, "}\n");
 }

@@ -1,29 +1,27 @@
-%{
+
+%define parse.error verbose
+
+%code provides{
+    typedef union{
+        int ival;              /* Value of integer values */
+        double rval;              /* Value of real values*/
+        char* string;              /* Value string */
+        SymTableNode *ident; /* Value of a IDENTIFIER */
+    } _YYSTYPE;
+    
+}
+
+%code requires{
     #include <stdio.h>
     #include <stdlib.h>
     #include "symtable.h"
     #include "ast.h"
     #include "misc.h"
-
-    extern int yylineno;
-    extern FILE *yyin, *yyout;
-
-    extern int yylex();
-    void yysuccess();
-    void yyerror();
-    void showLexicalError();
-
-    SymTable* symt;
-    int currentColumn = 1;
-    int showsuccess = 0;
-%}
-
-
-
-//%define parse.error detailed
+}
 
 %union {
     char* string;
+    int token_type;
 }
 
 %token ENTRY
@@ -38,7 +36,7 @@
 %token BREAK
 %token CONTINUE
 
-%token ID
+%token <token_type> ID
 
 %token FUNCTIONDECLARE
 %token NUMBERDECLARE
@@ -112,7 +110,27 @@
 %left OPENPARENTHESIS CLOSEPARENTHESIS
 
 
+%{
+    
+
+    extern int yylineno;
+    extern FILE *yyin, *yyout;
+
+    extern int yylex();
+    void yysuccess();
+    void yyerror();
+    void showLexicalError();
+
+    SymTable* symt;
+    int currentColumn = 1;
+    int showsuccess = 0;
+    
+    _YYSTYPE _yylval;
+%}
+
 %%
+
+
 
 underscore: /*eps*/ 
         | underscore func
@@ -194,7 +212,12 @@ type_declare: NUMBERDECLARE
 			| TABLEDECLARE
 			| STRUCTDECLARE
             ;
-just_declare: type_declare ID
+just_declare: type_declare ID {
+                    // if (symbol_exists(symt, $2)){
+                    //     printf("symbol exists");
+                    // }
+                    printf("%s\n", _yylval.ident->symName);
+                }
             ;
 init_declare: just_declare ASSIGNMENT expression
             ;
@@ -259,7 +282,9 @@ expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
 
 
 
-const :  INTEGER
+const :  INTEGER {
+                printf("%d\n", _yylval.ival);
+            }
 	    |  REALNUMBER
         |  STRING
         |  TRUE
@@ -274,8 +299,6 @@ var_exp : ID
 	| ID DOT accessfield {yysuccess("EXPRESSION : OBJECT  ACCESS");}
 	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
 	;
-
-
 
 
 
@@ -297,7 +320,7 @@ void yysuccess(char *s){
 int main(int argc, char **argv) {
 
     
-  
+    
     yyin = fopen(argv[1], "r");
   
     yyout = fopen("Output.txt", "w");
@@ -313,6 +336,9 @@ int main(int argc, char **argv) {
     fprintf(stdout, "" MAGENTA "========= Stream of tokens found =========" RESET "\n");
 
     yyparse();
+    
+    printSymTable(symt);
+
     // free up the sym table
     freeUpSymTable(symt);
     fclose(yyin);

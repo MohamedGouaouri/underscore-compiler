@@ -121,6 +121,7 @@
     
 
     extern int yylineno;
+    extern int yyleng;
     extern FILE *yyin, *yyout;
 
     extern int yylex();
@@ -251,7 +252,6 @@ elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"el
         | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif elif stmt.");}
         ;
 elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess(1,"else stmt.");}
-        | ELSE error body {yyerror("wrong syntax inside else()."); yyerrok;} 
         ;
 
 call_param: expression
@@ -455,7 +455,7 @@ void checkif_fieldisvalid(char type[50], char fieldname[50]) {
         while(fieldattr_node != NULL) {
 
             if(strcmp(fieldattr_node->val, fieldname) == 0 ) {
-                yysuccess("Field exists!"); return;
+                yysuccess(1, "Field exists!"); return;
             }
 
             fieldattr_node = fieldattr_node -> next;

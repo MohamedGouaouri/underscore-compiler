@@ -58,6 +58,7 @@ SymTableNode *insertNewEntry(SymTable *symtable, int symType, char *symName)
     }
 }
 
+
 SymTableNode *lookup(SymTable *symtable, char *symName)
 {
     SymTableNode *root = symtable->root;
@@ -71,6 +72,29 @@ SymTableNode *lookup(SymTable *symtable, char *symName)
         p = p->next;
     }
     return p;
+}
+
+void deleteEntry(SymTable *symtable, char *symName) 
+{
+    SymTableNode* node_todelete = lookup(symtable, symName);
+
+    if(node_todelete == NULL) return;
+
+    SymTableNode *p = symtable->root, *previous, *next;
+    next = node_todelete->next;
+    while( p != NULL ) {
+        if (p->next == node_todelete) {
+            previous = p; 
+            break;
+        }
+        p = p->next;
+    }
+
+    previous->next = next;
+    if(symtable->tail == node_todelete) symtable->tail = previous;
+    freeUpEntryAttr(node_todelete);
+    free(node_todelete);
+
 }
 
 void set_attr(SymTableNode *entry, char *name, char *val)
@@ -98,6 +122,7 @@ void set_attr(SymTableNode *entry, char *name, char *val)
 
             // setup chaining
             tailAttr->next = newAttr;
+            entry->tailAttr = newAttr;
         }
     }
 }
@@ -313,4 +338,106 @@ typedef int bool;
 bool symbol_exists(SymTable *symtable, char *symName)
 {
     return lookup(symtable, symName) == NULL ? false : true;
+}
+bool globalsymbol_exists(GlobalSymTable *gSymTable, char *symName)
+{
+    return lookup(gSymTable, symName) == NULL ? false : true;
+}
+
+                /** Global SymTable **/
+    
+GlobalSymTable *allocateGlobalSymTable()
+{
+    GlobalSymTable *gSymTable = (GlobalSymTable *)malloc(sizeof(GlobalSymTable));
+    gSymTable->head = NULL;
+    gSymTable->tail = NULL;
+    gSymTable->currentSize = 0;
+    return gSymTable;
+}
+
+GlobalSymTableNode *insertNewGlobalEntry(GlobalSymTable *gSymTable, SymTable *symTable)
+{
+
+    if (gSymTable->currentSize == 0)
+    {
+        // empty table
+        GlobalSymTableNode *head = (GlobalSymTableNode *)malloc(sizeof(GlobalSymTableNode));
+        GlobalSymTableNode *tail = head;
+        head->symTable = symTable;
+        head->next = NULL;
+        gSymTable->head = head;
+        gSymTable->tail = tail;
+        gSymTable->currentSize++;
+        return head;
+    }
+    else
+    {
+        // non empty table
+        // check if the symtable exists
+
+        GlobalSymTableNode *foundNode = lookupGlobal(gSymTable, symTable->root->symName);
+        if (foundNode != NULL)
+        {
+            return foundNode;
+        }
+        // get last node
+        GlobalSymTableNode *tail = gSymTable->tail;
+        // create new Entry
+        GlobalSymTableNode *newEntry = (GlobalSymTableNode *)malloc(sizeof(GlobalSymTableNode));
+        newEntry->symTable = symTable;
+        newEntry->next = NULL;
+        // create connection
+        tail->next = newEntry;
+        // change tail
+        gSymTable->tail = newEntry;
+        gSymTable->currentSize++;
+        return newEntry;
+    }
+}
+
+
+GlobalSymTableNode *lookupGlobal(GlobalSymTable *gSymTable, char *functionName)
+{
+    GlobalSymTableNode *head = gSymTable->head;
+    GlobalSymTableNode *p = head;
+    while (p != NULL)
+    {
+        if ( strcmp(p->symTable->root->symName, functionName) == 0)
+        {
+            return p;
+        }
+        p = p->next;
+    }
+    return p;
+}
+
+void freeUpGlobalSymTable(GlobalSymTable *gSymTable)
+{
+    GlobalSymTableNode *head = gSymTable->head;
+    GlobalSymTableNode *p = head;
+    GlobalSymTableNode *prev = head;
+    GlobalSymTableNode *tail = gSymTable->tail;
+    while (p != tail)
+    {
+        p = p->next;
+        // free node
+        free(prev);
+        gSymTable->currentSize--;
+        prev = p;
+    }
+    free(p);
+    gSymTable->currentSize--;
+}
+
+
+void printGlobalSymTable(GlobalSymTable *gSymTable)
+{
+    GlobalSymTableNode *current = gSymTable->head;
+    printf("\n\n");
+    while (current != NULL)
+    {
+        printSymTable(current->symTable);
+        current = current->next;
+    }
+    printf("\n\n");
 }

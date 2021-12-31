@@ -1,7 +1,7 @@
 
 underscore: scanner.l parser.y
 	flex scanner.l
-	bison --defines -g parser.y
+	bison --defines -g parser.y --report=all
 	gcc scanner.lex.c parser.tab.c ast.c symtable.c -o underscore
 	cp underscore tests/underscore
 

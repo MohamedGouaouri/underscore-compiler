@@ -157,8 +157,15 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {ID} {
     yysuccess("IDENTIFIER");
-    SymTableNode* node = insertNewEntry(symt, ID, yytext);
-    _yylval.ident = node;
+    SymTableNode* node = lookup(symt, yytext); 
+    if ( node == NULL ) { 
+        node = insertNewEntry(symt, ID, yytext);
+        _yylval.ident = node; 
+    } else {
+        _yylval.ident = NULL;
+    }
+    //_yylval.string = yytext;
+    //yyerror(yytext);
     return ID;
 }
 
@@ -304,18 +311,12 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {INTEGER} {
     yysuccess("constant INTEGER");
-    // SymTableNode* node = insertNewEntry(symt, _INTEGER);
-    // // insert integer value
-    // set_attr(node, _VALUE_ATTR, yytext);
     _yylval.ival = atoi(yytext);
     return INTEGER;
 }
 
 {REALNUMBER} {
     yysuccess("constant REALNUMBER");
-    // SymTableNode* node = insertNewEntry(symt, _REALNUMBER);
-    // // insert rea lnumber value
-    // set_attr(node, _VALUE_ATTR, yytext);
     _yylval.rval = strtod(yytext, NULL);
     return REALNUMBER;
 }
@@ -323,11 +324,6 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {STRING} {
     yysuccess("constant STRING");
-
-    // SymTableNode* node = insertNewEntry(symt, _STRING);
-    // // insert string value & length
-    // set_attr(node, _VALUE_ATTR, yytext);
-
     _yylval.string = yytext;
     return STRING;
 } 
@@ -335,16 +331,22 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {FUNCTIONDECLARE} {
     yysuccess("FUNCTION declaration");
+
+    _yylval.type = "function";
     return FUNCTIONDECLARE;
 } 
 
 {NUMBERDECLARE} {
     yysuccess("NUMBER declaration");
+    
+    _yylval.type = "number";
     return NUMBERDECLARE;
 }
 
 {STRINGDECLARE} {
     yysuccess("STRING declaration");
+
+    _yylval.type = "string";
     return STRINGDECLARE;
 }
 
@@ -355,16 +357,23 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {BOOLEENDECLARE} {
     yysuccess("BOOLEAN declaration");
+
+    _yylval.type = "boolean";
     return BOOLEENDECLARE;
 }
 
 {STRUCTTYPEDECLARE} {
     yysuccess("STRUCTTYPE declaration");
+
+    _yylval.type = "structtype";
     return STRUCTTYPEDECLARE;
 }
 
 {STRUCTDECLARE} {
     yysuccess("STRUCT declaration");
+    char* passtoyylval;
+    strcpy(passtoyylval, yytext);
+    _yylval.type = passtoyylval;
     return STRUCTDECLARE;
 }
 
@@ -375,6 +384,8 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {TABLEDECLARE} {
     yysuccess("TABLE declaration");
+
+    _yylval.type = "array";
     return TABLEDECLARE;
 }
 

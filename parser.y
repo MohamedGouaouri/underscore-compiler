@@ -5,7 +5,8 @@
     typedef union{
         int ival;              /* Value of integer values */
         double rval;              /* Value of real values*/
-        char* string;              /* Value string */
+        char *string;              /* Value string */
+        char *type;
         SymTableNode *ident; /* Value of a IDENTIFIER */
     } _YYSTYPE;
     
@@ -37,16 +38,22 @@
 %token CONTINUE
 
 %token <token_type> ID
+/* %token <string> STRUCTTYPEDECLARE */
+%type <string> type_declare
+%type <string> just_declare
+%type <string> struct_fields
+%type <string> srt
+%type <string> crt
 
-%token FUNCTIONDECLARE
-%token NUMBERDECLARE
-%token STRINGDECLARE
-%token CONSTDECLARE
-%token BOOLEENDECLARE
-%token STRUCTTYPEDECLARE
-%token STRUCTDECLARE
-%token TABLEDECLARE
-%token POINTERDECLARE
+%token <string> FUNCTIONDECLARE
+%token <string> NUMBERDECLARE
+%token <string> STRINGDECLARE
+%token <string> CONSTDECLARE
+%token <string> BOOLEENDECLARE
+%token <string> STRUCTTYPEDECLARE 
+%token <string> STRUCTDECLARE
+%token <string> TABLEDECLARE
+%token <string> POINTERDECLARE
 
 %token ADDRESSVALUE "&"
 %token POINTERVALUE "@"
@@ -121,11 +128,14 @@
     void yyerror();
     void showLexicalError();
 
-    SymTable* symt;
+
+    GlobalSymTable* gSymT; //Our global table of symbols
+    SymTable* symt;        //Current table of symboles (used by scanner.l as well)
     int currentColumn = 1;
     int showsuccess = 0;
     
     _YYSTYPE _yylval;
+
 %}
 
 %%
@@ -136,21 +146,18 @@ underscore: /*eps*/
         | underscore func
         ;
 
-func: FUNCTIONDECLARE ret ID OPENPARENTHESIS params_eps CLOSEPARENTHESIS body {
-        
-        yysuccess("function ended.");
-    }
+func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; /*set_attr(_yylval.ident, "typeretour", $1);*/ } OPENPARENTHESIS params_eps CLOSEPARENTHESIS body { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess("function ended.");}
 
 ret: // eps
-    | srt // simple return type
+    | srt // simple return type 
     | crt // complex return type
     ; 
     // just for simplicity
 
 
-srt: NUMBERDECLARE | STRINGDECLARE | BOOLEENDECLARE ;
+srt: NUMBERDECLARE {$$=_yylval.type;} | STRINGDECLARE {$$=_yylval.type;} | BOOLEENDECLARE {$$=_yylval.type;} ;
 
-crt: TABLEDECLARE | STRUCTTYPEDECLARE;
+crt: TABLEDECLARE {$$=_yylval.type;} | STRUCTTYPEDECLARE {$$=_yylval.type;};
 
 
 params_eps: // eps
@@ -160,14 +167,14 @@ params_eps: // eps
 
 params: param comma_params;
 
+
 comma_params: // eps
             | COMMA params
             ;
 
 
-param: type ID ;
+param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); } ;
 
-type: srt | crt ; // just for now it must be expanded to your type
 
 body: OPENHOOK bloc CLOSEHOOK
     ;
@@ -177,7 +184,7 @@ bloc: statement bloc {yysuccess("Block.");}
      ;
 
 statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
-		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess("Déclaration d'un type structure.");}
+		| STRUCTTYPEDECLARE ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", "typestruct");} OPENHOOK struct_fields CLOSEHOOK SEMICOLON 
 		| assign SEMICOLON {yysuccess("Assignment.");}
         
         | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("while loop.");}
@@ -190,10 +197,10 @@ statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
 		| ifstmt elifstmt elsestmt {yysuccess("If elif else statement.");}
 
         | RETURN expression SEMICOLON {yysuccess("Return statement.");}
-        | ID OPENPARENTHESIS CLOSEPARENTHESIS SEMICOLON {yysuccess("Call without params statement.");}
-		| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS SEMICOLON {yysuccess("Call with params statement.");}
+        | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess("Call without params statement.");}
+		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess("Call with params statement.");}
  
-        | READ OPENPARENTHESIS ID CLOSEPARENTHESIS SEMICOLON {yysuccess("Read input.");}
+        | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess("Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess("Print output.");}
         ;
 
@@ -203,34 +210,29 @@ statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
         |
         ; */
 
-type_declare: NUMBERDECLARE
-		    | STRINGDECLARE
-			| CONSTDECLARE NUMBERDECLARE
-			| CONSTDECLARE STRINGDECLARE
-			| BOOLEENDECLARE
-			| POINTERDECLARE
-			| TABLEDECLARE
-			| STRUCTDECLARE
+type_declare: NUMBERDECLARE {$$=_yylval.type;}
+		    | STRINGDECLARE {$$=_yylval.type;}
+			| CONSTDECLARE NUMBERDECLARE {$$="nombre constant";}
+			| CONSTDECLARE STRINGDECLARE {$$="chaine constante";}
+			| BOOLEENDECLARE {$$=_yylval.type;}
+			| POINTERDECLARE {$$=_yylval.type;}
+			| TABLEDECLARE {$$=_yylval.type;}
+			| STRUCTDECLARE {$$=_yylval.type;}
             ;
-just_declare: type_declare ID {
-                    // if (symbol_exists(symt, $2)){
-                    //     printf("symbol exists");
-                    // }
-                    printf("%s\n", _yylval.ident->symName);
-                }
+just_declare: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); }
             ;
-init_declare: just_declare ASSIGNMENT expression
+init_declare: just_declare ASSIGNMENT expression 
             ;
-declare: just_declare
+declare: just_declare 
 	   | init_declare
        ;
-struct_fields: declare
-			 | declare COMMA struct_fields
+struct_fields: type_declare ID { char saveName[255]; strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); set_attr(symt->tail, $1, saveName);}
+			 | type_declare ID { char saveName[255]; strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); set_attr(symt->tail, $1, saveName);} COMMA struct_fields
              |   // added by mohammed in C we can have an empty struct like this struct name{};
              ;
 
 assign: var ASSIGNMENT expression
-	  | ID OPENBRACKET expression CLOSEBRACKET ASSIGNMENT expression
+	  | ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression CLOSEBRACKET ASSIGNMENT expression
 	  | ADDRESSVALUE var ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression
       ;
@@ -249,11 +251,11 @@ call_param: expression
 accessfield: ID
 		   | ID DOT accessfield
            ;
-var: ID
-   | ID DOT accessfield
+var: ID {checkif_localsymbolexists(_yylval.ident);}
+   | ID {checkif_localsymbolexists(_yylval.ident);} DOT accessfield
    ;
 
-//General formuala for experession
+//General formula for experession
 expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
 	| NON expression
 	| POINTERVALUE var_exp
@@ -292,12 +294,13 @@ const :  INTEGER {
         ;
 
 variable : var_exp
-	| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
+	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
+	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
 	;
 
-var_exp : ID
-	| ID DOT accessfield {yysuccess("EXPRESSION : OBJECT  ACCESS");}
-	| ID OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
+var_exp : ID {checkif_localsymbolexists(_yylval.ident); yysuccess("variable");}
+	| ID {checkif_localsymbolexists(_yylval.ident);} DOT accessfield {yysuccess("EXPRESSION : OBJECT  ACCESS");}
+	| ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
 	;
 
 
@@ -329,18 +332,25 @@ int main(int argc, char **argv) {
         fprintf(stderr, "error - not an integer");
     }
     if(showsuccess != 0) showsuccess = 1;
+
+    // alocate the global symbols table
+    gSymT = allocateGlobalSymTable();
     
     // alocate the symbols table
     symt = allocateSymTable();
 
+
     fprintf(stdout, "" MAGENTA "========= Stream of tokens found =========" RESET "\n");
 
+    //while (yylex()) {}
+
     yyparse();
-    
-    printSymTable(symt);
+     
+    printGlobalSymTable(gSymT);
 
     // free up the sym table
     freeUpSymTable(symt);
+    freeUpGlobalSymTable(gSymT);
     fclose(yyin);
     fclose(yyout);
     return 0;
@@ -368,3 +378,61 @@ void showLexicalError() {
 
 
 }
+
+/* void addPotentialEntryWithTypeAttribute(int type) {
+    insertNewEntry(symt, type, "identifier"); /* identifier is just a placeholder for the ID name later 
+    set_attr(symt->tail, "type", _yylval.type );
+}
+
+
+void confirmOrDenyEntryID() {
+    if (symbol_exists(symt, _yylval.string)) {  /* Symbol already exists, we need to display an error and delete the potential entry added earlier 
+        deleteEntry(symt, "identifier"); /* Delete last entry 
+        yyerror("ID already declared."); /* First kind of symtable errors 
+    } 
+    else {  /* Symbol doesn't exist in this scope, we add the name of the identifier to the last entry 
+        SymTableNode* node = symt->tail; 
+        strcpy(node->symName, _yylval.string); 
+        _yylval.ident = node; 
+    }
+}
+
+void addStructTypeEntryWithTypeAttribute() {
+    char saveSymName[255]; strcpy(saveSymName, _yylval.string);
+    /*deleteEntry(symt, _yylval.string); /* Delete it from being a regular identifier (different symNodeType) 
+    if (symbol_exists(symt, _yylval.string)) yyerror("symbol exists"); 
+    else { 
+        SymTableNode* node = insertNewEntry(symt, STRUCTTYPEDECLARE, saveSymName); /* Insert it as a struct type declare 
+        set_attr(node, "type", "typestructure");
+        yysuccess("Déclaration d'un type structure.");
+    }
+} */
+
+void checkif_globalsymbolexists(SymTableNode* currentNode) {
+
+
+    if(currentNode == NULL) {
+        yyerror("ID already in use.");
+        return;
+    }  
+
+    if( !globalsymbol_exists(gSymT, currentNode->symName) ){
+        yyerror("Appel à une fonction non déclarée.");
+    }
+
+    deleteEntry(symt, symt->tail->symName);
+
+}
+
+void checkif_localsymbolexists(SymTableNode* insertedNode) {
+    /*Scanner returns NULL if it finds symbol already inserted in the symTable*/
+
+    if(insertedNode != NULL) printf("%s", insertedNode->symName); else printf("inserted null\n");
+ 
+    if(insertedNode != NULL) {
+        yyerror("ID is not declared.");
+        deleteEntry(symt, symt->tail->symName);
+    }
+
+}
+

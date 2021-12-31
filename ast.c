@@ -81,28 +81,54 @@ ast *build_ast(ast_node_type node_type)
     return tree;
 }
 
-ast_node *add_child(ast *tree, ast_node *node, ast_node_type node_type)
+ast_node *create_node(ast_node_type node_type)
 {
-    int where = node->index + 1;
     ast_node *new_node = (ast_node *)malloc(sizeof(ast_node));
-    // increase the number of nodes
-    tree->number_of_nodes += 1;
-
-    new_node->index = -1; // added as a leaf node
-    new_node->node_type = node_type;
-    new_node->label = stringFromNodeType(node_type);
-
     for (int i = 0; i < MAX_CHILDREN; i++)
     {
         new_node->children[i] = NULL;
     }
+    new_node->index = -1; // added as a leaf node
+    new_node->node_type = node_type;
+    new_node->label = stringFromNodeType(node_type);
 
-    node->index = node->index + 1;
-    node->children[where] = new_node; // linking
-    new_node->id = tree->number_of_nodes;
-    new_node->parent = node;
     return new_node;
 }
+
+ast_node *add_child(ast *tree, ast_node *parent, ast_node *node)
+{
+    int where = parent->index + 1;
+    parent->index = parent->index + 1;
+    parent->children[where] = node; // linking
+    tree->number_of_nodes += 1;
+    node->id = tree->number_of_nodes;
+    node->parent = parent;
+
+        return node;
+}
+
+// ast_node *add_child(ast *tree, ast_node *node, ast_node_type node_type)
+// {
+//     int where = node->index + 1;
+//     ast_node *new_node = (ast_node *)malloc(sizeof(ast_node));
+//     // increase the number of nodes
+//     tree->number_of_nodes += 1;
+
+//     new_node->index = -1; // added as a leaf node
+//     new_node->node_type = node_type;
+//     new_node->label = stringFromNodeType(node_type);
+
+//     for (int i = 0; i < MAX_CHILDREN; i++)
+//     {
+//         new_node->children[i] = NULL;
+//     }
+
+//     node->index = node->index + 1;
+//     node->children[where] = new_node; // linking
+//     new_node->id = tree->number_of_nodes;
+//     new_node->parent = node;
+//     return new_node;
+// }
 
 void set_val(ast_node *node, ast_node_val val)
 {

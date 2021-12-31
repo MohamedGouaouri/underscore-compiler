@@ -99,8 +99,10 @@ typedef struct ast
  * Build new ast tree
  */
 ast *build_ast(ast_node_type node_type);
-ast_node *add_child(ast *ast, ast_node *node, ast_node_type node_type);
+// ast_node *add_child(ast *ast, ast_node *node, ast_node_type node_type);
+ast_node *add_child(ast *tree, ast_node *parent, ast_node *node);
 ast_node *get_child(ast_node *node, int index);
+ast_node *create_node(ast_node_type node_type);
 void set_val(ast_node *node, ast_node_val val);
 
 bool is_leaf(ast_node *node);

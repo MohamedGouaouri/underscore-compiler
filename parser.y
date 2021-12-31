@@ -9,6 +9,7 @@
         SymTableNode *ident; /* Value of a IDENTIFIER */
     } _YYSTYPE;
     
+    
 }
 
 %code requires{
@@ -17,11 +18,13 @@
     #include "symtable.h"
     #include "ast.h"
     #include "misc.h"
+    #include "ast.h"
 }
 
 %union {
     char* string;
     int token_type;
+    ast_node* node;
 }
 
 %token ENTRY
@@ -94,6 +97,10 @@
 %token FALSE
 
 
+// types
+%type <node> func
+%type <node> assign expression statement bloc ifstmt
+
 %{
     
 
@@ -110,6 +117,9 @@
     int showsuccess = 0;
     
     _YYSTYPE _yylval;
+    ast* tree;
+    ast_node* p;
+    ast_node* prev;
 %}
 
 %%
@@ -120,8 +130,13 @@ underscore: /*eps*/
         | underscore func
         ;
 
-func: FUNCTIONDECLARE ret ID OPENPARENTHESIS params_eps CLOSEPARENTHESIS body {
-        
+func: FUNCTIONDECLARE ret ID OPENPARENTHESIS params_eps CLOSEPARENTHESIS {
+        // begin a function
+        tree = build_ast(AST_FUNCTION);
+        p = tree->root;
+        prev = p;
+    } OPENHOOK bloc CLOSEHOOK {
+        // add_child(tree, tree->root, $9);
         yysuccess("function ended.");
     }
 
@@ -153,93 +168,119 @@ param: type ID ;
 
 type: srt | crt ; // just for now it must be expanded to your type
 
-body: OPENHOOK bloc CLOSEHOOK
-    ;
 
-bloc: statement bloc {yysuccess("Block.");}
-     | {yysuccess("Emptyness.");} 
+bloc: statement{
+    printf("P is: %d\n", p->node_type);
+        add_child(tree, p, $1);
+    }
+    bloc {
+        $$ = $1;
+    }
+    | {}
      ;
 
 statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
-		| STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess("Déclaration d'un type structure.");}
-		| assign SEMICOLON {yysuccess("Assignment.");}
+		/* | STRUCTTYPEDECLARE ID OPENHOOK struct_fields CLOSEHOOK SEMICOLON {yysuccess("Déclaration d'un type structure.");} */
+		| assign SEMICOLON {
+            $$ = $1;
+
+        }
         
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("while loop.");}
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK loop_bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
-        
-        | ifstmt {yysuccess("Simplest if statement.");}
-		| ifstmt elsestmt {yysuccess("If else statement.");}
+        /* | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("while loop.");}
+		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
+		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
+         */
+        | ifstmt {$$ = $1;}
+		/* | ifstmt elsestmt {yysuccess("If else statement.");}
 		| ifstmt elifstmt {yysuccess("If elif statement.") ;}
-		| ifstmt elifstmt elsestmt {yysuccess("If elif else statement.");}
+		| ifstmt elifstmt elsestmt {yysuccess("If elif else statement.");} */
 
-        | RETURN expression SEMICOLON {yysuccess("Return statement.");}
-        | ID OPENPARENTHESIS CLOSEPARENTHESIS SEMICOLON {yysuccess("Call without params statement.");}
+        | RETURN {$<node>$ = create_node(AST_RETURN);} expression SEMICOLON {
+            // add children
+            $$ = $<node>2;
+            add_child(tree, $$, $3);
+        ;}
+        /* | ID OPENPARENTHESIS CLOSEPARENTHESIS SEMICOLON {yysuccess("Call without params statement.");}
 		| ID OPENPARENTHESIS call_param CLOSEPARENTHESIS SEMICOLON {yysuccess("Call with params statement.");}
- 
-        | READ OPENPARENTHESIS ID CLOSEPARENTHESIS SEMICOLON {yysuccess("Read input.");}
+  */
+        /* | READ OPENPARENTHESIS ID CLOSEPARENTHESIS SEMICOLON {yysuccess("Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess("Print output.");}
+        ; */
         ;
 
-loop_bloc: statement loop_bloc
-        | loop_bloc BREAK ";" loop_bloc
-        | loop_bloc CONTINUE ";" loop_bloc
-        |
-        ;
-
+declare: just_declare
+	   | init_declare
+       ;
 type_declare: NUMBERDECLARE
-		    | STRINGDECLARE
+		    /* | STRINGDECLARE
 			| CONSTDECLARE NUMBERDECLARE
 			| CONSTDECLARE STRINGDECLARE
 			| BOOLEENDECLARE
 			| POINTERDECLARE
 			| TABLEDECLARE
-			| STRUCTDECLARE
+			| STRUCTDECLARE */
             ;
-just_declare: type_declare ID {
-                    // if (symbol_exists(symt, $2)){
-                    //     printf("symbol exists");
-                    // }
-                    printf("%s\n", _yylval.ident->symName);
-                }
-            ;
-init_declare: just_declare ASSIGNMENT expression
-            ;
-declare: just_declare
-	   | init_declare
-       ;
-struct_fields: declare
+
+just_declare: type_declare ID;
+
+init_declare: just_declare ASSIGNMENT expression;
+
+
+/* struct_fields: declare
 			 | declare COMMA struct_fields
              |   // added by mohammed in C we can have an empty struct like this struct name{};
-             ;
+             ; */
 
-assign: var ASSIGNMENT expression
-	  | ID OPENBRACKET expression CLOSEBRACKET ASSIGNMENT expression
-	  | ADDRESSVALUE var ASSIGNMENT expression
-	  | POINTERVALUE var ASSIGNMENT expression
+ assign: ID {
+        $<node>$ = create_node(AST_ID);
+     } ASSIGNMENT expression {
+        $$ = create_node(AST_ASSIGNMENT);
+        add_child(tree, $$, $<node>2);
+        add_child(tree, $$, $4);
+ }
+
+	  /* | ID OPENBRACKET expression CLOSEBRACKET ASSIGNMENT expression */
+	  /* | ADDRESSVALUE var ASSIGNMENT expression */
+	  /* | POINTERVALUE var ASSIGNMENT expression */
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("if stmt.");}
-      ;
-elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif stmt.");}
-        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif elif stmt.");}
-        ;
-elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess("else stmt.");}
-        ;
+ifstmt: IF {$<node>$ = create_node(AST_IF);} OPENPARENTHESIS expression CLOSEPARENTHESIS "{" 
+            // enter new contexte
+            {
+                add_child(tree, $<node>2, $4);
+                p = create_node(AST_BLOC);
+                printf("P is: %d\n", p->node_type);
+                add_child(tree, $<node>2, p);
+            }
+        bloc
+        "}" {
+            $$ = $<node>2;
+            // // pop context
+            p = prev;
+        }
+    ;
+/* elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif stmt.");} */
+        /* | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif elif stmt.");} */
+        /* ; */
+/* elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess("else stmt.");} */
+        /* ; */
 
-call_param: expression
-		  | expression COMMA call_param
+/* call_param: expression
+		  | expression COMMA call_param */
 
-accessfield: ID
+/* accessfield: ID
 		   | ID DOT accessfield
-           ;
-var: ID
-   | ID DOT accessfield
-   ;
+           ; */
+/* var: ID {
 
-expression: ID 
+} */
+  /* ID DOT accessfield */
+   ; 
+
+expression: ID {$$ = create_node(AST_ID);}
             | INTEGER {
-                printf("%d\n", _yylval.ival);
+                // printf("%d\n", _yylval.ival);
+                $$ = create_node(AST_INTEGER);
             }
             ;
 
@@ -278,6 +319,10 @@ int main(int argc, char **argv) {
     yyparse();
     
     printSymTable(symt);
+    FILE *dotfile = fopen("ast.dot", "w+");
+    main_ast_print(tree, dotfile);
+    printf("Type: %d\n", tree->root->children[0]->node_type);
+    destroy_ast(tree->root, number_of_children(tree->root));
 
     // free up the sym table
     freeUpSymTable(symt);

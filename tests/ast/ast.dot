@@ -1,5 +1,0 @@
-digraph AST {
-    node [fontname="Arial"];
-    1[label=AST_INTEGER];
-    1;
-}

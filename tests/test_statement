@@ -55,14 +55,14 @@
 
     #thatMethod(sum, difference);
 
-    thatOtherMethod();
+    thatOtherMethod(;
 
     -> sum ;
     #break; ## Syntax error normally
 
 }
-_#
-#_
+
+
 ()_ thatMothod($_ s, $_ d) {
 
     READ(s);
@@ -74,7 +74,7 @@ _#
     -> d;
 
 }
-_#
+
 
 #_
 ()_ thatMothod($_ s, $_ d) {

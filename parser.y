@@ -145,9 +145,11 @@
 
 underscore: %empty
         | underscore func
+        | error func {yyerrok;}
         ;
 
-func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS body { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess("function ended.");}
+func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS body { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
+
 
 ret: %empty
     | srt // simple return type 
@@ -180,36 +182,35 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!
 body: OPENHOOK bloc CLOSEHOOK
     ;
 
-bloc: statement bloc {yysuccess("Block.");}
-     | %empty {yysuccess("Emptyness.");} 
+bloc: statement bloc {yysuccess(1, "Block.");}
+     | %empty {yysuccess(1, "Emptyness.");} 
+     | error bloc {yyerror("wrong statement inside block."); yyerrok;}
      ;
 
-statement: declare SEMICOLON {yysuccess("Simple declaration / with assign.");}
-		| STRUCTTYPEDECLARE ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else { _yylval.ident->symType = STRUCTTYPEDECLARE; set_attr(_yylval.ident, "type", "typestruct");}} OPENHOOK struct_fields CLOSEHOOK SEMICOLON 
-		| assign SEMICOLON {yysuccess("Assignment.");}
+statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");}
+		| STRUCTTYPEDECLARE ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else { _yylval.ident->symType = STRUCTTYPEDECLARE; set_attr(_yylval.ident, "type", "typestruct"); yysuccess(1,"Déclaration d'un type structure.");}} OPENHOOK struct_fields CLOSEHOOK SEMICOLON 
+		| assign SEMICOLON {yysuccess(1, "Assignment.");}
+        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "while loop.");}
+		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with assignment.");}
+		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with declaration+assignment.");}
+        | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;} 
         
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("while loop.");}
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess("for loop with declaration+assignment.");}
         
-        | ifstmt {yysuccess("Simplest if statement.");}
-		| ifstmt elsestmt {yysuccess("If else statement.");}
-		| ifstmt elifstmt {yysuccess("If elif statement.") ;}
-		| ifstmt elifstmt elsestmt {yysuccess("If elif else statement.");}
+        
+        | ifstmt {yysuccess(1,"Simplest if statement.");}
+		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
+		| ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
+		| ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}
 
-        | RETURN expression SEMICOLON {yysuccess("Return statement.");}
-        | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess("Call without params statement.");}
-		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess("Call with params statement.");}
+        | RETURN expression SEMICOLON {yysuccess(1, "Return statement.");}
+        | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
+		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call with params statement.");}
  
-        | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess("Read input.");}
-		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess("Print output.");}
+        | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Read input.");}
+		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Print output.");}
+        | error SEMICOLON {yyerror("wrong statement"); yyerrok;}
         ;
 
-/* loop_bloc: statement loop_bloc
-        | loop_bloc BREAK ";" loop_bloc
-        | loop_bloc CONTINUE ";" loop_bloc
-        |
-        ; */
 
 type_declare: NUMBERDECLARE {$$=_yylval.type;}
 		    | STRINGDECLARE {$$=_yylval.type;}
@@ -223,8 +224,13 @@ type_declare: NUMBERDECLARE {$$=_yylval.type;}
 just_declare: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); }
             ;
 init_declare: just_declare ASSIGNMENT expression 
+            | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
             ;
-declare: just_declare 
+values_eps: %empty
+          | call_param /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
+          ;
+            
+declare: just_declare
 	   | init_declare
        ;
 struct_fields: type_declare ID { char saveName[255]; strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); set_attr(symt->tail, $1, saveName); }
@@ -237,12 +243,15 @@ assign: var_exp ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("if stmt.");}
+ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"if stmt.");}
+      | IF error body {yyerror("wrong syntax inside if()."); yyerrok;} 
       ;
-elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif stmt.");}
-        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess("elif elif stmt.");}
+elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif stmt.");}
+        | ELSE error body {yyerror("wrong syntax inside elif()."); yyerrok;} 
+        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif elif stmt.");}
         ;
-elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess("else stmt.");}
+elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess(1,"else stmt.");}
+        | ELSE error body {yyerror("wrong syntax inside else()."); yyerrok;} 
         ;
 
 call_param: expression
@@ -251,6 +260,7 @@ call_param: expression
 
 //General formula for experession
 expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
+    | OPENPARENTHESIS error CLOSEPARENTHESIS
 	| NON expression
 	| POINTERVALUE var_exp
 	| ADDRESSVALUE var_exp
@@ -303,20 +313,19 @@ var: ID {checkif_localsymbolexists(_yylval.ident);}
    | ID {checkif_localsymbolexists(_yylval.ident); /* strcpy(save, symt->tail->symName);*/} DOT accessfield
    ;
 
-
-
-
 %%
 
 
 
 
 void yyerror(char *s){
-    fprintf(stdout, "%d: " RED "%s" RESET "\n", yylineno, s);
+    fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
 }
 
-void yysuccess(char *s){
-    fprintf(stdout, "%d: " GREEN "%s" RESET "\n", yylineno, s);
+void yysuccess(int i, char *s){
+    if(i) fprintf(stdout, "%d: " GREEN " %s " RESET "\n", yylineno, s);
+    else fprintf(stdout, "%d: %s\n", yylineno, s);
+    currentColumn+=yyleng;
 }
 
 

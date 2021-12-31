@@ -105,59 +105,59 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 {LOOP} {
-    yysuccess("LOOP");
+    yysuccess(0,"LOOP");
     return LOOP;
 }
 
 {READ} {
-    yysuccess("READ");
+    yysuccess(0,"READ");
     return READ;
 }
 
 {WRITE} {
-    yysuccess("WRITE");
+    yysuccess(0,"WRITE");
     return WRITE;
 }
 
 {ENTRY} {
-    yysuccess("the main entry");
+    yysuccess(0,"the main entry");
     return ENTRY;
 }
 
 {IF} {
-    yysuccess("IF condition");
+    yysuccess(0,"IF condition");
     return IF;
 }
 
 {ELSE} {
-    yysuccess("ELSE condition");
+    yysuccess(0,"ELSE condition");
     return ELSE;
 }
 
 {BREAK} {
-    yysuccess("Loop break");
+    yysuccess(0,"Loop break");
     return BREAK;
 }
 
 {CONTINUE} {
-    yysuccess("Loop continue");
+    yysuccess(0,"Loop continue");
     return CONTINUE;
 }
 
 {TRUE} {
-    yysuccess("TRUE continue");
+    yysuccess(0,"TRUE continue");
     return TRUE;
 }
 
 {FALSE} {
-    yysuccess("FALSE");
+    yysuccess(0,"FALSE");
     return FALSE;
 }
 
 
 {ID} {
     //printSymTable(symt);
-    yysuccess("IDENTIFIER");
+    yysuccess(0, "IDENTIFIER");
     SymTableNode* node = lookup(symt, yytext); 
     if ( node == NULL ) { 
         node = insertNewEntry(symt, ID, yytext);
@@ -173,17 +173,17 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 {DOT} {
-    yysuccess("DOT");
+    yysuccess(0,"DOT");
     return DOT;
 }
 
 {COMMA} {
-    yysuccess("COMMA");
+    yysuccess(0,"COMMA");
     return COMMA;
 }
 
 {SEMICOLON} {
-    yysuccess("SEMICOLON");
+    yysuccess(0,"SEMICOLON");
     return SEMICOLON;
 }
 
@@ -191,188 +191,188 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 {OPENPARENTHESIS} {
-    yysuccess("OPENPARENTHESIS");
+    yysuccess(0,"OPENPARENTHESIS");
     return OPENPARENTHESIS;
 }
 
 {CLOSEPARENTHESIS} {
-    yysuccess("CLOSEPARENTHESIS");
+    yysuccess(0,"CLOSEPARENTHESIS");
     return CLOSEPARENTHESIS;
 }
 
 {OPENHOOK} {
-    yysuccess("OPENHOOK");
+    yysuccess(0,"OPENHOOK");
     return OPENHOOK;
 }
 
 {CLOSEHOOK} {
-    yysuccess("CLOSEHOOK");
+    yysuccess(0,"CLOSEHOOK");
     return CLOSEHOOK;
 }
 
 {OPENBRACKET} {
-    yysuccess("OPENBRACKET");
+    yysuccess(0,"OPENBRACKET");
     return OPENBRACKET;
 }
 
 {CLOSEBRACKET} {
-    yysuccess("CLOSEBRACKET");
+    yysuccess(0,"CLOSEBRACKET");
     return CLOSEBRACKET;
 }
 
 
 			
 {EQUAL} {
-    yysuccess("EQU operator");
+    yysuccess(0,"EQU operator");
     return EQUAL;
 }
 
 {NONEQUAL} {
-    yysuccess("NONEQU operator");
+    yysuccess(0,"NONEQU operator");
     return NONEQUAL;
 }
 
 {AND} {
-    yysuccess("AND operator");
+    yysuccess(0,"AND operator");
     return AND;
 }
 
 {OR} {
-    yysuccess("OR operator");
+    yysuccess(0,"OR operator");
     return OR;
 }
 
 {NON} {
-    yysuccess("NON operator");
+    yysuccess(0,"NON operator");
     return NON;
 }
 
 {INFERIOR} {
-    yysuccess("INFERIOR sign");
+    yysuccess(0,"INFERIOR sign");
     return INFERIOR;
 }
 
 {SUPERIOR} {
-    yysuccess("SUPERIOR sign");
+    yysuccess(0,"SUPERIOR sign");
     return SUPERIOR;
 }
 
 {INFERIOREQUAL} {
-    yysuccess("INFERIOREQUAL sign");
+    yysuccess(0,"INFERIOREQUAL sign");
     return INFERIOREQUAL;
 }
 
 {SUPERIOREQUAL} {
-    yysuccess("SUPERIOREQUAL sign");
+    yysuccess(0,"SUPERIOREQUAL sign");
     return SUPERIOREQUAL;
 }
 
 {ADD} {
-    yysuccess("ADDITION operator");
+    yysuccess(0,"ADDITION operator");
     return ADD;
 }
 
 {SUB} {
-    yysuccess("SUBTRACTION operator");
+    yysuccess(0,"SUBTRACTION operator");
     return SUB;
 
 }
 
 {MULT} {
-    yysuccess("MULTIPLICATION operator");
+    yysuccess(0,"MULTIPLICATION operator");
     return MULT;
 }
 
 {DIV} {
-    yysuccess("DIVISION operator");
+    yysuccess(0,"DIVISION operator");
     return DIV;
 }
 
 {MOD} {
-    yysuccess("MODULO operator");
+    yysuccess(0,"MODULO operator");
     return MOD;
 }
 
 {POWER} {
-    yysuccess("POWER operator");
+    yysuccess(0,"POWER operator");
     return POWER;
 }
 
 
 {ASSIGNMENT} {
-    yysuccess("ASSIGNMENT");
+    yysuccess(0,"ASSIGNMENT");
     return ASSIGNMENT;
 }
 
 {RETURN} {
-    yysuccess("RETURN");
+    yysuccess(0,"RETURN");
     return RETURN;
 }
 
 
 
 {INTEGER} {
-    yysuccess("constant INTEGER");
+    yysuccess(0, "constant INTEGER");
     _yylval.ival = atoi(yytext);
     return INTEGER;
 }
 
 {REALNUMBER} {
-    yysuccess("constant REALNUMBER");
+    yysuccess(0, "constant REALNUMBER");
     _yylval.rval = strtod(yytext, NULL);
     return REALNUMBER;
 }
 
 
 {STRING} {
-    yysuccess("constant STRING");
+    yysuccess(0, "constant STRING");
     _yylval.string = yytext;
     return STRING;
 } 
 
 
 {FUNCTIONDECLARE} {
-    yysuccess("FUNCTION declaration");
+    yysuccess(0, "FUNCTION declaration");
 
     _yylval.type = "function";
     return FUNCTIONDECLARE;
 } 
 
 {NUMBERDECLARE} {
-    yysuccess("NUMBER declaration");
+    yysuccess(0, "NUMBER declaration");
     
     _yylval.type = "number";
     return NUMBERDECLARE;
 }
 
 {STRINGDECLARE} {
-    yysuccess("STRING declaration");
+    yysuccess(0, "STRING declaration");
 
     _yylval.type = "string";
     return STRINGDECLARE;
 }
 
 {CONSTDECLARE} {
-    yysuccess("CONSTANT declaration");
+    yysuccess(0, "CONSTANT declaration");
     return CONSTDECLARE;
 }
 
 {BOOLEENDECLARE} {
-    yysuccess("BOOLEAN declaration");
+    yysuccess(0, "BOOLEAN declaration");
 
     _yylval.type = "boolean";
     return BOOLEENDECLARE;
 }
 
 {STRUCTTYPEDECLARE} {
-    yysuccess("STRUCTTYPE declaration");
+    yysuccess(0, "STRUCTTYPE declaration");
 
     _yylval.type = "structtype";
     return STRUCTTYPEDECLARE;
 }
 
 {STRUCTDECLARE} {
-    yysuccess("STRUCT declaration");
+    yysuccess(0, "STRUCT declaration");
     // char* passtoyylval;
     // strcpy(passtoyylval, yytext);
     // _yylval.type = passtoyylval;
@@ -381,24 +381,24 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 {POINTERDECLARE} {
-    yysuccess("POINTER declaration");
+    yysuccess(0,"POINTER declaration");
     return POINTERDECLARE;
 }
 
 {TABLEDECLARE} {
-    yysuccess("TABLE declaration");
+    yysuccess(0, "TABLE declaration");
 
     _yylval.type = "array";
     return TABLEDECLARE;
 }
 
 {ADDRESSVALUE} {
-    yysuccess("ADDRESS value");
+    yysuccess(0,"ADDRESS value");
     return ADDRESSVALUE;
 }
 
 {POINTERVALUE} {
-    yysuccess("POITER value");
+    yysuccess(0,"POINTER value");
     return POINTERVALUE;
 }
 
@@ -423,6 +423,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 <<EOF>> yyterminate();
 
 . {
+    
     yyerror("Unrecognized character");
     showLexicalError();
     yyterminate();

@@ -10,6 +10,7 @@
         SymTableNode *ident; /* Value of a IDENTIFIER */
     } _YYSTYPE;
     
+    
 }
 
 %code requires{
@@ -18,11 +19,13 @@
     #include "symtable.h"
     #include "ast.h"
     #include "misc.h"
+    #include "ast.h"
 }
 
 %union {
     char* string;
     int token_type;
+    ast_node* node;
 }
 
 %token ENTRY
@@ -117,6 +120,10 @@
 %left OPENPARENTHESIS CLOSEPARENTHESIS
 
 
+// types
+%type <node> func
+%type <node> assign expression statement bloc ifstmt
+
 %{
     
 
@@ -137,7 +144,9 @@
     int showsuccess = 0;
     
     _YYSTYPE _yylval;
-
+    ast* tree;
+    ast_node* p;
+    ast_node* prev;
 %}
 
 %%
@@ -180,8 +189,6 @@ comma_params: %empty
 param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); } ;
 
 
-body: OPENHOOK bloc CLOSEHOOK
-    ;
 
 bloc: statement bloc {yysuccess(1, "Block.");}
      | %empty {yysuccess(1, "Emptyness.");} 
@@ -254,8 +261,8 @@ elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"el
 elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess(1,"else stmt.");}
         ;
 
-call_param: expression
-		  | expression COMMA call_param
+/* call_param: expression
+		  | expression COMMA call_param */
 
 
 //General formula for experession

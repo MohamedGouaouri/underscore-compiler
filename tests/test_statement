@@ -4,27 +4,33 @@
 
  ()_ $_ f(){
 
-    $_i; 
-
-
+    $_ i; 
 
     {}_ teacher {''_ name, ""[]_ modules};
+
     $_ wall;
-    {}_ student {$_ matricule, $_ gpa, ""_ name, ""_ favoriteteacher, $_ age};
 
+    {}_ student {""_ name, $_ matricule, $_ gpa, _teacher favteacher};
 
-     $_ i;
-
-     ~_ $_ cste;
+    $_wall;
 
     _student s;
+
+    s.name <- "sity";
+
+    $_ one;
+
+    $_ i;
+
+    ~_ $_ cste;
+
 
     $_ duplicate <- sumifcond;
 
     
 }
 
-
+#_
 ()_ $_ g($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
 
     ""_ name;
@@ -55,7 +61,7 @@
     #break; ## Syntax error normally
 
 }
-
+_#
 #_
 ()_ thatMothod($_ s, $_ d) {
 

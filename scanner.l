@@ -156,6 +156,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 
 {ID} {
+    //printSymTable(symt);
     yysuccess("IDENTIFIER");
     SymTableNode* node = lookup(symt, yytext); 
     if ( node == NULL ) { 
@@ -166,6 +167,7 @@ INLINECOMMENT #[^_]{ANYTHING}
     }
     //_yylval.string = yytext;
     //yyerror(yytext);
+    //printSymTable(symt);
     return ID;
 }
 
@@ -371,9 +373,10 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 {STRUCTDECLARE} {
     yysuccess("STRUCT declaration");
-    char* passtoyylval;
-    strcpy(passtoyylval, yytext);
-    _yylval.type = passtoyylval;
+    // char* passtoyylval;
+    // strcpy(passtoyylval, yytext);
+    // _yylval.type = passtoyylval;
+    _yylval.type = yytext;
     return STRUCTDECLARE;
 }
 

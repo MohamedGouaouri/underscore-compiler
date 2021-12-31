@@ -158,7 +158,7 @@ underscore: %empty
         | error func {yyerrok;}
         ;
 
-func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS body { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
+func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
 
 
 ret: %empty
@@ -251,18 +251,18 @@ assign: var_exp ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"if stmt.");}
-      | IF error body {yyerror("wrong syntax inside if()."); yyerrok;} 
+ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"if stmt.");}
+      | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;} 
       ;
-elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif stmt.");}
-        | ELSE error body {yyerror("wrong syntax inside elif()."); yyerrok;} 
-        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS body {yysuccess(1,"elif elif stmt.");}
+elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif stmt.");}
+        | ELSE error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside elif()."); yyerrok;} 
+        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif elif stmt.");}
         ;
-elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS body {yysuccess(1,"else stmt.");}
+elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"else stmt.");}
         ;
 
-/* call_param: expression
-		  | expression COMMA call_param */
+call_param: expression
+		  | expression COMMA call_param
 
 
 //General formula for experession

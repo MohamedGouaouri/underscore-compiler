@@ -120,9 +120,6 @@
 %left OPENPARENTHESIS CLOSEPARENTHESIS
 
 
-// types
-%type <node> func
-%type <node> assign expression statement bloc ifstmt
 
 %{
     

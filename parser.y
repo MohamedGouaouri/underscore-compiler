@@ -42,7 +42,6 @@
 %token CONTINUE
 
 %token <token_type> ID
-/* %token <string> STRUCTTYPEDECLARE */
 %type <string> type_declare
 %type <string> just_declare
 %type <string> struct_fields
@@ -137,7 +136,7 @@
 
     GlobalSymTable* gSymT; //Our global table of symbols
     SymTable* symt;        //Current table of symboles (used by scanner.l as well)
-    char save[255];
+    char save[50];
     int currentColumn = 1;
     int showsuccess = 0;
     
@@ -311,16 +310,14 @@ var_exp : var
 	| ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
 	;
 
-accessfield: ID { /*checkif_fieldisvalid(save, symt->tail->symName);*/ deleteEntry(symt, symt->tail->symName); }
+accessfield: ID { char fieldnameCopy[50]; strcpy(fieldnameCopy, symt->tail->symName); checkif_fieldisvalid(save, fieldnameCopy); deleteEntry(symt, symt->tail->symName); }
 		   | ID { deleteEntry(symt, symt->tail->symName); } DOT accessfield
            ;
 var: ID {checkif_localsymbolexists(_yylval.ident);}
-   | ID {checkif_localsymbolexists(_yylval.ident); /*strcpy(save, symt->tail->symName);*/} DOT accessfield
+   | ID {checkif_localsymbolexists(_yylval.ident); strcpy(save, symt->tail->symName);} DOT accessfield
    ;
 
 %%
-
-
 
 
 void yyerror(char *s){
@@ -360,9 +357,6 @@ int main(int argc, char **argv) {
 
 
     printGlobalSymTable(gSymT);
-
-    /**/
-    //checkif_fieldisvalid("teacher", "name"); 
      
 
     // free up the sym table
@@ -431,11 +425,8 @@ void checkif_localsymbolexists(SymTableNode* insertedNode) {
     /* yyerror("Id is declared, all is good"); */
 }
 
-void checkif_fieldisvalid(char precedent[50], char fieldname[50]) {
+void checkif_fieldisvalid(char precedent[50], char fieldname[50]) { /*Works with variable.field*/
 
-        /*Going back to the first symtable*/
-
-        //symt = gSymT->head->symTable;
 
         SymTableNode* node = lookup(symt, precedent); //Look up its row
 
@@ -449,7 +440,15 @@ void checkif_fieldisvalid(char precedent[50], char fieldname[50]) {
 
         char *str = malloc(strlen(type)); 
 
-        SymTableNode* structnode = lookup(symt, type); /*Lookup the node where the struct type is declared (we need to remove the _ from the type string first)*/
+        strncpy(str, type + 1, strlen(type));
+
+        SymTableNode* structnode = lookup(symt, str); /*Lookup the node where the struct type is declared (we need to remove the _ from the type string first)*/
+
+        if (structnode == NULL) {
+            printf("\n\nType wasn't found %s\n\n", str);
+            return;
+        } 
+
 
         AttrNode* fieldattr_node = structnode->rootAttr;
 
@@ -458,6 +457,7 @@ void checkif_fieldisvalid(char precedent[50], char fieldname[50]) {
         fieldattr_node = fieldattr_node->next; /*rootAttr node is dedicated for the type=typestruct, we need to skip it*/
 
         while(fieldattr_node != NULL) {
+
 
             if(strcmp(fieldattr_node->val, fieldname) == 0 ) {
                 yysuccess(1, "Field exists!"); return;

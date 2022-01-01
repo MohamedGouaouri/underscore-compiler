@@ -10,7 +10,7 @@
 
     $_ wall;
 
-    {}_ student {""_ name, $_ matricule, $_ gpa, _teacher favteacher};
+    {}_ student {""_ name, $_ matricule, $_ gpa, _teacher fav};
 
     $_wall;
 

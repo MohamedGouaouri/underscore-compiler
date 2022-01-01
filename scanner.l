@@ -334,21 +334,21 @@ INLINECOMMENT #[^_]{ANYTHING}
 {FUNCTIONDECLARE} {
     yysuccess(0, "FUNCTION declaration");
 
-    _yylval.type = "function";
+    strcpy(_yylval.type, "function");
     return FUNCTIONDECLARE;
 } 
 
 {NUMBERDECLARE} {
     yysuccess(0, "NUMBER declaration");
     
-    _yylval.type = "number";
+    strcpy(_yylval.type, "number");
     return NUMBERDECLARE;
 }
 
 {STRINGDECLARE} {
     yysuccess(0, "STRING declaration");
 
-    _yylval.type = "string";
+    strcpy(_yylval.type, "string");
     return STRINGDECLARE;
 }
 
@@ -360,14 +360,14 @@ INLINECOMMENT #[^_]{ANYTHING}
 {BOOLEENDECLARE} {
     yysuccess(0, "BOOLEAN declaration");
 
-    _yylval.type = "boolean";
+    strcpy(_yylval.type, "boolean");
     return BOOLEENDECLARE;
 }
 
 {STRUCTTYPEDECLARE} {
     yysuccess(0, "STRUCTTYPE declaration");
 
-    _yylval.type = "structtype";
+    strcpy(_yylval.type, "structtype");
     return STRUCTTYPEDECLARE;
 }
 
@@ -376,7 +376,8 @@ INLINECOMMENT #[^_]{ANYTHING}
     // char* passtoyylval;
     // strcpy(passtoyylval, yytext);
     // _yylval.type = passtoyylval;
-    _yylval.type = yytext;
+    //_yylval.type = yytext;
+    strcpy(_yylval.type, yytext);
     return STRUCTDECLARE;
 }
 
@@ -388,7 +389,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 {TABLEDECLARE} {
     yysuccess(0, "TABLE declaration");
 
-    _yylval.type = "array";
+    strcpy(_yylval.type, "array");
     return TABLEDECLARE;
 }
 

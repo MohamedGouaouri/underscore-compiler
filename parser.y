@@ -6,7 +6,7 @@
         int ival;              /* Value of integer values */
         double rval;              /* Value of real values*/
         char *string;              /* Value string */
-        char *type;
+        char type[255];
         SymTableNode *ident; /* Value of a IDENTIFIER */
     } _YYSTYPE;
     
@@ -16,6 +16,7 @@
 %code requires{
     #include <stdio.h>
     #include <stdlib.h>
+    #include <string.h>
     #include "symtable.h"
     #include "ast.h"
     #include "misc.h"
@@ -23,7 +24,7 @@
 }
 
 %union {
-    char* string;
+    char string[255];
     int token_type;
     ast_node* node;
 }
@@ -165,9 +166,9 @@ ret: %empty
     // just for simplicity
 
 
-srt: NUMBERDECLARE {$$=_yylval.type;} | STRINGDECLARE {$$=_yylval.type;} | BOOLEENDECLARE {$$=_yylval.type;} ;
+srt: NUMBERDECLARE {strcpy($$ , _yylval.type); } | STRINGDECLARE {strcpy($$ , _yylval.type); } | BOOLEENDECLARE {strcpy($$ , _yylval.type); } ;
 
-crt: TABLEDECLARE {$$=_yylval.type;} | STRUCTTYPEDECLARE {$$=_yylval.type;};
+crt: TABLEDECLARE {strcpy($$ , _yylval.type); } | STRUCTTYPEDECLARE {strcpy($$ , _yylval.type); };
 
 
 params_eps: %empty
@@ -217,14 +218,14 @@ statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");
         ;
 
 
-type_declare: NUMBERDECLARE {$$=_yylval.type;}
-		    | STRINGDECLARE {$$=_yylval.type;}
-			| CONSTDECLARE NUMBERDECLARE {$$="nombre constant";}
-			| CONSTDECLARE STRINGDECLARE {$$="chaine constante";}
-			| BOOLEENDECLARE {$$=_yylval.type;}
-			| POINTERDECLARE {$$=_yylval.type;}
-			| TABLEDECLARE {$$=_yylval.type;}
-			| STRUCTDECLARE {$$=_yylval.type;}
+type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
+		    | STRINGDECLARE {strcpy($$ , _yylval.type);}
+			| CONSTDECLARE NUMBERDECLARE {strcpy($$ , "nombre constant");}
+			| CONSTDECLARE STRINGDECLARE {strcpy($$ , "chaine constante"); }
+			| BOOLEENDECLARE {strcpy($$ , _yylval.type); }
+			| POINTERDECLARE {strcpy($$ , _yylval.type); }
+			| TABLEDECLARE {strcpy($$ , _yylval.type); }
+			| STRUCTDECLARE {strcpy($$ , _yylval.type); }
             ;
 just_declare: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); }
             ;
@@ -314,7 +315,7 @@ accessfield: ID { /*checkif_fieldisvalid(save, symt->tail->symName);*/ deleteEnt
 		   | ID { deleteEntry(symt, symt->tail->symName); } DOT accessfield
            ;
 var: ID {checkif_localsymbolexists(_yylval.ident);}
-   | ID {checkif_localsymbolexists(_yylval.ident); /* strcpy(save, symt->tail->symName);*/} DOT accessfield
+   | ID {checkif_localsymbolexists(_yylval.ident); /*strcpy(save, symt->tail->symName);*/} DOT accessfield
    ;
 
 %%
@@ -361,7 +362,7 @@ int main(int argc, char **argv) {
     printGlobalSymTable(gSymT);
 
     /**/
-    checkif_fieldisvalid("teacher", "name"); 
+    //checkif_fieldisvalid("teacher", "name"); 
      
 
     // free up the sym table
@@ -430,13 +431,13 @@ void checkif_localsymbolexists(SymTableNode* insertedNode) {
     /* yyerror("Id is declared, all is good"); */
 }
 
-void checkif_fieldisvalid(char type[50], char fieldname[50]) {
+void checkif_fieldisvalid(char precedent[50], char fieldname[50]) {
 
         /*Going back to the first symtable*/
 
-        symt = gSymT->head->symTable;
+        //symt = gSymT->head->symTable;
 
-        /* SymTableNode* node = lookup(symt, precedent); //Look up its row
+        SymTableNode* node = lookup(symt, precedent); //Look up its row
 
         if(node == NULL) return;
 
@@ -446,7 +447,7 @@ void checkif_fieldisvalid(char type[50], char fieldname[50]) {
 
         char* type; strcpy(type, typeattr_node->val); 
 
-        char *str = malloc(strlen(type));  */
+        char *str = malloc(strlen(type)); 
 
         SymTableNode* structnode = lookup(symt, type); /*Lookup the node where the struct type is declared (we need to remove the _ from the type string first)*/
 

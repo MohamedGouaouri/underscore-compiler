@@ -119,7 +119,7 @@
 %left POWER
 %left OPENPARENTHESIS CLOSEPARENTHESIS
 
-
+%type <string> ret
 
 %{
     
@@ -158,7 +158,7 @@ underscore: %empty
 func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
 
 
-ret: %empty
+ret: %empty {strcpy($$ , "void");}
     | srt // simple return type 
     | crt // complex return type
     ; 
@@ -167,7 +167,7 @@ ret: %empty
 
 srt: NUMBERDECLARE {strcpy($$ , _yylval.type); } | STRINGDECLARE {strcpy($$ , _yylval.type); } | BOOLEENDECLARE {strcpy($$ , _yylval.type); } ;
 
-crt: TABLEDECLARE {strcpy($$ , _yylval.type); } | STRUCTTYPEDECLARE {strcpy($$ , _yylval.type); };
+crt: TABLEDECLARE {strcpy($$ , _yylval.type); };
 
 
 params_eps: %empty

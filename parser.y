@@ -240,7 +240,6 @@ declare: just_declare
        ;
 struct_fields: type_declare ID { char saveName[255]; strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); set_attr(symt->tail, $1, saveName); }
 			 | type_declare ID { set_fieldattribute($1); } COMMA struct_fields
-             | %empty {}
              ;
 
 assign: var_exp ASSIGNMENT expression

@@ -127,6 +127,7 @@
     extern int yylineno;
     extern int yyleng;
     extern FILE *yyin, *yyout;
+    char* currentFileName;
 
     extern int yylex();
     void yysuccess();
@@ -201,7 +202,6 @@ statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");
         | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;} 
         
         
-        
         | ifstmt {yysuccess(1,"Simplest if statement.");}
 		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
 		| ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
@@ -211,6 +211,8 @@ statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");
         | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
 		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call with params statement.");}
  
+        | BREAK SEMICOLON {yysuccess(1,"Break statement.") ;}
+        | CONTINUE SEMICOLON {yysuccess(1,"Continue statement.") ;}
         | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Print output.");}
         | error SEMICOLON {yyerror("wrong statement"); yyerrok;}
@@ -320,7 +322,8 @@ var: ID {checkif_localsymbolexists(_yylval.ident);}
 
 
 void yyerror(char *s){
-    fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
+    fprintf(stdout, "File '%s', line %d, character %d : syntax error: " RED " %s " RESET "\n", currentFileName, yylineno, currentColumn, s);
+    //fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
 }
 
 void yysuccess(int i, char *s){
@@ -332,9 +335,9 @@ void yysuccess(int i, char *s){
 
 int main(int argc, char **argv) {
 
-    
-    
-    yyin = fopen(argv[1], "r");
+    currentFileName = argv[1];
+
+    yyin = fopen(currentFileName, "r");
   
     yyout = fopen("Output.txt", "w");
 

@@ -31,15 +31,15 @@
 
 %token ENTRY
 
-%token LOOP 
-%token IF
-%token ELSE
+%token LOOP "loop"
+%token IF "?"
+%token ELSE ":"
 
 %token READ
 %token WRITE
 
-%token BREAK
-%token CONTINUE
+%token BREAK "break"
+%token CONTINUE "continue"
 
 %token <token_type> ID
 %type <string> type_declare
@@ -93,8 +93,8 @@
 
 
 
-%token ASSIGNMENT 
-%token RETURN
+%token ASSIGNMENT "<-"
+%token RETURN "->"
 
 %token INTEGER
 %token REALNUMBER

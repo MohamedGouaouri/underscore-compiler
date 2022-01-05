@@ -60,4 +60,5 @@ parser.pdf
 parser.png
 parser.ps
 parser.dot
+parser.output
 .vscode/*

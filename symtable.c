@@ -97,6 +97,8 @@ void deleteEntry(SymTable *symtable, char *symName)
 
 }
 
+
+
 void set_attr(SymTableNode *entry, char *name, char *val)
 {
     if (entry != NULL)

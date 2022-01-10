@@ -7,6 +7,7 @@
     extern SymTable* symt;
     
     extern _YYSTYPE _yylval;
+    extern char save[50];
 %}
 
 /*Used to get the current line number*/
@@ -164,6 +165,7 @@ INLINECOMMENT #[^_]{ANYTHING}
         _yylval.ident = node; 
     } else {
         _yylval.ident = NULL;
+        strcpy(save, yytext);
     }
     //_yylval.string = yytext;
     //yyerror(yytext);

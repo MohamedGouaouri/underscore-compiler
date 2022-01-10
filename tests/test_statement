@@ -4,17 +4,20 @@
 
  ()_ $_ f(){
 
-    $_ i; 
+    $_ x; 
+    $_ i;
 
-    {}_ teacher {''_ name, ""[]_ modules};
+    {}_ P{ $_x };
+    {}_ G{ $_x };
 
-    $_ wall;
-
-    {}_ student {""_ name, $_ matricule, $_ gpa, _teacher fav};
+    {}_ F {''_ name, ""[]_ modules};
 
     $_wall;
+    
+    {}_ student {""_ name, $_ matricule, $_ gpa, _teacher fav};
 
-    _student s;
+
+    _student s <- f();
 
     s.nam <- "sity";
 
@@ -27,6 +30,10 @@
 
     $_ duplicate <- sumifcond;
 
+    
+}
+
+()_ $_ f() {
     
 }
 

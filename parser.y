@@ -240,7 +240,7 @@ values_eps: %empty
 declare: just_declare
 	   | init_declare
        ;
-struct_fields: type_declare ID { char saveName[255]; strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); set_attr(symt->tail, $1, saveName); }
+struct_fields: type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
 			 | type_declare ID { set_fieldattribute($1); } COMMA struct_fields
              ;
 
@@ -395,16 +395,20 @@ void showLexicalError() {
 
 void set_fieldattribute(char* type) {
     char saveName[255]; 
-    strcpy(saveName, _yylval.ident->symName); 
-    deleteEntry(symt, saveName); 
+
+    if(_yylval.ident == NULL) strcpy(saveName, save); 
+    else { 
+        strcpy(saveName, _yylval.ident->symName); deleteEntryNode(symt, symt->tail); 
+        deleteEntry(symt, saveName); 
+    } 
+    
     set_attr(symt->tail, type, saveName);
 }
 
 void checkif_globalsymbolexists(SymTableNode* currentNode) {
 
-
     if(currentNode == NULL) {
-        yyerror("ID already in use.");
+        //yyerror("ID already in use.");
         return;
     }  
 

@@ -398,7 +398,8 @@ void set_fieldattribute(char* type) {
 
     if(_yylval.ident == NULL) strcpy(saveName, save); 
     else { 
-        strcpy(saveName, _yylval.ident->symName); deleteEntryNode(symt, symt->tail); 
+        strcpy(saveName, _yylval.ident->symName); 
+        deleteEntry(symt, saveName); 
         deleteEntry(symt, saveName); 
     } 
     

@@ -44,7 +44,7 @@ _#
 
 
 
-()_ $[]_ f(""[10]_ param) {
+()_ $[]_ h(""[10]_ param) {
 
     $[4]_ arrayN <- [1, 2];
     $[]_ ar;
@@ -59,13 +59,25 @@ _#
     
     ?[1]_ arrayB;
 
+    ""3_ chaine;
+
     ? (cond1) {
         #break;
     }
     : () {
         #continue;
     }
+
 }
+
+()_ ""6_ y(""10_ param) {
+
+    ""8_ arrayN <- "";
+    ""[]_ ar;
+    
+    
+}
+
 
 #_
 ()_ $_ g($_ sumifcond, $_ sumifcond1, $_ lastresortsum){

@@ -236,6 +236,7 @@ complex_type_declare: NUMBERSYMBOL OPENBRACKET INTEGER CLOSEBRACKET UNDERSCORE {
                     | STRINGSYMBOL OPENBRACKET INTEGER CLOSEBRACKET UNDERSCORE {strcpy($$ , "string array"); saveSize(_yylval.ival); };
                     | IF OPENBRACKET INTEGER CLOSEBRACKET UNDERSCORE {strcpy($$ , "boolean array"); saveSize(_yylval.ival); }
                     | TABLEDECLARE { strcpy($$ , _yylval.type); }
+                    | STRINGSYMBOL INTEGER UNDERSCORE {strcpy($$ , "sized string"); saveSize(_yylval.ival);}
                     ;
 
 just_declare: simple_type_declare ID { setupNewSimpleVariable($1); }

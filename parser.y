@@ -29,6 +29,7 @@
     ast_node* node;
 }
 
+%token UNDERSCORE
 %token ENTRY
 
 %token LOOP "loop"
@@ -42,11 +43,12 @@
 %token CONTINUE "continue"
 
 %token <token_type> ID
-%type <string> type_declare
+%type <string> simple_type_declare
+%type <string> complex_type_declare
 %type <string> just_declare
 %type <string> struct_fields
 %type <string> srt
-%type <string> crt
+//%type <string> crt
 
 %token <string> FUNCTIONDECLARE
 %token <string> NUMBERDECLARE
@@ -55,6 +57,8 @@
 %token <string> BOOLEENDECLARE
 %token <string> STRUCTTYPEDECLARE 
 %token <string> STRUCTDECLARE
+%token NUMBERSYMBOL
+%token STRINGSYMBOL
 %token <string> TABLEDECLARE
 %token <string> POINTERDECLARE
 
@@ -96,7 +100,7 @@
 %token ASSIGNMENT "<-"
 %token RETURN "->"
 
-%token INTEGER
+%token <token_type> INTEGER
 %token REALNUMBER
 %token STRING
 
@@ -138,6 +142,7 @@
     GlobalSymTable* gSymT; //Our global table of symbols
     SymTable* symt;        //Current table of symboles (used by scanner.l as well)
     char save[50];
+    int size = -1;
     int currentColumn = 1;
     int showsuccess = 0;
     
@@ -145,6 +150,7 @@
     ast* tree;
     ast_node* p;
     ast_node* prev;
+
 %}
 
 %%
@@ -156,19 +162,18 @@ underscore: %empty
         | error func {yyerrok;}
         ;
 
-func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
+func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); char str[5]; sprintf(str, "%d", size); if(size!=-1) set_attr(_yylval.ident, "size", str); size=-1; } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
 
 
 ret: %empty {strcpy($$ , "void");}
     | srt // simple return type 
-    | crt // complex return type
+    | complex_type_declare // complex return type
     ; 
     // just for simplicity
 
 
 srt: NUMBERDECLARE {strcpy($$ , _yylval.type); } | STRINGDECLARE {strcpy($$ , _yylval.type); } | BOOLEENDECLARE {strcpy($$ , _yylval.type); } ;
 
-crt: TABLEDECLARE {strcpy($$ , _yylval.type); };
 
 
 params_eps: %empty
@@ -184,8 +189,8 @@ comma_params: %empty
             ;
 
 
-param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); } ;
-
+param: simple_type_declare ID { setupNewSimpleVariable($1); } ;
+     | complex_type_declare ID { setupNewComplexVariable($1); }
 
 
 bloc: statement bloc {yysuccess(1, "Block.");}
@@ -219,16 +224,22 @@ statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");
         ;
 
 
-type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
+simple_type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
 		    | STRINGDECLARE {strcpy($$ , _yylval.type);}
 			| CONSTDECLARE NUMBERDECLARE {strcpy($$ , "nombre constant");}
 			| CONSTDECLARE STRINGDECLARE {strcpy($$ , "chaine constante"); }
 			| BOOLEENDECLARE {strcpy($$ , _yylval.type); }
 			| POINTERDECLARE {strcpy($$ , _yylval.type); }
-			| TABLEDECLARE {strcpy($$ , _yylval.type); }
 			| STRUCTDECLARE {strcpy($$ , _yylval.type); }
             ;
-just_declare: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); }
+complex_type_declare: NUMBERSYMBOL OPENBRACKET INTEGER CLOSEBRACKET UNDERSCORE {strcpy($$ , "number array"); saveSize(_yylval.ival); };
+                    | STRINGSYMBOL OPENBRACKET INTEGER CLOSEBRACKET UNDERSCORE {strcpy($$ , "string array"); saveSize(_yylval.ival); };
+                    | IF OPENBRACKET INTEGER CLOSEBRACKET UNDERSCORE {strcpy($$ , "boolean array"); saveSize(_yylval.ival); }
+                    | TABLEDECLARE { strcpy($$ , _yylval.type); }
+                    ;
+
+just_declare: simple_type_declare ID { setupNewSimpleVariable($1); }
+            | complex_type_declare ID { setupNewComplexVariable($1); }
             ;
 init_declare: just_declare ASSIGNMENT expression 
             | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
@@ -238,10 +249,11 @@ values_eps: %empty
           ;
             
 declare: just_declare
-	   | init_declare
+	   | init_declare 
        ;
-struct_fields: type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
-			 | type_declare ID { set_fieldattribute($1); } COMMA struct_fields
+struct_fields: simple_type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
+			 | simple_type_declare ID { set_fieldattribute($1); } COMMA struct_fields
+             | complex_type_declare ID { yyerror("Complex types aren't allowed within structs."); }
              ;
 
 assign: var_exp ASSIGNMENT expression
@@ -293,22 +305,20 @@ expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
 
 
 
-const :  INTEGER {
-                printf("%d\n", _yylval.ival);
-            }
+const :    INTEGER 
 	    |  REALNUMBER
         |  STRING
         |  TRUE
-        | FALSE
+        |  FALSE
         ;
 
 variable : var_exp
-	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
-	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
+	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} call_param CLOSEPARENTHESIS {yysuccess(1, "EXPRESSION : FUNCTION CALL");}
+	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} CLOSEPARENTHESIS {yysuccess(1, "EXPRESSION : FUNCTION CALL");}
 	;
 
 var_exp : var
-	| ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
+	| ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression CLOSEBRACKET {yysuccess(1, "EXPRESSION : ARRAY ACCESS");}
 	;
 
 accessfield: ID { char fieldnameCopy[50]; strcpy(fieldnameCopy, symt->tail->symName); checkif_fieldisvalid(save, fieldnameCopy); deleteEntry(symt, symt->tail->symName); }
@@ -478,4 +488,28 @@ void checkif_fieldisvalid(char precedent[50], char fieldname[50]) { /*Works with
 
 }
 
+void saveSize(int ival) {
+    size=ival; 
+    if(size<0) { 
+        yyerror("The size of an array needs to be a positive integer."); 
+        size=-1; 
+    }
+}
+
+
+void setupNewSimpleVariable(char type[255]) {
+    if(_yylval.ident == NULL) yyerror("ID already declared!"); 
+    else set_attr(_yylval.ident, "type", type);
+}
+
+void setupNewComplexVariable(char type[255]) {
+    if(_yylval.ident == NULL) yyerror("ID already declared!"); 
+    else { 
+        set_attr(_yylval.ident, "type", type); 
+        char str[5];
+        sprintf(str, "%d", size); 
+        if(size!=-1) set_attr(_yylval.ident, "size", str); 
+        size=-1; 
+    }
+}
 

@@ -8,6 +8,8 @@
     
     extern _YYSTYPE _yylval;
     extern char save[50];
+    
+    
 %}
 
 /*Used to get the current line number*/
@@ -91,7 +93,12 @@ BOOLEENDECLARE \?{UNDERSCORE}
 STRUCTTYPEDECLARE \{\}{UNDERSCORE}
 STRUCTDECLARE {UNDERSCORE}{ID}
 POINTERDECLARE ((\@)+)(({STRUCTDECLARE})|({NUMBERDECLARE}|{STRINGDECLARE}|{CONSTDECLARE}|{BOOLEENDECLARE}))
-TABLEDECLARE ((\@)*)((\$)|((\"\")|(\'\'))|(\~)|(\?)|(\{\}))((\[\])+){UNDERSCORE}
+
+NUMBERSYMBOL (\$)
+STRINGSYMBOL (\"\")
+
+/*sizeless array*/
+TABLEDECLARE ((\@)*)((\$)|((\"\")|(\'\'))|(\~)|(\?)|(\{\}))((\[\])+){UNDERSCORE} 
 
 /*Pointers*/
 ADDRESSVALUE &
@@ -103,7 +110,10 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 %%
 
-
+{UNDERSCORE} {
+    yysuccess(0,"Stray underscore");
+    return UNDERSCORE;
+}
 
 {LOOP} {
     yysuccess(0,"LOOP");
@@ -126,7 +136,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 {IF} {
-    yysuccess(0,"IF condition");
+    yysuccess(0,"IF condition / Boolean symbol");
     return IF;
 }
 
@@ -311,28 +321,6 @@ INLINECOMMENT #[^_]{ANYTHING}
     return RETURN;
 }
 
-
-
-{INTEGER} {
-    yysuccess(0, "constant INTEGER");
-    _yylval.ival = atoi(yytext);
-    return INTEGER;
-}
-
-{REALNUMBER} {
-    yysuccess(0, "constant REALNUMBER");
-    _yylval.rval = strtod(yytext, NULL);
-    return REALNUMBER;
-}
-
-
-{STRING} {
-    yysuccess(0, "constant STRING");
-    _yylval.string = yytext;
-    return STRING;
-} 
-
-
 {FUNCTIONDECLARE} {
     yysuccess(0, "FUNCTION declaration");
 
@@ -388,12 +376,23 @@ INLINECOMMENT #[^_]{ANYTHING}
     return POINTERDECLARE;
 }
 
+{NUMBERSYMBOL} {
+    yysuccess(0, "Number symbol");
+    return NUMBERSYMBOL;
+}
+
+{STRINGSYMBOL} {
+    yysuccess(0, "String symbol");
+    return STRINGSYMBOL;
+}
+
 {TABLEDECLARE} {
     yysuccess(0, "TABLE declaration");
 
     strcpy(_yylval.type, "array");
     return TABLEDECLARE;
 }
+
 
 {ADDRESSVALUE} {
     yysuccess(0,"ADDRESS value");
@@ -404,6 +403,27 @@ INLINECOMMENT #[^_]{ANYTHING}
     yysuccess(0,"POINTER value");
     return POINTERVALUE;
 }
+
+
+{INTEGER} {
+    yysuccess(0, "constant INTEGER");
+    _yylval.ival = atoi(yytext);
+    return INTEGER;
+}
+
+{REALNUMBER} {
+    yysuccess(0, "constant REALNUMBER");
+    _yylval.rval = strtod(yytext, NULL);
+    return REALNUMBER;
+}
+
+
+{STRING} {
+    yysuccess(0, "constant STRING");
+    _yylval.string = yytext;
+    return STRING;
+} 
+
 
 
 {INLINECOMMENT} {;}

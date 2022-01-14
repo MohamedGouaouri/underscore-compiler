@@ -43,13 +43,25 @@ static const char * const quadruplets_operators_names[] = {
         [ARRAY_INDEX] = "[]"
 };
 
+enum operandCategory { Empty, Variable, Integers, Labels };
+union operandValue {
+    int empty;
+    char variable[255];
+    int integer;
+    char label[255];
+    void *p;
+};
+typedef struct operand {
+    enum operandCategory category;
+    union operandValue value;
+} operand;
 
 typedef struct quadruplets_node
 {
     int label;
     char* operator ;
-    char op1[255];
-    char op2[255];
+    operand* op1;
+    operand* op2;
     int* Tampon ; // Address to the tompon in their symtables
     struct quadruplets_node* next;
 
@@ -66,13 +78,58 @@ typedef struct quadruplets_table{
 //void modify_quadruplet (quadruplets_table quadrupletsTable);
 //quadruplets_table* allocate_quadruplets_table();
 //void print_quadruplets_table(quadruplets_table* quadrupletsTable);
+union operandValue* create_operand_value(){
+    union operandValue* operand_value = (union  operandValue*)malloc(sizeof( union operandValue));
+    return operand_value;
+}
 
-quadruplets_node* create_quadruplet(int label,char operator[255]  ,char op1[255],char op2[255],int* Tampon){
+operand* create_operand(enum operandCategory category , union  operandValue* value){
+    operand* new_operand = (operand *)malloc(sizeof(operand));
+    new_operand->category = category;
+    switch (category) {
+        case Empty:
+            new_operand->value.empty = 1;
+            break;
+        case Variable:
+            strcpy(new_operand->value.variable , value->variable);
+            break;
+        case Integers:
+            new_operand->value.integer = value->integer;
+            break;
+        case Labels:
+            strcpy(new_operand->value.label, value->label);
+            break;
+        default:
+            break;
+    }
+    return new_operand;
+}
+
+void print_operand( operand* the_operand){
+    switch (the_operand->category) {
+        case Empty:
+            printf(" ,");
+            break;
+        case Variable:
+            printf("%s ,", the_operand->value.variable);
+            break;
+        case Integers:
+            printf("%d ,", the_operand->value.integer);
+            break;
+        case Labels:
+            printf("%s ,", the_operand->value.label);
+            break;
+        default:
+            break;
+    }
+}
+
+quadruplets_node* create_quadruplet(int label,char operator[255]  ,operand* op1 ,operand*  op2,int* Tampon){
     quadruplets_node* quadrupletsNode = (quadruplets_node *)malloc(sizeof(quadruplets_node));
     quadrupletsNode->label=label;
     quadrupletsNode->operator=operator;
-    strcpy(quadrupletsNode->op1, op1);
-    strcpy(quadrupletsNode->op2 , op2);
+    quadrupletsNode->op1 = op1;
+    quadrupletsNode->op2 = op2;
     quadrupletsNode->Tampon = Tampon;
     quadrupletsNode->next = NULL;
     return quadrupletsNode;
@@ -113,8 +170,13 @@ void *add_quadruplet(quadruplets_table** quadrupletsTable , quadruplets_node* qu
 }
 
 void print_quadruplets_node(quadruplets_node* quadrupletsNode){
-    printf(" %d - ( %s , %s , %s , %d )\n" , quadrupletsNode->label , quadrupletsNode->operator , quadrupletsNode->op1 , quadrupletsNode->op2 , *quadrupletsNode->Tampon);
+    printf(" %d - ( %s , ", quadrupletsNode->label, quadrupletsNode->operator);
+    print_operand(quadrupletsNode->op1);
+    print_operand(quadrupletsNode->op2);
+    printf(" %d )\n" , *quadrupletsNode->Tampon);
 }
+
+
 
 void print_quadruplets_table(quadruplets_table* quadrupletsTable){
     quadruplets_node *p = quadrupletsTable->root;

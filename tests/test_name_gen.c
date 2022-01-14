@@ -3,12 +3,12 @@
 
 int main(int argc, char const *argv[])
 {
-    printf("%s\n", gentemp());
-    printf("%s\n", gentemp());
-    printf("%s\n", gentemp());
-    printf("%s\n", genlabel());
-    printf("%s\n", genlabel());
+    printf("%d\n", nextaddress());
+    printf("%d\n", nextaddress());
+    printf("%d\n", nextaddress());
+    printf("%d\n", nextaddress());
+    printf("%d\n", nextaddress());
 
-    printf("%s\n", genlabel());
+    printf("%d\n", nextaddress());
     return 0;
 }

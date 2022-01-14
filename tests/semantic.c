@@ -33,3 +33,10 @@ char *genlabel()
     id = id + 1;
     return strncat(base_name, num_str, MAXSTRING);
 }
+
+int nextaddress()
+{
+    static int id;
+    id++;
+    return id;
+}

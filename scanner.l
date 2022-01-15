@@ -146,7 +146,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 }
 
 {TRUE} {
-    yysuccess(0,"TRUE continue");
+    yysuccess(0,"TRUE");
     return TRUE;
 }
 
@@ -164,6 +164,7 @@ INLINECOMMENT #[^_]{ANYTHING}
         node = insertNewEntry(symt, ID, yytext);
         _yylval.ident = node; 
     } else {
+        // symbol exists;
         _yylval.ident = NULL;
         strcpy(save, yytext);
     }

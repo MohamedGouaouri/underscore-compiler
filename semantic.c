@@ -40,3 +40,44 @@ int nextaddress()
     id++;
     return id;
 }
+
+struct jump_indices *makelist(int i)
+{
+    struct jump_indices *list = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+    list->index = i;
+    list->next = NULL;
+    return list;
+}
+
+struct jump_indices *merge(struct jump_indices *q1, struct jump_indices *q2)
+{
+    if (q1 != NULL)
+    {
+        struct jump_indices *prev = q1;
+        struct jump_indices *ptr = q1;
+        while (ptr->next != NULL)
+        {
+            prev = ptr;
+            ptr = ptr->next;
+        }
+        prev->next = q2;
+    }
+    return q1;
+}
+
+void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int to)
+{
+    // update by index
+
+    if (to <= length)
+    {
+
+        while (q != NULL)
+        {
+            int where = q->index;
+            quads[where].op1->value.label = to;
+            printf("WHERE: %d\n", where);
+            q = q->next;
+        }
+    }
+}

@@ -1,7 +1,7 @@
 # We'll use an id whenever we need to fill the space of an expression
 # ends of if statements (elif) not detected properly (either a little too late or a little too early)
 
-
+#_
  ()_ $_ f(){
 
     $_ x; 
@@ -32,10 +32,13 @@
 
     
 }
+_#
 
+#_
 ()_ $_ f() {
     
 }
+_#
 
 #_
 ()_ $_ g($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
@@ -95,8 +98,16 @@
    
 }
 _#
-#_
+
 ()_ f($_ i){
-    $_ s <- 10 + 11;
+    $_ x;
+    $_ y;
+    $_ z;
+    x <- 55 + 10;
+    y <- x - 30;
+    z <- x * y;
+    $_ f;
+    ? (true) {
+        f <- z / 5;
+    }
 }
-_#

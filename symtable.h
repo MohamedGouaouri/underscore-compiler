@@ -37,7 +37,6 @@ typedef struct SymTable
     int currentSize;
 } SymTable;
 
-
 SymTable *allocateSymTable();                                                 // Allocate new sym table
 SymTableNode *insertNewEntry(SymTable *symtable, int symType, char *symName); // insert new row
 SymTableNode *lookup(SymTable *symtable, char *symName);                      // row based search
@@ -65,26 +64,27 @@ SymTableNode *insertEntryByIndex(SymTable *symtable, int index, int symType);
 
 SymTableNode *getEntryByIndex(SymTable *symtable, int index);
 
+// get the index of a specific symbol
+int getIndexOfSym(SymTable *symtable, char *name);
 
 typedef struct GlobalSymTableNode
 {
     SymTable *symTable;
-    //ptr to ast
-    struct GlobalSymTableNode *next; 
+    // ptr to ast
+    struct GlobalSymTableNode *next;
 } GlobalSymTableNode;
 
 // Global symtable (linked link of symtables (each symtable concerns one function))
 typedef struct GlobalSymTable
 {
-    GlobalSymTableNode* head;
-    GlobalSymTableNode* tail;
+    GlobalSymTableNode *head;
+    GlobalSymTableNode *tail;
     int currentSize;
 } GlobalSymTable;
 
-GlobalSymTable *allocateGlobalSymTable();                                                 // Allocate new global symtable
+GlobalSymTable *allocateGlobalSymTable();                                                // Allocate new global symtable
 GlobalSymTableNode *insertNewGlobalEntry(GlobalSymTable *gSymTable, SymTable *symTable); // insert new row
-GlobalSymTableNode *lookupGlobal(GlobalSymTable *gSymTable, char *functionName);                      // row based search 
+GlobalSymTableNode *lookupGlobal(GlobalSymTable *gSymTable, char *functionName);         // row based search
 void freeUpGlobalSymTable(GlobalSymTable *gSymTable);
-
 
 #endif

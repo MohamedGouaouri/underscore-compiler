@@ -18,15 +18,18 @@
     #include <stdlib.h>
     #include <string.h>
     #include "symtable.h"
-    #include "ast.h"
     #include "misc.h"
     #include "ast.h"
+    #include "semantic.h"
 }
 
 %union {
     char string[255];
+
     int token_type;
-    ast_node* node;
+    struct boolean_expression boolean_expression;
+    struct expression expression;
+    struct statement statement;
 }
 
 %token ENTRY
@@ -41,7 +44,7 @@
 %token BREAK "break"
 %token CONTINUE "continue"
 
-%token <token_type> ID
+%token <string> ID
 %type <string> type_declare
 %type <string> just_declare
 %type <string> struct_fields
@@ -103,6 +106,12 @@
 %token TRUE
 %token FALSE
 
+// special token
+%type <token_type> M;
+%type <statement> statement bloc ifstmt;
+%type <expression> expression;
+
+
 // Lof
 //Comparison
 %left COMMA
@@ -142,9 +151,15 @@
     int showsuccess = 0;
     
     _YYSTYPE _yylval;
-    ast* tree;
-    ast_node* p;
-    ast_node* prev;
+
+    /* Set of instruction of the current statement */
+    quadruplets_node quads[MAXCODE];
+    int currentInstruction = 0;
+
+    // temp name storage just for testing
+    // cuz they must be stored in the semtable
+    char tempnames[255][255]; int indicator;
+
 %}
 
 %%
@@ -156,7 +171,18 @@ underscore: %empty
         | error func {yyerrok;}
         ;
 
-func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
+func: FUNCTIONDECLARE ret ID { 
+        _yylval.ident->symType = FUNCTIONDECLARE; 
+        set_attr(_yylval.ident, "typeretour", $<string>2); 
+        } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { 
+            insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();
+            yysuccess(1,"function ended.");
+            for(int i = 0; i < currentInstruction; i++){
+                print_quadruplets_node(&quads[i]);
+            }
+            printf("NB INST: %d\n", currentInstruction);
+            print_tempnames();
+        }
 
 
 ret: %empty {strcpy($$ , "void");}
@@ -188,22 +214,67 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!
 
 
 
-bloc: statement bloc {yysuccess(1, "Block.");}
-     | %empty {yysuccess(1, "Emptyness.");} 
+bloc: bloc M statement  {
+            yysuccess(1, "Block.");
+           if ($1.nextlist != NULL){
+                backpatch(quads, currentInstruction+1, $3.nextlist, $2);
+                $$.nextlist = $3.nextlist;
+           }
+        }
+     | %empty {
+        /*yysuccess(1, "Emptyness.");*/
+     } 
      | error bloc {yyerror("wrong statement inside block."); yyerrok;}
      ;
 
-statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");}
-		| STRUCTTYPEDECLARE ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else { _yylval.ident->symType = STRUCTTYPEDECLARE; set_attr(_yylval.ident, "type", "typestruct"); yysuccess(1,"Déclaration d'un type structure.");}} OPENHOOK struct_fields CLOSEHOOK SEMICOLON 
-		| assign SEMICOLON {yysuccess(1, "Assignment.");}
-        | LOOP OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "while loop.");}
+statement: declare SEMICOLON {
+            /*yysuccess(1, "Simple declaration / with assign.");*/
+        
+        }
+		| STRUCTTYPEDECLARE ID { 
+            if(_yylval.ident == NULL) yyerror("ID already declared!"); 
+            else { 
+                _yylval.ident->symType = STRUCTTYPEDECLARE; 
+                set_attr(_yylval.ident, "type", "typestruct"); 
+                /*yysuccess(1,"Déclaration d'un type structure.");*/
+            }
+
+        } OPENHOOK struct_fields CLOSEHOOK SEMICOLON
+
+		| assign SEMICOLON {
+            /*yysuccess(1, "Assignment.");*/
+
+        }
+        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc {
+            backpatch(quads, currentInstruction+1, $8.nextlist, $2);
+            // backpatch(quads, currentInstruction+1, $4.truelist, $7);
+            // $8.nextlist = $4.falselist;
+            // union operandValue* operand1 = create_operand_value();
+            // union operandValue* operand2 = create_operand_value();
+            // operand1->label = $2;
+            // operand2->empty = 1;
+
+            //  // gen quad
+            // int x = -1;
+            // quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+            //                                    create_operand(Labels , operand1), create_operand(Empty , operand2), &x);
+            // quads[currentInstruction] = *quad;
+            // currentInstruction++;
+        }CLOSEHOOK {
+            
+
+        }
 		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with assignment.");}
 		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with declaration+assignment.");}
-        | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;} 
+        /* | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;}  */
         
         
-        | ifstmt {yysuccess(1,"Simplest if statement.");}
-		| ifstmt elsestmt {yysuccess(1,"If else statement.");}
+        | ifstmt {
+            /*yysuccess(1,"Simplest if statement.");*/
+        }
+		| ifstmt elsestmt {
+
+        }
 		| ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
 		| ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}
 
@@ -218,7 +289,6 @@ statement: declare SEMICOLON {yysuccess(1, "Simple declaration / with assign.");
         | error SEMICOLON {yyerror("wrong statement"); yyerrok;}
         ;
 
-
 type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
 		    | STRINGDECLARE {strcpy($$ , _yylval.type);}
 			| CONSTDECLARE NUMBERDECLARE {strcpy($$ , "nombre constant");}
@@ -228,7 +298,10 @@ type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
 			| TABLEDECLARE {strcpy($$ , _yylval.type); }
 			| STRUCTDECLARE {strcpy($$ , _yylval.type); }
             ;
-just_declare: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); }
+just_declare: type_declare ID { 
+                if(_yylval.ident == NULL) yyerror("ID already declared!"); 
+                else set_attr(_yylval.ident, "type", $1);
+            }
             ;
 init_declare: just_declare ASSIGNMENT expression 
             | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
@@ -244,12 +317,62 @@ struct_fields: type_declare ID { char saveName[255];   if(_yylval.ident == NULL)
 			 | type_declare ID { set_fieldattribute($1); } COMMA struct_fields
              ;
 
-assign: var_exp ASSIGNMENT expression
+// TODO change this to var_exp
+assign: ID {
+            // strcpy($<string>$ , _yylval.ident->symName);
+            char saveName[255];   
+            if(_yylval.ident == NULL) { 
+                strcpy($<string>$, save); 
+            } else { 
+                strcpy($<string>$, _yylval.ident->symName);
+            }
+            
+        } ASSIGNMENT expression {
+            if (!$4.is_boolean){
+                union operandValue* operand1_val = create_operand_value();
+                union operandValue* operand2_val = create_operand_value();
+                union operandValue* result_val = create_operand_value();
+                
+                operand* operand1;
+                operand* operand2;
+                operand* result;
+                
+                // operand1 management
+                if ($4.arithmetic_expression.is_litteral){
+                    operand1_val->integer = $4.arithmetic_expression.value;
+                    operand1 = create_operand(Integers , operand1_val);
+                }else{
+                    // strcpy(operand1_val->variable, $4.arithmetic_expression.sym);
+                    // fetch symbole from symtable normally
+                    strcpy(operand1_val->variable, tempnames[indicator-1]);
+                    operand1 = create_operand(Variable , operand1_val);
+                }
+                operand2_val->empty = true; // or 1
+                operand2 = create_operand(Empty , operand1_val);
+
+                strcpy(result_val->variable, $<string>2);
+                printf("ID: %s\n", $<string>2);
+                result = create_operand(Variable, result_val);
+
+
+                quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[AFFECT],
+                                                    operand1, operand2, result);
+                quads[currentInstruction] = *quad;
+                currentInstruction++;
+            }
+      }
 	  | ADDRESSVALUE var ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"if stmt.");}
+ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+            // yysuccess(1,"if stmt.");
+            // Check if <expression> is boolean, otherwise throw a semantic error
+
+            backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
+            $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+
+        }
       | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;} 
       ;
 elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif stmt.");}
@@ -264,43 +387,348 @@ call_param: expression
 
 
 //General formula for experession
-expression: OPENPARENTHESIS expression CLOSEPARENTHESIS
+expression: 
+    OPENPARENTHESIS expression CLOSEPARENTHESIS {
+        if ($2.is_boolean){
+            $$.is_boolean = true;
+            $$.boolean_expression.falselist = $2.boolean_expression.falselist;
+            $$.boolean_expression.truelist = $2.boolean_expression.truelist;
+
+        }
+    }
+
     | OPENPARENTHESIS error CLOSEPARENTHESIS
-	| NON expression
+	| NON expression {
+        if ($2.is_boolean){
+            $$.is_boolean = true;
+            $$.boolean_expression.truelist = $2.boolean_expression.falselist;
+            $$.boolean_expression.falselist = $2.boolean_expression.truelist;
+
+        }
+    }
 	| POINTERVALUE var_exp
 	| ADDRESSVALUE var_exp
 
-	| expression EQUAL expression
-    | expression NONEQUAL expression
-    | expression OR expression
-    | expression AND expression
+    | expression OR M expression{
+        
+        if ($1.is_boolean && $4.is_boolean){
+            $$.is_boolean = true;
+            backpatch(quads ,currentInstruction+1, $1.boolean_expression.falselist, $3);
+            $$.boolean_expression.truelist = merge($1.boolean_expression.truelist, $4.boolean_expression.truelist);
+            $$.boolean_expression.falselist = $4.boolean_expression.falselist;
+        }
+    }
+    | expression AND M expression {
+        if ($1.is_boolean && $4.is_boolean){
+            $$.is_boolean = true;
+            backpatch(quads, currentInstruction+1,$1.boolean_expression.truelist, $3);
+            $$.boolean_expression.truelist = $4.boolean_expression.truelist;
+            $$.boolean_expression.falselist = merge($1.boolean_expression.falselist, $4.boolean_expression.falselist);
+        }
 
-    | expression INFERIOR expression
-    | expression INFERIOREQUAL expression
-    | expression SUPERIOR expression
-    | expression SUPERIOREQUAL expression
 
-    | expression ADD expression
-    | expression SUB expression
-    | expression MULT expression
-    | expression DIV expression
-    | expression MOD expression
-    | expression POWER expression
+    }
+    | expression EQUAL expression{
+        if (!$1.is_boolean && !$3.is_boolean){
+        //     $$.is_boolean = true;
+        //     expression.boolean_expression.truelist = makelist(currentInstruction);
+        //     expression.boolean_expression.falselist = makelist(currentInstruction+1);
 
-	| const
-	| variable
+        //     union operandValue* operand1_val = create_operand_value();
+        //     union operandValue* operand2_val = create_operand_value();
+        
+        //     operand* operand1;
+        //     operand* operand2;
+        
+        //     // operand1 management
+        //     if ($1.arithmetic_expression.is_litteral){
+        //         operand1_val->integer = $1.arithmetic_expression.value;
+        //         operand1 = create_operand(Integers , operand1_val);
+        //     }else{
+        //         strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+        //         operand1 = create_operand(Variable , operand1_val);
+        //     }
+        //     // operand2 management
+        //     if ($3.arithmetic_expression.is_litteral){
+        //         operand2_val->integer = $3.arithmetic_expression.value;
+        //         operand2 = create_operand(Integers , operand2_val);
+        //     }else{
+        //         strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+        //         operand2 = create_operand(Variable , operand2_val);
+        //     }
+        // //     int x = indicator;
+
+        // // strcpy(tempnames[indicator], gentemp());
+
+        // quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[DIVIDE],
+        //                                        operand1, operand2, );
+        
+        // // indicator++;
+        // quads[currentInstruction] = *quad;
+        // currentInstruction++;
+
+        }
+    }
+    | expression NONEQUAL expression{
+        if (!$1.is_boolean && !$3.is_boolean){
+            $$.is_boolean = true;
+            $$.boolean_expression.truelist = makelist(currentInstruction);
+            $$.boolean_expression.falselist = makelist(currentInstruction+1);
+        }
+    }
+
+    | expression INFERIOR expression {
+        if (!$1.is_boolean && !$3.is_boolean){
+            $$.is_boolean = true;
+            $$.boolean_expression.truelist = makelist(currentInstruction);
+            $$.boolean_expression.falselist = makelist(currentInstruction+1);
+        }
+    }
+    | expression INFERIOREQUAL expression{
+        if (!$1.is_boolean && !$3.is_boolean){
+            $$.is_boolean = true;
+        }
+
+    }
+    | expression SUPERIOR expression {
+        if (!$1.is_boolean && !$3.is_boolean){
+            $$.is_boolean = true;
+        }
+
+    }
+    | expression SUPERIOREQUAL expression{
+        if (!$1.is_boolean && !$3.is_boolean){
+            $$.is_boolean = true;
+        }
+
+    }
+
+    // Arithmetic expressions
+    | expression ADD expression {
+
+        $$.is_boolean = false;
+        union operandValue* operand1_val = create_operand_value();
+        union operandValue* operand2_val = create_operand_value();
+        union operandValue* result_val = create_operand_value();
+        
+        operand* operand1;
+        operand* operand2;
+        operand* result;
+        
+        // operand1 management
+        if ($1.arithmetic_expression.is_litteral){
+            operand1_val->integer = $1.arithmetic_expression.value;
+            operand1 = create_operand(Integers , operand1_val);
+        }else{
+            strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+            operand1 = create_operand(Variable , operand1_val);
+        }
+        // operand2 management
+        if ($3.arithmetic_expression.is_litteral){
+            operand2_val->integer = $3.arithmetic_expression.value;
+            operand2 = create_operand(Integers , operand2_val);
+        }else{
+            strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+            operand2 = create_operand(Variable , operand2_val);
+        }
+        strcpy(tempnames[indicator], gentemp());
+        
+        strcpy(result_val->variable, tempnames[indicator]);
+        result = create_operand(Variable, result_val);
+        // int x = indicator;
+        
+
+
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[PLUS],
+                                               operand1, operand2, result);
+        
+        indicator++;
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+
+    }
+    | expression SUB expression {
+        $$.is_boolean = false;
+        union operandValue* operand1_val = create_operand_value();
+        union operandValue* operand2_val = create_operand_value();
+        union operandValue* result_val = create_operand_value();
+        
+        operand* operand1;
+        operand* operand2;
+        operand* result;
+        
+        // operand1 management
+        if ($1.arithmetic_expression.is_litteral){
+            operand1_val->integer = $1.arithmetic_expression.value;
+            operand1 = create_operand(Integers , operand1_val);
+        }else{
+            strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+            operand1 = create_operand(Variable , operand1_val);
+        }
+        // operand2 management
+        if ($3.arithmetic_expression.is_litteral){
+            operand2_val->integer = $3.arithmetic_expression.value;
+            operand2 = create_operand(Integers , operand2_val);
+        }else{
+            strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+            operand2 = create_operand(Variable , operand2_val);
+        }
+        strcpy(tempnames[indicator], gentemp());
+        
+        strcpy(result_val->variable, tempnames[indicator]);
+        result = create_operand(Variable, result_val);
+
+
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[MINUS],
+                                               operand1, operand2, result);
+        indicator++;
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+
+    }
+    | expression MULT expression {
+        $$.is_boolean = false;
+        union operandValue* operand1_val = create_operand_value();
+        union operandValue* operand2_val = create_operand_value();
+        union operandValue* result_val = create_operand_value();
+        
+        operand* operand1;
+        operand* operand2;
+        operand* result;
+        
+        // operand1 management
+        if ($1.arithmetic_expression.is_litteral){
+            operand1_val->integer = $1.arithmetic_expression.value;
+            operand1 = create_operand(Integers , operand1_val);
+        }else{
+            strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+            operand1 = create_operand(Variable , operand1_val);
+        }
+        // operand2 management
+        if ($3.arithmetic_expression.is_litteral){
+            operand2_val->integer = $3.arithmetic_expression.value;
+            operand2 = create_operand(Integers , operand2_val);
+        }else{
+            strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+            operand2 = create_operand(Variable , operand2_val);
+        }
+        strcpy(tempnames[indicator], gentemp());
+        
+        strcpy(result_val->variable, tempnames[indicator]);
+        result = create_operand(Variable, result_val);
+
+
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[MULTIPLY],
+                                               operand1, operand2, result);
+        indicator++;
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+    }
+    | expression DIV expression {
+        $$.is_boolean = false;
+        union operandValue* operand1_val = create_operand_value();
+        union operandValue* operand2_val = create_operand_value();
+        union operandValue* result_val = create_operand_value();
+        
+        operand* operand1;
+        operand* operand2;
+        operand* result;
+        
+        // operand1 management
+        if ($1.arithmetic_expression.is_litteral){
+            operand1_val->integer = $1.arithmetic_expression.value;
+            operand1 = create_operand(Integers , operand1_val);
+        }else{
+            strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+            operand1 = create_operand(Variable , operand1_val);
+        }
+        // operand2 management
+        if ($3.arithmetic_expression.is_litteral){
+            operand2_val->integer = $3.arithmetic_expression.value;
+            operand2 = create_operand(Integers , operand2_val);
+        }else{
+            strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+            operand2 = create_operand(Variable , operand2_val);
+        }
+        strcpy(tempnames[indicator], gentemp());
+        
+        strcpy(result_val->variable, tempnames[indicator]);
+        result = create_operand(Variable, result_val);
+
+
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[DIVIDE],
+                                               operand1, operand2, result);
+        indicator++;
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+    }
+
+    // Frozen for the moment since we don't have quad ops for these high level operations
+    | expression MOD expression {
+        $$.is_boolean = false;
+
+    }
+    | expression POWER expression {
+        $$.is_boolean = false;
+
+    }
+/* 
+	| const */
+	/* | variable */
+    | TRUE {
+        $$.is_boolean = true;
+        $$.boolean_expression.truelist = makelist(currentInstruction);
+        union operandValue* operand1 = create_operand_value();
+        union operandValue* operand2 = create_operand_value();
+        union operandValue* result = create_operand_value();
+        operand1->label = -1;
+        operand2->empty = 1;
+        result->empty = 1;
+        // int x = -1;
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                               create_operand(Labels , operand1), create_operand(Empty , operand2), result);
+        
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+    }
+    | FALSE {
+        $$.is_boolean = true;
+        $$.boolean_expression.falselist = makelist(currentInstruction);
+        union operandValue* operand1 = create_operand_value();
+        union operandValue* operand2 = create_operand_value();
+        union operandValue* result = create_operand_value();
+        operand1->label = -1;
+        operand2->empty = 1;
+        result->empty = 1;
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                               create_operand(Labels , operand1), create_operand(Empty , operand2), result);
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+    }
+    | INTEGER {
+        $$.arithmetic_expression.is_litteral = true;
+        $$.arithmetic_expression.value  = _yylval.ival;
+    }
+    | ID {
+        checkif_localsymbolexists(_yylval.ident);
+        $$.arithmetic_expression.is_litteral = false;
+        if(_yylval.ident == NULL) {
+             strcpy($$.arithmetic_expression.sym, save); 
+        } else { 
+            strcpy($$.arithmetic_expression.sym, _yylval.ident->symName); 
+        }
+        
+    }
 	;
 
 
 
-const :  INTEGER {
+/* const :  INTEGER {
                 printf("%d\n", _yylval.ival);
             }
 	    |  REALNUMBER
         |  STRING
-        |  TRUE
-        | FALSE
-        ;
+        ; */
 
 variable : var_exp
 	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
@@ -318,6 +746,11 @@ var: ID {checkif_localsymbolexists(_yylval.ident);}
    | ID {checkif_localsymbolexists(_yylval.ident); strcpy(save, symt->tail->symName);} DOT accessfield
    ;
 
+
+
+M: %empty{
+    $$ = currentInstruction;
+};
 %%
 
 
@@ -479,3 +912,11 @@ void checkif_fieldisvalid(char precedent[50], char fieldname[50]) { /*Works with
 }
 
 
+void print_tempnames(){
+    int i = 0;
+    printf("Temporary names with %d entries: \n", indicator);
+    while(i < indicator){
+        printf("(%d, %s)\n", i, tempnames[i]);
+        i++;
+    }
+}

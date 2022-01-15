@@ -58,7 +58,6 @@ SymTableNode *insertNewEntry(SymTable *symtable, int symType, char *symName)
     }
 }
 
-
 SymTableNode *lookup(SymTable *symtable, char *symName)
 {
     SymTableNode *root = symtable->root;
@@ -74,30 +73,31 @@ SymTableNode *lookup(SymTable *symtable, char *symName)
     return p;
 }
 
-void deleteEntry(SymTable *symtable, char *symName) 
+void deleteEntry(SymTable *symtable, char *symName)
 {
-    SymTableNode* node_todelete = lookup(symtable, symName);
+    SymTableNode *node_todelete = lookup(symtable, symName);
 
-    if(node_todelete == NULL) return;
+    if (node_todelete == NULL)
+        return;
 
     SymTableNode *p = symtable->root, *previous, *next;
     next = node_todelete->next;
-    while( p != NULL ) {
-        if (p->next == node_todelete) {
-            previous = p; 
+    while (p != NULL)
+    {
+        if (p->next == node_todelete)
+        {
+            previous = p;
             break;
         }
         p = p->next;
     }
 
     previous->next = next;
-    if(symtable->tail == node_todelete) symtable->tail = previous;
+    if (symtable->tail == node_todelete)
+        symtable->tail = previous;
     freeUpEntryAttr(node_todelete);
     free(node_todelete);
-
 }
-
-
 
 void set_attr(SymTableNode *entry, char *name, char *val)
 {
@@ -346,8 +346,8 @@ bool globalsymbol_exists(GlobalSymTable *gSymTable, char *symName)
     return lookup(gSymTable, symName) == NULL ? false : true;
 }
 
-                /** Global SymTable **/
-    
+/** Global SymTable **/
+
 GlobalSymTable *allocateGlobalSymTable()
 {
     GlobalSymTable *gSymTable = (GlobalSymTable *)malloc(sizeof(GlobalSymTable));
@@ -397,14 +397,13 @@ GlobalSymTableNode *insertNewGlobalEntry(GlobalSymTable *gSymTable, SymTable *sy
     }
 }
 
-
 GlobalSymTableNode *lookupGlobal(GlobalSymTable *gSymTable, char *functionName)
 {
     GlobalSymTableNode *head = gSymTable->head;
     GlobalSymTableNode *p = head;
     while (p != NULL)
     {
-        if ( strcmp(p->symTable->root->symName, functionName) == 0)
+        if (strcmp(p->symTable->root->symName, functionName) == 0)
         {
             return p;
         }
@@ -431,7 +430,6 @@ void freeUpGlobalSymTable(GlobalSymTable *gSymTable)
     gSymTable->currentSize--;
 }
 
-
 void printGlobalSymTable(GlobalSymTable *gSymTable)
 {
     GlobalSymTableNode *current = gSymTable->head;
@@ -442,4 +440,21 @@ void printGlobalSymTable(GlobalSymTable *gSymTable)
         current = current->next;
     }
     printf("\n\n");
+}
+
+int getIndexOfSym(SymTable *symtable, char *name)
+{
+    SymTableNode *root = symtable->root;
+    SymTableNode *p = root;
+    int i = -1;
+    while (p != NULL)
+    {
+        i++;
+        if (strcmp(p->symName, name) == 0)
+        {
+            return i;
+        }
+        p = p->next;
+    }
+    return i;
 }

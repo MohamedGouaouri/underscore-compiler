@@ -61,8 +61,12 @@ struct jump_indices *merge(struct jump_indices *q1, struct jump_indices *q2)
             ptr = ptr->next;
         }
         prev->next = q2;
+        return q1;
     }
-    return q1;
+    else
+    {
+        return q2;
+    }
 }
 
 void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int to)
@@ -76,7 +80,7 @@ void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int
         {
             int where = q->index;
             quads[where].op1->value.label = to;
-            printf("WHERE: %d\n", where);
+            printf("Chaining done to: %d\n", where);
             q = q->next;
         }
     }

@@ -8,6 +8,6 @@ underscore: scanner.l parser.y
 report:
 	bison -d parser.y --report=all 
 
-clean: scanner.lex.c parser.tab.c parser.tab.c
-	rm scanner.lex.c parser.tab.c
+clean: scanner.lex.c parser.tab.c parser.tab.c underscore
+	rm scanner.lex.c parser.tab.c underscore
 

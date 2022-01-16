@@ -65,7 +65,7 @@
 %token POINTERVALUE "@"
 
 %token OPENHOOK "{"
-%token CLOSEHOOK "}"
+%token <token_type> CLOSEHOOK "}"
 
 %token OPENPARENTHESIS "("
 %token CLOSEPARENTHESIS ")"
@@ -108,7 +108,7 @@
 
 // special token
 %type <token_type> M;
-%type <statement> statement bloc ifstmt;
+%type <statement> L statement bloc ifstmt elsestmt N;
 %type <expression> expression;
 
 
@@ -214,22 +214,26 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!
 
 
 
-bloc: bloc M statement  {
+bloc: bloc  statement  M {
             yysuccess(1, "Block.");
-           if ($1.nextlist != NULL){
-                backpatch(quads, currentInstruction+1, $3.nextlist, $2);
-                $$.nextlist = $3.nextlist;
+           if ($2.nextlist != NULL){
+               printf("chaining\n");
+               printf("WHERE: %d\n", $3);
+                backpatch(quads, currentInstruction+1, $2.nextlist, $3);
+                $$.nextlist = $2.nextlist;
            }
         }
+    
      | %empty {
         /*yysuccess(1, "Emptyness.");*/
+
      } 
      | error bloc {yyerror("wrong statement inside block."); yyerrok;}
      ;
 
 statement: declare SEMICOLON {
             /*yysuccess(1, "Simple declaration / with assign.");*/
-        
+            $$.nextlist = NULL;
         }
 		| STRUCTTYPEDECLARE ID { 
             if(_yylval.ident == NULL) yyerror("ID already declared!"); 
@@ -246,7 +250,7 @@ statement: declare SEMICOLON {
 
         }
         | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc {
-            backpatch(quads, currentInstruction+1, $8.nextlist, $2);
+            // backpatch(quads, currentInstruction+1, $8.nextlist, $2);
             // backpatch(quads, currentInstruction+1, $4.truelist, $7);
             // $8.nextlist = $4.falselist;
             // union operandValue* operand1 = create_operand_value();
@@ -270,13 +274,38 @@ statement: declare SEMICOLON {
         
         
         | ifstmt {
-            /*yysuccess(1,"Simplest if statement.");*/
+            $$.nextlist = $1.nextlist;
+            if ($$.nextlist == NULL) {
+                printf("NULL!!!!\n");
+            }
         }
-		| ifstmt elsestmt {
+        /* | ifstmt elsestmt {
+            $$.nextlist = $2.nextlist;
+        } */
+        // If-else statement (grammar change required, I might be wrong sorry x) )
 
+        | IF OPENPARENTHESIS expression CLOSEPARENTHESIS M OPENHOOK  bloc CLOSEHOOK N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK{
+            // S -> if ( B ) M_1 S_1 N else M_2 S_2
+            
+                //backpatch ( B: truelist ; M 1 : instr );
+                //backpatch ( B: falselist ; M 2 : instr );
+                //temp = merge ( S 1 : nextlist ; N: nextlist );
+                //S: nextlist = merge ( temp ; S 2 : nextlist );
+            
+            // check if $3 is evaluates to true or false
+
+            // backpatching
+            backpatch(quads, currentInstruction+1, $3.boolean_expression.truelist, $5); // backpatch it to M1.inst
+            backpatch(quads, currentInstruction+1, $3.boolean_expression.falselist, $11); // backpatch it toM2.inst
+            struct jump_indices* temp = merge($7.nextlist, $9.nextlist);
+
+            $$.nextlist = merge(temp, $15.nextlist);
+        
+        
         }
-		| ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
-		| ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}
+        // caused some errors
+		//  | ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
+		/* | ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}  */
 
         | RETURN expression SEMICOLON {yysuccess(1, "Return statement.");}
         | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
@@ -288,6 +317,7 @@ statement: declare SEMICOLON {
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Print output.");}
         | error SEMICOLON {yyerror("wrong statement"); yyerrok;}
         ;
+
 
 type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
 		    | STRINGDECLARE {strcpy($$ , _yylval.type);}
@@ -365,12 +395,14 @@ assign: ID {
 	  | POINTERVALUE var ASSIGNMENT expression
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M statement CLOSEHOOK {
             // yysuccess(1,"if stmt.");
             // Check if <expression> is boolean, otherwise throw a semantic error
 
             backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
+            // printf("False list: %d", $3.boolean_expression.falselist->index);
             $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+            
 
         }
       | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;} 
@@ -379,7 +411,17 @@ elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHO
         | ELSE error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside elif()."); yyerrok;} 
         | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif elif stmt.");}
         ;
-elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"else stmt.");}
+elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
+            // yysuccess(1,"else stmt.");
+
+            // // I don't know what I'm doing x) I'm sorry
+            // backpatch(quads, currentInstruction+1, ($<expression>-6).boolean_expression.truelist, $<token_type>-3); // backpatch it to M1.inst
+            // backpatch(quads, currentInstruction+1, ($<expression>-6).boolean_expression.falselist, $3); // backpatch it toM2.inst
+            // printf("===> Stack content %d\n", $<statement>-3);
+            // struct jump_indices* temp = merge(($<statement>-2).nextlist, $1.nextlist);
+
+            // $$.nextlist = merge(temp, $7.nextlist);
+        }
         ;
 
 call_param: expression
@@ -393,7 +435,9 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.falselist = $2.boolean_expression.falselist;
             $$.boolean_expression.truelist = $2.boolean_expression.truelist;
-
+        }else{
+            // is expression
+            strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
         }
     }
 
@@ -430,42 +474,54 @@ expression:
     }
     | expression EQUAL expression{
         if (!$1.is_boolean && !$3.is_boolean){
-        //     $$.is_boolean = true;
-        //     expression.boolean_expression.truelist = makelist(currentInstruction);
-        //     expression.boolean_expression.falselist = makelist(currentInstruction+1);
+            $$.is_boolean = true;
+            $$.boolean_expression.truelist = makelist(currentInstruction);
+            $$.boolean_expression.falselist = makelist(currentInstruction+1);
 
-        //     union operandValue* operand1_val = create_operand_value();
-        //     union operandValue* operand2_val = create_operand_value();
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
         
-        //     operand* operand1;
-        //     operand* operand2;
+            operand* operand1;
+            operand* operand2;
+            operand* result;
         
-        //     // operand1 management
-        //     if ($1.arithmetic_expression.is_litteral){
-        //         operand1_val->integer = $1.arithmetic_expression.value;
-        //         operand1 = create_operand(Integers , operand1_val);
-        //     }else{
-        //         strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
-        //         operand1 = create_operand(Variable , operand1_val);
-        //     }
-        //     // operand2 management
-        //     if ($3.arithmetic_expression.is_litteral){
-        //         operand2_val->integer = $3.arithmetic_expression.value;
-        //         operand2 = create_operand(Integers , operand2_val);
-        //     }else{
-        //         strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
-        //         operand2 = create_operand(Variable , operand2_val);
-        //     }
-        // //     int x = indicator;
+            operand1_val->label = -1;
+            operand1 = create_operand(Labels, operand1_val);
+            // operand1 management
+            if ($1.arithmetic_expression.is_litteral){
+                operand2_val->integer = $1.arithmetic_expression.value;
+                operand2 = create_operand(Integers , operand2_val);
+            }else{
+                strcpy(operand2_val->variable, $1.arithmetic_expression.sym);
+                operand2 = create_operand(Variable , operand2_val);
+            }
+            // operand2 management
+            if ($3.arithmetic_expression.is_litteral){
+                result_val->integer = $3.arithmetic_expression.value;
+                result = create_operand(Integers , result_val);
+            }else{
+                strcpy(result_val->variable, $3.arithmetic_expression.sym);
+                result = create_operand(Variable , result_val);
+            }
 
-        // // strcpy(tempnames[indicator], gentemp());
 
-        // quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[DIVIDE],
-        //                                        operand1, operand2, );
-        
-        // // indicator++;
-        // quads[currentInstruction] = *quad;
-        // currentInstruction++;
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BE],
+                                                operand1, operand2, result);
+            
+            // indicator++;
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
+
+            operand1_val->label = -1; operand1=create_operand(Labels, operand1_val);
+            operand2_val->empty = 1; operand2=create_operand(Empty, operand1_val);
+            result_val->empty = 1; result=create_operand(Empty, operand1_val);
+            quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
 
         }
     }
@@ -474,6 +530,52 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.truelist = makelist(currentInstruction);
             $$.boolean_expression.falselist = makelist(currentInstruction+1);
+
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+        
+            operand* operand1;
+            operand* operand2;
+            operand* result;
+        
+            operand1_val->label = -1;
+            operand1 = create_operand(Labels, operand1_val);
+            // operand1 management
+            if ($1.arithmetic_expression.is_litteral){
+                operand2_val->integer = $1.arithmetic_expression.value;
+                operand2 = create_operand(Integers , operand2_val);
+            }else{
+                strcpy(operand2_val->variable, $1.arithmetic_expression.sym);
+                operand2 = create_operand(Variable , operand2_val);
+            }
+            // operand2 management
+            if ($3.arithmetic_expression.is_litteral){
+                result_val->integer = $3.arithmetic_expression.value;
+                result = create_operand(Integers , result_val);
+            }else{
+                strcpy(result_val->variable, $3.arithmetic_expression.sym);
+                result = create_operand(Variable , result_val);
+            }
+
+
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BNE],
+                                                operand1, operand2, result);
+            
+            // indicator++;
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
+
+            operand1_val->label = -1; operand1=create_operand(Labels, operand1_val);
+            operand2_val->empty = 1; operand2=create_operand(Empty, operand1_val);
+            result_val->empty = 1; result=create_operand(Empty, operand1_val);
+            quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
         }
     }
 
@@ -482,23 +584,209 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.truelist = makelist(currentInstruction);
             $$.boolean_expression.falselist = makelist(currentInstruction+1);
+
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+        
+            operand* operand1;
+            operand* operand2;
+            operand* result;
+        
+            operand1_val->label = -1;
+            operand1 = create_operand(Labels, operand1_val);
+            // operand1 management
+            if ($1.arithmetic_expression.is_litteral){
+                operand2_val->integer = $1.arithmetic_expression.value;
+                operand2 = create_operand(Integers , operand2_val);
+            }else{
+                strcpy(operand2_val->variable, $1.arithmetic_expression.sym);
+                operand2 = create_operand(Variable , operand2_val);
+            }
+            // operand2 management
+            if ($3.arithmetic_expression.is_litteral){
+                result_val->integer = $3.arithmetic_expression.value;
+                result = create_operand(Integers , result_val);
+            }else{
+                strcpy(result_val->variable, $3.arithmetic_expression.sym);
+                result = create_operand(Variable , result_val);
+            }
+
+
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BL],
+                                                operand1, operand2, result);
+            
+
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
+            operand1_val->label = -1; operand1=create_operand(Labels, operand1_val);
+            operand2_val->empty = 1; operand2=create_operand(Empty, operand1_val);
+            result_val->empty = 1; result=create_operand(Empty, operand1_val);
+            quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
         }
     }
     | expression INFERIOREQUAL expression{
         if (!$1.is_boolean && !$3.is_boolean){
             $$.is_boolean = true;
+            $$.boolean_expression.truelist = makelist(currentInstruction);
+            $$.boolean_expression.falselist = makelist(currentInstruction+1);
+
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+        
+            operand* operand1;
+            operand* operand2;
+            operand* result;
+        
+            operand1_val->label = -1;
+            operand1 = create_operand(Labels, operand1_val);
+            // operand1 management
+            if ($1.arithmetic_expression.is_litteral){
+                operand2_val->integer = $1.arithmetic_expression.value;
+                operand2 = create_operand(Integers , operand2_val);
+            }else{
+                strcpy(operand2_val->variable, $1.arithmetic_expression.sym);
+                operand2 = create_operand(Variable , operand2_val);
+            }
+            // operand2 management
+            if ($3.arithmetic_expression.is_litteral){
+                result_val->integer = $3.arithmetic_expression.value;
+                result = create_operand(Integers , result_val);
+            }else{
+                strcpy(result_val->variable, $3.arithmetic_expression.sym);
+                result = create_operand(Variable , result_val);
+            }
+
+
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BLE],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
+            operand1_val->label = -1; operand1=create_operand(Labels, operand1_val);
+            operand2_val->empty = 1; operand2=create_operand(Empty, operand1_val);
+            result_val->empty = 1; result=create_operand(Empty, operand1_val);
+            quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
         }
 
     }
     | expression SUPERIOR expression {
         if (!$1.is_boolean && !$3.is_boolean){
             $$.is_boolean = true;
+            $$.boolean_expression.truelist = makelist(currentInstruction);
+            $$.boolean_expression.falselist = makelist(currentInstruction+1);
+
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+        
+            operand* operand1;
+            operand* operand2;
+            operand* result;
+        
+            operand1_val->label = -1;
+            operand1 = create_operand(Labels, operand1_val);
+            // operand1 management
+            if ($1.arithmetic_expression.is_litteral){
+                operand2_val->integer = $1.arithmetic_expression.value;
+                operand2 = create_operand(Integers , operand2_val);
+            }else{
+                strcpy(operand2_val->variable, $1.arithmetic_expression.sym);
+                operand2 = create_operand(Variable , operand2_val);
+            }
+            // operand2 management
+            if ($3.arithmetic_expression.is_litteral){
+                result_val->integer = $3.arithmetic_expression.value;
+                result = create_operand(Integers , result_val);
+            }else{
+                strcpy(result_val->variable, $3.arithmetic_expression.sym);
+                result = create_operand(Variable , result_val);
+            }
+
+
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BG],
+                                                operand1, operand2, result);
+            
+
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
+            operand1_val->label = -1; operand1=create_operand(Labels, operand1_val);
+            operand2_val->empty = 1; operand2=create_operand(Empty, operand1_val);
+            result_val->empty = 1; result=create_operand(Empty, operand1_val);
+            quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
         }
 
     }
     | expression SUPERIOREQUAL expression{
         if (!$1.is_boolean && !$3.is_boolean){
             $$.is_boolean = true;
+            $$.boolean_expression.truelist = makelist(currentInstruction);
+            $$.boolean_expression.falselist = makelist(currentInstruction+1);
+
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+        
+            operand* operand1;
+            operand* operand2;
+            operand* result;
+        
+            operand1_val->label = -1;
+            operand1 = create_operand(Labels, operand1_val);
+            // operand1 management
+            if ($1.arithmetic_expression.is_litteral){
+                operand2_val->integer = $1.arithmetic_expression.value;
+                operand2 = create_operand(Integers , operand2_val);
+            }else{
+                strcpy(operand2_val->variable, $1.arithmetic_expression.sym);
+                operand2 = create_operand(Variable , operand2_val);
+            }
+            // operand2 management
+            if ($3.arithmetic_expression.is_litteral){
+                result_val->integer = $3.arithmetic_expression.value;
+                result = create_operand(Integers , result_val);
+            }else{
+                strcpy(result_val->variable, $3.arithmetic_expression.sym);
+                result = create_operand(Variable , result_val);
+            }
+
+
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BGE],
+                                                operand1, operand2, result);
+            
+
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+
+            operand1_val->label = -1; operand1=create_operand(Labels, operand1_val);
+            operand2_val->empty = 1; operand2=create_operand(Empty, operand1_val);
+            result_val->empty = 1; result=create_operand(Empty, operand1_val);
+            quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                operand1, operand2, result);
+            
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+            
+
         }
 
     }
@@ -545,6 +833,8 @@ expression:
         indicator++;
         quads[currentInstruction] = *quad;
         currentInstruction++;
+        $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
 
     }
     | expression SUB expression {
@@ -584,6 +874,8 @@ expression:
         indicator++;
         quads[currentInstruction] = *quad;
         currentInstruction++;
+        $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
 
     }
     | expression MULT expression {
@@ -623,6 +915,8 @@ expression:
         indicator++;
         quads[currentInstruction] = *quad;
         currentInstruction++;
+        $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
     }
     | expression DIV expression {
         $$.is_boolean = false;
@@ -661,6 +955,8 @@ expression:
         indicator++;
         quads[currentInstruction] = *quad;
         currentInstruction++;
+        $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
     }
 
     // Frozen for the moment since we don't have quad ops for these high level operations
@@ -751,6 +1047,22 @@ var: ID {checkif_localsymbolexists(_yylval.ident);}
 M: %empty{
     $$ = currentInstruction;
 };
+
+N: %empty {
+    $$.nextlist = makelist(currentInstruction);
+
+    // generate ( goto - )
+    union operandValue* operand1 = create_operand_value();
+    union operandValue* operand2 = create_operand_value();
+    union operandValue* result = create_operand_value();
+    operand1->label = -1;
+    operand2->empty = 1;
+    result->empty = 1;
+    quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                               create_operand(Labels , operand1), create_operand(Empty , operand2), result);
+    quads[currentInstruction] = *quad;
+    currentInstruction++;
+}
 %%
 
 
@@ -920,3 +1232,4 @@ void print_tempnames(){
         i++;
     }
 }
+

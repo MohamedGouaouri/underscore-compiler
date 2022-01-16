@@ -87,4 +87,7 @@ backpatch ( q; i ) inserts i as the target label for each of the instructions on
 the list pointed to by p .
 */
 void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int to);
+
+// swap instruction positions
+void migrate(quadruplets_node quads[], int i1, int i2, int j1, int j2);
 #endif

@@ -47,7 +47,7 @@
 %token <string> ID
 %type <string> type_declare
 %type <string> just_declare
-%type <string> struct_fields
+/* %type <string> struct_fields */
 %type <string> srt
 %type <string> crt
 
@@ -56,7 +56,7 @@
 %token <string> STRINGDECLARE
 %token <string> CONSTDECLARE
 %token <string> BOOLEENDECLARE
-%token <string> STRUCTTYPEDECLARE 
+%token <string> STRUCTTYPEDECLARE
 %token <string> STRUCTDECLARE
 %token <string> TABLEDECLARE
 %token <string> POINTERDECLARE
@@ -108,7 +108,7 @@
 
 // special token
 %type <token_type> M;
-%type <statement> L statement bloc ifstmt elsestmt N;
+%type <statement> statement bloc ifstmt N;
 %type <expression> expression;
 
 
@@ -217,8 +217,6 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!
 bloc: bloc  statement  M {
             yysuccess(1, "Block.");
            if ($2.nextlist != NULL){
-               printf("chaining\n");
-               printf("WHERE: %d\n", $3);
                 backpatch(quads, currentInstruction+1, $2.nextlist, $3);
                 $$.nextlist = $2.nextlist;
            }
@@ -235,41 +233,89 @@ statement: declare SEMICOLON {
             /*yysuccess(1, "Simple declaration / with assign.");*/
             $$.nextlist = NULL;
         }
-		| STRUCTTYPEDECLARE ID { 
+		/* | STRUCTTYPEDECLARE ID { 
             if(_yylval.ident == NULL) yyerror("ID already declared!"); 
             else { 
                 _yylval.ident->symType = STRUCTTYPEDECLARE; 
                 set_attr(_yylval.ident, "type", "typestruct"); 
-                /*yysuccess(1,"Déclaration d'un type structure.");*/
+                yysuccess(1,"Déclaration d'un type structure.");
             }
 
-        } OPENHOOK struct_fields CLOSEHOOK SEMICOLON
+        } OPENHOOK struct_fields CLOSEHOOK SEMICOLON */
+
 
 		| assign SEMICOLON {
             /*yysuccess(1, "Assignment.");*/
 
         }
-        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc {
-            // backpatch(quads, currentInstruction+1, $8.nextlist, $2);
-            // backpatch(quads, currentInstruction+1, $4.truelist, $7);
-            // $8.nextlist = $4.falselist;
-            // union operandValue* operand1 = create_operand_value();
-            // union operandValue* operand2 = create_operand_value();
-            // operand1->label = $2;
-            // operand2->empty = 1;
-
-            //  // gen quad
-            // int x = -1;
-            // quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
-            //                                    create_operand(Labels , operand1), create_operand(Empty , operand2), &x);
-            // quads[currentInstruction] = *quad;
-            // currentInstruction++;
-        }CLOSEHOOK {
+        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+            backpatch(quads, currentInstruction+1, $8.nextlist, $2);
+            backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
+            $$.nextlist = $4.boolean_expression.falselist;
             
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+            operand1_val->label = $2;
+
+            operand2_val->empty = 1;
+            result_val->empty = 1;
+
+             // gen quad
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                               create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
 
         }
-		| LOOP OPENPARENTHESIS assign SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with assignment.");}
-		| LOOP OPENPARENTHESIS init_declare SEMICOLON expression SEMICOLON assign CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1, "for loop with declaration+assignment.");}
+		| LOOP  OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+            backpatch(quads, currentInstruction+1, $14.nextlist, $5);
+            backpatch(quads, currentInstruction+1, $6.boolean_expression.truelist, $13);
+            $$.nextlist = $6.boolean_expression.falselist;
+            
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+            operand1_val->label = $5;
+
+            operand2_val->empty = 1;
+            result_val->empty = 1;
+            printf("UPDATE FROM: %d TO: %d\n", $8, $10-1);
+            printf("GRAB FROM %d\n", $13);
+            printf("Current instruction %d\n", currentInstruction);
+
+            // migrate instructions
+            migrate(quads, $8, $10-1, $13, currentInstruction-1);
+
+             // gen quad
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                               create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+        }
+		| LOOP  OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+
+            backpatch(quads, currentInstruction+1, $14.nextlist, $5);
+            backpatch(quads, currentInstruction+1, $6.boolean_expression.truelist, $13);
+            $$.nextlist = $6.boolean_expression.falselist;
+            
+            union operandValue* operand1_val = create_operand_value();
+            union operandValue* operand2_val = create_operand_value();
+            union operandValue* result_val = create_operand_value();
+            operand1_val->label = $5;
+
+            operand2_val->empty = 1;
+            result_val->empty = 1;
+
+            // migrate instructions
+            migrate(quads, $8, $10-1, $13, currentInstruction-1);
+
+             // gen quad
+            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                               create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+            quads[currentInstruction] = *quad;
+            currentInstruction++;
+        }
         /* | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;}  */
         
         
@@ -333,7 +379,45 @@ just_declare: type_declare ID {
                 else set_attr(_yylval.ident, "type", $1);
             }
             ;
-init_declare: just_declare ASSIGNMENT expression 
+init_declare: just_declare ASSIGNMENT expression {
+                    char sym[255];
+                    // get symbole from symtable
+                    strcpy(sym, symt->tail->symName);
+                    if (!$3.is_boolean){
+                        union operandValue* operand1_val = create_operand_value();
+                        union operandValue* operand2_val = create_operand_value();
+                        union operandValue* result_val = create_operand_value();
+                        
+                        operand* operand1;
+                        operand* operand2;
+                        operand* result;
+                        
+                        // operand1 management
+                        if ($3.arithmetic_expression.is_litteral){
+                            operand1_val->integer = $3.arithmetic_expression.value;
+                            operand1 = create_operand(Integers , operand1_val);
+                        }else{
+                            // strcpy(operand1_val->variable, $3.arithmetic_expression.sym);
+                            // fetch symbole from symtable normally
+                            strcpy(operand1_val->variable, tempnames[indicator-1]);
+                            operand1 = create_operand(Variable , operand1_val);
+                        }
+                        operand2_val->empty = true; // or 1
+                        operand2 = create_operand(Empty , operand1_val);
+
+                        strcpy(result_val->variable, sym);
+                        // printf("ID: %s\n", $<string>2);
+                        result = create_operand(Variable, result_val);
+
+
+                        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[AFFECT],
+                                                            operand1, operand2, result);
+                        quads[currentInstruction] = *quad;
+                        currentInstruction++;
+                    }
+
+                    
+            }
             | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
             ;
 values_eps: %empty
@@ -343,9 +427,9 @@ values_eps: %empty
 declare: just_declare
 	   | init_declare
        ;
-struct_fields: type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
+/* struct_fields: type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
 			 | type_declare ID { set_fieldattribute($1); } COMMA struct_fields
-             ;
+             ; */
 
 // TODO change this to var_exp
 assign: ID {
@@ -381,7 +465,7 @@ assign: ID {
                 operand2 = create_operand(Empty , operand1_val);
 
                 strcpy(result_val->variable, $<string>2);
-                printf("ID: %s\n", $<string>2);
+                // printf("ID: %s\n", $<string>2);
                 result = create_operand(Variable, result_val);
 
 
@@ -391,8 +475,8 @@ assign: ID {
                 currentInstruction++;
             }
       }
-	  | ADDRESSVALUE var ASSIGNMENT expression
-	  | POINTERVALUE var ASSIGNMENT expression
+	  /* | ADDRESSVALUE var ASSIGNMENT expression
+	  | POINTERVALUE var ASSIGNMENT expression */
       ;
 
 ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M statement CLOSEHOOK {
@@ -407,11 +491,11 @@ ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M statement CLOS
         }
       | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;} 
       ;
-elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif stmt.");}
+/* elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif stmt.");}
         | ELSE error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside elif()."); yyerrok;} 
         | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif elif stmt.");}
-        ;
-elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
+        ; */
+/* elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             // yysuccess(1,"else stmt.");
 
             // // I don't know what I'm doing x) I'm sorry
@@ -422,7 +506,7 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
 
             // $$.nextlist = merge(temp, $7.nextlist);
         }
-        ;
+        ; */
 
 call_param: expression
 		  | expression COMMA call_param
@@ -441,7 +525,7 @@ expression:
         }
     }
 
-    | OPENPARENTHESIS error CLOSEPARENTHESIS
+    | OPENPARENTHESIS error CLOSEPARENTHESIS { /* stop code */ }
 	| NON expression {
         if ($2.is_boolean){
             $$.is_boolean = true;
@@ -450,8 +534,8 @@ expression:
 
         }
     }
-	| POINTERVALUE var_exp
-	| ADDRESSVALUE var_exp
+	/* | POINTERVALUE var_exp
+	| ADDRESSVALUE var_exp */
 
     | expression OR M expression{
         
@@ -961,11 +1045,91 @@ expression:
 
     // Frozen for the moment since we don't have quad ops for these high level operations
     | expression MOD expression {
-        $$.is_boolean = false;
+        // $$.is_boolean = false;
+        // union operandValue* operand1_val = create_operand_value();
+        // union operandValue* operand2_val = create_operand_value();
+        // union operandValue* result_val = create_operand_value();
+        
+        // operand* operand1;
+        // operand* operand2;
+        // operand* result;
+        
+        // // operand1 management
+        // if ($1.arithmetic_expression.is_litteral){
+        //     operand1_val->integer = $1.arithmetic_expression.value;
+        //     operand1 = create_operand(Integers , operand1_val);
+        // }else{
+        //     strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+        //     operand1 = create_operand(Variable , operand1_val);
+        // }
+        // // operand2 management
+        // if ($3.arithmetic_expression.is_litteral){
+        //     operand2_val->integer = $3.arithmetic_expression.value;
+        //     operand2 = create_operand(Integers , operand2_val);
+        // }else{
+        //     strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+        //     operand2 = create_operand(Variable , operand2_val);
+        // }
+        // strcpy(tempnames[indicator], gentemp());
+        
+        // strcpy(result_val->variable, tempnames[indicator]);
+        // result = create_operand(Variable, result_val);
+        // // int x = indicator;
+        
+
+
+        // quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[MOD],
+        //                                        operand1, operand2, result);
+        
+        // indicator++;
+        // quads[currentInstruction] = *quad;
+        // currentInstruction++;
+        // $$.arithmetic_expression.is_litteral = false;
+        // strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
 
     }
     | expression POWER expression {
         $$.is_boolean = false;
+        union operandValue* operand1_val = create_operand_value();
+        union operandValue* operand2_val = create_operand_value();
+        union operandValue* result_val = create_operand_value();
+        
+        operand* operand1;
+        operand* operand2;
+        operand* result;
+        
+        // operand1 management
+        if ($1.arithmetic_expression.is_litteral){
+            operand1_val->integer = $1.arithmetic_expression.value;
+            operand1 = create_operand(Integers , operand1_val);
+        }else{
+            strcpy(operand1_val->variable, $1.arithmetic_expression.sym);
+            operand1 = create_operand(Variable , operand1_val);
+        }
+        // operand2 management
+        if ($3.arithmetic_expression.is_litteral){
+            operand2_val->integer = $3.arithmetic_expression.value;
+            operand2 = create_operand(Integers , operand2_val);
+        }else{
+            strcpy(operand2_val->variable, $3.arithmetic_expression.sym);
+            operand2 = create_operand(Variable , operand2_val);
+        }
+        strcpy(tempnames[indicator], gentemp());
+        
+        strcpy(result_val->variable, tempnames[indicator]);
+        result = create_operand(Variable, result_val);
+        // int x = indicator;
+        
+
+
+        quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[POWER],
+                                               operand1, operand2, result);
+        
+        indicator++;
+        quads[currentInstruction] = *quad;
+        currentInstruction++;
+        $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
 
     }
 /* 
@@ -1026,21 +1190,21 @@ expression:
         |  STRING
         ; */
 
-variable : var_exp
+/* variable : var_exp
 	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} call_param CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
 	| ID OPENPARENTHESIS {checkif_globalsymbolexists(_yylval.ident);} CLOSEPARENTHESIS {yysuccess("EXPRESSION : FUNCTION CALL");}
-	;
+	; */
 
-var_exp : var
+/* var_exp : var
 	| ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression CLOSEBRACKET {yysuccess("EXPRESSION : ARRAY ACCESS");}
-	;
+	; */
 
-accessfield: ID { char fieldnameCopy[50]; strcpy(fieldnameCopy, symt->tail->symName); checkif_fieldisvalid(save, fieldnameCopy); deleteEntry(symt, symt->tail->symName); }
+/* accessfield: ID { char fieldnameCopy[50]; strcpy(fieldnameCopy, symt->tail->symName); checkif_fieldisvalid(save, fieldnameCopy); deleteEntry(symt, symt->tail->symName); }
 		   | ID { deleteEntry(symt, symt->tail->symName); } DOT accessfield
            ;
 var: ID {checkif_localsymbolexists(_yylval.ident);}
    | ID {checkif_localsymbolexists(_yylval.ident); strcpy(save, symt->tail->symName);} DOT accessfield
-   ;
+   ; */
 
 
 

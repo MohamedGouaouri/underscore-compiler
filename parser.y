@@ -400,7 +400,7 @@ ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M statement CLOS
             // Check if <expression> is boolean, otherwise throw a semantic error
 
             backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
-            printf("False list: %d", $3.boolean_expression.falselist->index);
+            // printf("False list: %d", $3.boolean_expression.falselist->index);
             $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
             
 
@@ -435,7 +435,9 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.falselist = $2.boolean_expression.falselist;
             $$.boolean_expression.truelist = $2.boolean_expression.truelist;
-
+        }else{
+            // is expression
+            strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
         }
     }
 
@@ -783,6 +785,7 @@ expression:
             
             quads[currentInstruction] = *quad;
             currentInstruction++;
+            
 
         }
 
@@ -831,6 +834,7 @@ expression:
         quads[currentInstruction] = *quad;
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
 
     }
     | expression SUB expression {
@@ -871,6 +875,7 @@ expression:
         quads[currentInstruction] = *quad;
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
 
     }
     | expression MULT expression {
@@ -911,6 +916,7 @@ expression:
         quads[currentInstruction] = *quad;
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
     }
     | expression DIV expression {
         $$.is_boolean = false;
@@ -950,6 +956,7 @@ expression:
         quads[currentInstruction] = *quad;
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
+        strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
     }
 
     // Frozen for the moment since we don't have quad ops for these high level operations

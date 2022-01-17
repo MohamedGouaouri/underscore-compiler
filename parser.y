@@ -268,24 +268,21 @@ statement: declare SEMICOLON {
             currentInstruction++;
 
         }
-		| LOOP  OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-            backpatch(quads, currentInstruction+1, $14.nextlist, $5);
-            backpatch(quads, currentInstruction+1, $6.boolean_expression.truelist, $13);
-            $$.nextlist = $6.boolean_expression.falselist;
+		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+            backpatch(quads, currentInstruction+1, $15.nextlist, $6);
+            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
+            $$.nextlist = $7.boolean_expression.falselist;
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
             union operandValue* result_val = create_operand_value();
-            operand1_val->label = $5;
+            operand1_val->label = $6;
 
             operand2_val->empty = 1;
             result_val->empty = 1;
-            printf("UPDATE FROM: %d TO: %d\n", $8, $10-1);
-            printf("GRAB FROM %d\n", $13);
-            printf("Current instruction %d\n", currentInstruction);
 
             // migrate instructions
-            migrate(quads, $8, $10-1, $13, currentInstruction-1);
+            migrate(quads, $9, $11-1, $14, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -293,22 +290,22 @@ statement: declare SEMICOLON {
             quads[currentInstruction] = *quad;
             currentInstruction++;
         }
-		| LOOP  OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
 
-            backpatch(quads, currentInstruction+1, $14.nextlist, $5);
-            backpatch(quads, currentInstruction+1, $6.boolean_expression.truelist, $13);
-            $$.nextlist = $6.boolean_expression.falselist;
+            backpatch(quads, currentInstruction+1, $15.nextlist, $6);
+            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
+            $$.nextlist = $7.boolean_expression.falselist;
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
             union operandValue* result_val = create_operand_value();
-            operand1_val->label = $5;
+            operand1_val->label = $6;
 
             operand2_val->empty = 1;
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $8, $10-1, $13, currentInstruction-1);
+            migrate(quads, $9, $11-1, $14, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],

@@ -62,6 +62,13 @@ struct expression
     };
 };
 
+struct ifstatement
+{
+    struct boolean_expression boolean_expression;
+    struct jump_indices *nextlist;
+    int m1;
+};
+
 // generate temporary names
 char *gentemp();
 

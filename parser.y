@@ -30,6 +30,7 @@
     struct boolean_expression boolean_expression;
     struct expression expression;
     struct statement statement;
+    struct ifstatement ifstatement; 
 }
 
 %token ENTRY
@@ -108,7 +109,8 @@
 
 // special token
 %type <token_type> M;
-%type <statement> statement bloc ifstmt N;
+%type <statement> statement bloc N ifstmtonly;
+%type <ifstatement>  ifstmt elsestmt
 %type <expression> expression;
 
 
@@ -233,17 +235,6 @@ statement: declare SEMICOLON {
             /*yysuccess(1, "Simple declaration / with assign.");*/
             $$.nextlist = NULL;
         }
-		/* | STRUCTTYPEDECLARE ID { 
-            if(_yylval.ident == NULL) yyerror("ID already declared!"); 
-            else { 
-                _yylval.ident->symType = STRUCTTYPEDECLARE; 
-                set_attr(_yylval.ident, "type", "typestruct"); 
-                yysuccess(1,"Déclaration d'un type structure.");
-            }
-
-        } OPENHOOK struct_fields CLOSEHOOK SEMICOLON */
-
-
 		| assign SEMICOLON {
             /*yysuccess(1, "Assignment.");*/
 
@@ -316,18 +307,25 @@ statement: declare SEMICOLON {
         /* | LOOP error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside loop()."); yyerrok;}  */
         
         
-        | ifstmt {
-            $$.nextlist = $1.nextlist;
-            if ($$.nextlist == NULL) {
-                printf("NULL!!!!\n");
-            }
-        }
-        /* | ifstmt elsestmt {
-            $$.nextlist = $2.nextlist;
+        /* | IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+            // yysuccess(1,"if stmt.");
+            // Check if <expression> is boolean, otherwise throw a semantic error
+
+            backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
+            // printf("False list: %d", $3.boolean_expression.falselist->index);
+            $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+            
+
         } */
+        | ifstmtonly {
+            $$.nextlist = $1.nextlist;
+        }
+        | ifstmt elsestmt {
+            $$.nextlist = $2.nextlist;
+        }
         // If-else statement (grammar change required, I might be wrong sorry x) )
 
-        | IF OPENPARENTHESIS expression CLOSEPARENTHESIS M OPENHOOK  bloc CLOSEHOOK N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK{
+        | IF OPENPARENTHESIS expression CLOSEPARENTHESIS  OPENHOOK  M bloc CLOSEHOOK N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK{
             // S -> if ( B ) M_1 S_1 N else M_2 S_2
             
                 //backpatch ( B: truelist ; M 1 : instr );
@@ -335,14 +333,14 @@ statement: declare SEMICOLON {
                 //temp = merge ( S 1 : nextlist ; N: nextlist );
                 //S: nextlist = merge ( temp ; S 2 : nextlist );
             
-            // check if $3 is evaluates to true or false
+            // check if $3 evaluates to true or false
 
             // backpatching
-            backpatch(quads, currentInstruction+1, $3.boolean_expression.truelist, $5); // backpatch it to M1.inst
-            backpatch(quads, currentInstruction+1, $3.boolean_expression.falselist, $11); // backpatch it toM2.inst
-            struct jump_indices* temp = merge($7.nextlist, $9.nextlist);
+            // backpatch(quads, currentInstruction+1, $3.boolean_expression.truelist, $5); // backpatch it to M1.inst
+            // backpatch(quads, currentInstruction+1, $3.boolean_expression.falselist, $11); // backpatch it toM2.inst
+            // struct jump_indices* temp = merge($7.nextlist, $9.nextlist);
 
-            $$.nextlist = merge(temp, $15.nextlist);
+            // $$.nextlist = merge(temp, $15.nextlist);
         
         
         }
@@ -424,9 +422,7 @@ values_eps: %empty
 declare: just_declare
 	   | init_declare
        ;
-/* struct_fields: type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
-			 | type_declare ID { set_fieldattribute($1); } COMMA struct_fields
-             ; */
+
 
 // TODO change this to var_exp
 assign: ID {
@@ -476,34 +472,36 @@ assign: ID {
 	  | POINTERVALUE var ASSIGNMENT expression */
       ;
 
-ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M statement CLOSEHOOK {
+ifstmtonly: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
             // yysuccess(1,"if stmt.");
             // Check if <expression> is boolean, otherwise throw a semantic error
 
             backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
-            // printf("False list: %d", $3.boolean_expression.falselist->index);
             $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
-            
 
         }
-      | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;} 
+      /* | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;}  */
       ;
-/* elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif stmt.");}
-        | ELSE error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside elif()."); yyerrok;} 
-        | elifstmt ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"elif elif stmt.");}
-        ; */
-/* elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
+    
+ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+            // backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
+            // backpatch(quads,currentInstruction+1, $3.boolean_expression.falselist, $6);
+            // $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+            $$.boolean_expression.truelist = $3.boolean_expression.truelist;
+            $$.boolean_expression.falselist = $3.boolean_expression.falselist;
+            $$.m1 = $6;
+    }
+elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             // yysuccess(1,"else stmt.");
 
             // // I don't know what I'm doing x) I'm sorry
-            // backpatch(quads, currentInstruction+1, ($<expression>-6).boolean_expression.truelist, $<token_type>-3); // backpatch it to M1.inst
-            // backpatch(quads, currentInstruction+1, ($<expression>-6).boolean_expression.falselist, $3); // backpatch it toM2.inst
-            // printf("===> Stack content %d\n", $<statement>-3);
-            // struct jump_indices* temp = merge(($<statement>-2).nextlist, $1.nextlist);
+            backpatch(quads, currentInstruction+1, ($<ifstatement>0).boolean_expression.truelist, ($<ifstatement>0).m1); // backpatch it to M1.inst
+            backpatch(quads, currentInstruction+1, ($<ifstatement>0).boolean_expression.falselist, $3); // backpatch it toM2.inst
+            struct jump_indices* temp = merge(($<ifstatement>0).nextlist, $1.nextlist);
 
-            // $$.nextlist = merge(temp, $7.nextlist);
+            $$.nextlist = merge(temp, $7.nextlist);
         }
-        ; */
+        ;
 
 call_param: expression
 		  | expression COMMA call_param

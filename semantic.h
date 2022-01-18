@@ -54,19 +54,10 @@ struct arithmetic_expression
 struct expression
 {
     /* data */
+    bool is_string;
     bool is_boolean; // tells weather the current expression is boolean or not
-    union
-    {
-        struct arithmetic_expression arithmetic_expression;
-        struct boolean_expression boolean_expression;
-    };
-};
-
-struct ifstatement
-{
+    struct arithmetic_expression arithmetic_expression;
     struct boolean_expression boolean_expression;
-    struct jump_indices *nextlist;
-    int m1;
 };
 
 // generate temporary names

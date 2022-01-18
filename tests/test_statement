@@ -1,7 +1,5 @@
-# We'll use an id whenever we need to fill the space of an expression
-# ends of if statements (elif) not detected properly (either a little too late or a little too early)
 
-
+#_
  ()_ $_ f(){
 
     $_ x; 
@@ -32,7 +30,7 @@
 
     
 }
-
+_#
 #_
 ()_ f() {
 
@@ -49,12 +47,19 @@ _#
     $[4]_ arrayN <- [1, 2];
     $[]_ ar;
     ""[4]_ arrayS <- ["hi", "hello"];
+
+    $[2]_ array1 <- [1, 2, 3, 4];
+
+
+    $[]_ initarray <- [];
     
 }
-
+#_
 ()_ ""[3]_ g( $[25]_ param ) {
 
-    $[4]_ array <- [1, 2];
+    $_ id;
+
+    $[4]_ array <- [id, 2];
     $[]_ ar;
     
     ?[1]_ arrayB;
@@ -72,12 +77,12 @@ _#
 
 ()_ ""6_ y(""10_ param) {
 
-    ""8_ arrayN <- "";
+    ""8_ arrayS <- "";
     ""[]_ ar;
     
     
 }
-
+_#
 
 #_
 ()_ $_ g($_ sumifcond, $_ sumifcond1, $_ lastresortsum){

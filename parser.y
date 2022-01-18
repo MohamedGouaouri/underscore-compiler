@@ -142,7 +142,8 @@
     GlobalSymTable* gSymT; //Our global table of symbols
     SymTable* symt;        //Current table of symboles (used by scanner.l as well)
     char save[50];
-    int size = -1;
+    int declared_size = -1;         //Declared Size of array/string
+    int effective_size = 0;
     int currentColumn = 1;
     int showsuccess = 0;
     
@@ -162,7 +163,7 @@ underscore: %empty
         | error func {yyerrok;}
         ;
 
-func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); char str[5]; sprintf(str, "%d", size); if(size!=-1) set_attr(_yylval.ident, "size", str); size=-1; } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
+func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); char str[5]; sprintf(str, "%d", declared_size); if(declared_size!=-1) set_attr(_yylval.ident, "size", str); declared_size=-1; } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
 
 
 ret: %empty {strcpy($$ , "void");}
@@ -245,16 +246,16 @@ just_declare: simple_type_declare ID { setupNewSimpleVariable($1); }
 init_declare: just_declare ASSIGNMENT expression 
             | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
             ;
-values_eps: %empty
+values_eps: %empty { if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); declared_size=-1; }
           | call_param /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
           ;
             
-declare: just_declare
+declare: just_declare 
 	   | init_declare 
        ;
 struct_fields: simple_type_declare ID { char saveName[255];   if(_yylval.ident == NULL) { strcpy(saveName, save); } else { strcpy(saveName, _yylval.ident->symName); deleteEntry(symt, saveName); }  set_attr(symt->tail, $1, saveName); }
 			 | simple_type_declare ID { set_fieldattribute($1); } COMMA struct_fields
-             | complex_type_declare ID { yyerror("Complex types aren't allowed within structs."); }
+             | complex_type_declare ID { yyerror("Complex types aren't allowed within structs."); } //just for now, don't panic
              ;
 
 assign: var_exp ASSIGNMENT expression
@@ -272,8 +273,8 @@ elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHO
 elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"else stmt.");}
         ;
 
-call_param: expression
-		  | expression COMMA call_param
+call_param: expression {effective_size++; if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); effective_size=0; declared_size=-1; }
+		  | expression {effective_size++;} COMMA call_param 
 
 
 //General formula for experession
@@ -335,6 +336,11 @@ var: ID {checkif_localsymbolexists(_yylval.ident);}
 void yyerror(char *s){
     fprintf(stdout, "File '%s', line %d, character %d : syntax error: " RED " %s " RESET "\n", currentFileName, yylineno, currentColumn, s);
     //fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
+}
+
+void yywarning(char *s){
+    fprintf(stdout, "File '%s', line %d, character %d : warning: " YELLOW " %s " RESET "\n", currentFileName, yylineno, currentColumn, s);
+    
 }
 
 void yysuccess(int i, char *s){
@@ -490,10 +496,10 @@ void checkif_fieldisvalid(char precedent[50], char fieldname[50]) { /*Works with
 }
 
 void saveSize(int ival) {
-    size=ival; 
-    if(size<0) { 
+    declared_size=ival; 
+    if(declared_size<0) { 
         yyerror("The size of an array needs to be a positive integer."); 
-        size=-1; 
+        /* declared_size=-1 */
     }
 }
 
@@ -508,9 +514,9 @@ void setupNewComplexVariable(char type[255]) {
     else { 
         set_attr(_yylval.ident, "type", type); 
         char str[5];
-        sprintf(str, "%d", size); 
-        if(size!=-1) set_attr(_yylval.ident, "size", str); 
-        size=-1; 
+        sprintf(str, "%d", declared_size); 
+        if(declared_size!=-1) set_attr(_yylval.ident, "size", str); 
+        /* declared_size=-1;  */
     }
 }
 

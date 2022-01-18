@@ -151,6 +151,9 @@
     char save[50];
     int currentColumn = 1;
     int showsuccess = 0;
+
+    // flag for entering loops
+    int flag=0;
     
     _YYSTYPE _yylval;
 
@@ -239,9 +242,9 @@ statement: declare SEMICOLON {
             /*yysuccess(1, "Assignment.");*/
 
         }
-        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-            backpatch(quads, currentInstruction+1, $8.nextlist, $2);
-            backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
+        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc CLOSEHOOK {flag--;} {
+            backpatch(quads, currentInstruction+1, $9.nextlist, $2);
+            backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $8);
             $$.nextlist = $4.boolean_expression.falselist;
             
             union operandValue* operand1_val = create_operand_value();
@@ -259,9 +262,9 @@ statement: declare SEMICOLON {
             currentInstruction++;
 
         }
-		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-            backpatch(quads, currentInstruction+1, $15.nextlist, $6);
-            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
+		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc CLOSEHOOK {flag--;} {
+            backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $15);
             $$.nextlist = $7.boolean_expression.falselist;
             
             union operandValue* operand1_val = create_operand_value();
@@ -273,7 +276,7 @@ statement: declare SEMICOLON {
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $9, $11-1, $14, currentInstruction-1);
+            migrate(quads, $9, $11-1, $15, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -281,10 +284,10 @@ statement: declare SEMICOLON {
             quads[currentInstruction] = *quad;
             currentInstruction++;
         }
-		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc CLOSEHOOK {flag--;} {
 
-            backpatch(quads, currentInstruction+1, $15.nextlist, $6);
-            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
+            backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $15);
             $$.nextlist = $7.boolean_expression.falselist;
             
             union operandValue* operand1_val = create_operand_value();
@@ -296,7 +299,7 @@ statement: declare SEMICOLON {
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $9, $11-1, $14, currentInstruction-1);
+            migrate(quads, $9, $11-1, $15, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -352,8 +355,8 @@ statement: declare SEMICOLON {
         | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
 		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call with params statement.");}
  
-        | BREAK SEMICOLON {yysuccess(1,"Break statement.") ;}
-        | CONTINUE SEMICOLON {yysuccess(1,"Continue statement.") ;}
+        | BREAK SEMICOLON {if(flag<=0) yyerror("Break statement not allowed outside of a loop."); else yysuccess(1,"Break statement inside loop."); }
+        | CONTINUE SEMICOLON { if(flag<=0) yyerror("Continue statement not allowed outside of a loop."); else yysuccess(1,"Continue statement inside loop.");}
         | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Print output.");}
         | error SEMICOLON {yyerror("wrong statement"); yyerrok;}

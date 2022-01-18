@@ -104,8 +104,28 @@ _#
     $_ y;
     y <- 100;
     $_ z <- 0;
+
+    continue; #error
+
     loop (x < 10){
         y <- y + 1;
         x <- x + 1;
+        loop (x > 10){
+            ? (x = 2){
+                continue; 
+            } 
+            : (){
+                loop (x > 0){
+                    x <- x + 1;
+                    ? (x = 3){
+                        continue;
+                    }
+                }
+                
+            }
+        }
+        break;
     }
+
+    break; #error
 }

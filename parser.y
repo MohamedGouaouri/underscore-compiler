@@ -231,7 +231,7 @@ bloc: bloc  statement  M {
         /*yysuccess(1, "Emptyness.");*/
 
      } 
-     | error bloc {yyerror("wrong statement inside block."); yyerrok;}
+     /* | error bloc {yyerror("wrong statement inside block."); yyerrok;} */
      ;
 
 statement: declare SEMICOLON {
@@ -326,51 +326,31 @@ statement: declare SEMICOLON {
         | ifstmt elsestmt {
             $$.nextlist = $2.nextlist;
         }
-        // If-else statement (grammar change required, I might be wrong sorry x) )
-
-        | IF OPENPARENTHESIS expression CLOSEPARENTHESIS  OPENHOOK  M bloc CLOSEHOOK N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK{
-            // S -> if ( B ) M_1 S_1 N else M_2 S_2
-            
-                //backpatch ( B: truelist ; M 1 : instr );
-                //backpatch ( B: falselist ; M 2 : instr );
-                //temp = merge ( S 1 : nextlist ; N: nextlist );
-                //S: nextlist = merge ( temp ; S 2 : nextlist );
-            
-            // check if $3 evaluates to true or false
-
-            // backpatching
-            // backpatch(quads, currentInstruction+1, $3.boolean_expression.truelist, $5); // backpatch it to M1.inst
-            // backpatch(quads, currentInstruction+1, $3.boolean_expression.falselist, $11); // backpatch it toM2.inst
-            // struct jump_indices* temp = merge($7.nextlist, $9.nextlist);
-
-            // $$.nextlist = merge(temp, $15.nextlist);
-        
-        
-        }
         // caused some errors
 		//  | ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
 		/* | ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}  */
 
-        | RETURN expression SEMICOLON {yysuccess(1, "Return statement.");}
-        | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
+        /* | RETURN expression SEMICOLON {yysuccess(1, "Return statement.");} */
+        /* | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
 		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call with params statement.");}
  
         | BREAK SEMICOLON {if(flag<=0) yyerror("Break statement not allowed outside of a loop."); else yysuccess(1,"Break statement inside loop."); }
         | CONTINUE SEMICOLON { if(flag<=0) yyerror("Continue statement not allowed outside of a loop."); else yysuccess(1,"Continue statement inside loop.");}
         | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Print output.");}
-        | error SEMICOLON {yyerror("wrong statement"); yyerrok;}
+         */
+        /* | error SEMICOLON {yyerror("wrong statement"); yyerrok;} */
         ;
 
 
 type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
-		    | STRINGDECLARE {strcpy($$ , _yylval.type);}
+		    /* | STRINGDECLARE {strcpy($$ , _yylval.type);}
 			| CONSTDECLARE NUMBERDECLARE {strcpy($$ , "nombre constant");}
 			| CONSTDECLARE STRINGDECLARE {strcpy($$ , "chaine constante"); }
 			| BOOLEENDECLARE {strcpy($$ , _yylval.type); }
 			| POINTERDECLARE {strcpy($$ , _yylval.type); }
 			| TABLEDECLARE {strcpy($$ , _yylval.type); }
-			| STRUCTDECLARE {strcpy($$ , _yylval.type); }
+			| STRUCTDECLARE {strcpy($$ , _yylval.type); } */
             ;
 just_declare: type_declare ID { 
                 if(_yylval.ident == NULL) yyerror("ID already declared!"); 
@@ -381,6 +361,7 @@ init_declare: just_declare ASSIGNMENT expression {
                     char sym[255];
                     // get symbole from symtable
                     strcpy(sym, symt->tail->symName);
+                    printf("Symbol declared recenlty: %s\n", sym);
                     if (!$3.is_boolean){
                         union operandValue* operand1_val = create_operand_value();
                         union operandValue* operand2_val = create_operand_value();
@@ -416,11 +397,11 @@ init_declare: just_declare ASSIGNMENT expression {
 
                     
             }
-            | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
+            /* | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET */
             ;
-values_eps: %empty
+/* values_eps: %empty
           | call_param /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
-          ;
+          ; 
             
 declare: just_declare
 	   | init_declare
@@ -506,8 +487,8 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
         }
         ;
 
-call_param: expression
-		  | expression COMMA call_param
+/* call_param: expression
+		  | expression COMMA call_param */
 
 
 //General formula for experession
@@ -517,7 +498,13 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.falselist = $2.boolean_expression.falselist;
             $$.boolean_expression.truelist = $2.boolean_expression.truelist;
-        }else{
+        }
+        else if($2.arithmetic_expression.is_litteral){
+            $$.arithmetic_expression.value = $2.arithmetic_expression.value;
+            $$.arithmetic_expression.is_litteral = $2.arithmetic_expression.is_litteral;
+            // printf("VALUE: x) %d\n", $2.arithmetic_expression.value);
+        }
+        else{
             // is expression
             strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);
         }

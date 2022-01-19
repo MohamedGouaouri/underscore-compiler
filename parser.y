@@ -248,6 +248,7 @@ statement: declare SEMICOLON {
 
         }
         | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+if (!$4.is_boolean){yyerror("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $8.nextlist, $2);
             backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
             $$.nextlist = $4.boolean_expression.falselist;
@@ -268,6 +269,7 @@ statement: declare SEMICOLON {
 
         }
 		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
+if (!$7.is_boolean){yyerror("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
@@ -290,7 +292,7 @@ statement: declare SEMICOLON {
             currentInstruction++;
         }
 		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-
+if (!$7.is_boolean){yyerror("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
@@ -497,6 +499,7 @@ assign: ID {
       ;
 
 ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M statement CLOSEHOOK {
+if (!$3.is_boolean){yyerror("expression in ?() should be boolean! ");}
             // yysuccess(1,"if stmt.");
             // Check if <expression> is boolean, otherwise throw a semantic error
 

@@ -80,7 +80,7 @@ void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int
         {
             int where = q->index;
             quads[where].op1->value.label = to;
-            printf("Chaining done to: %d\n", where);
+            printf("Chaining done : %d to %d\n", where, to);
             q = q->next;
         }
     }

@@ -161,9 +161,10 @@
     quadruplets_node quads[MAXCODE];
     int currentInstruction = 0;
 
-    // temp name storage just for testing
-    // cuz they must be stored in the semtable
+    // temp name storage
     char tempnames[255][255]; int indicator;
+
+    int i=0;
 
 %}
 
@@ -219,11 +220,19 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!
 
 
 
-bloc: bloc  statement  M {
+bloc: bloc statement  M {
             yysuccess(1, "Block.");
            if ($2.nextlist != NULL){
                 backpatch(quads, currentInstruction+1, $2.nextlist, $3);
                 $$.nextlist = $2.nextlist;
+           } 
+           if ($2.continuelist != NULL){
+               yyerror("not null");
+               $$.continuelist = merge($1.continuelist, $2.continuelist);
+           }
+           if ($2.breaklist != NULL){
+               yyerror("not null break");
+               $$.breaklist = merge($1.breaklist, $2.breaklist);
            }
         }
     
@@ -242,8 +251,20 @@ statement: declare SEMICOLON {
             /*yysuccess(1, "Assignment.");*/
 
         }
-        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc CLOSEHOOK {flag--;} {
-            backpatch(quads, currentInstruction+1, $9.nextlist, $2);
+        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M CLOSEHOOK {flag--;} {
+
+            //backpatch(quads, currentInstruction+1, $9.nextlist, $2);
+
+            if ($9.continuelist == NULL){
+               yyerror("continue list null");
+            }
+            if ($9.breaklist == NULL){
+               yyerror("break list null");
+            }
+            
+            backpatch(quads, currentInstruction+1, $9.continuelist, $2);
+            backpatch(quads, currentInstruction+1, $9.breaklist, $10+1);
+        
             backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $8);
             $$.nextlist = $4.boolean_expression.falselist;
             
@@ -262,10 +283,25 @@ statement: declare SEMICOLON {
             currentInstruction++;
 
         }
-		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc CLOSEHOOK {flag--;} {
-            backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M CLOSEHOOK {flag--;} {
+            
+            //backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+
+            yyerror("hi");
+
+
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $15);
             $$.nextlist = $7.boolean_expression.falselist;
+
+            if($16.breaklist == NULL) {
+                yyerror("breaklist null");
+            }
+            if($16.continuelist == NULL) {
+                yyerror("breaklist null");
+            }
+
+            backpatch(quads, currentInstruction+1, $16.continuelist, $17);
+            backpatch(quads, currentInstruction+1, $16.breaklist, $17+1);
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -284,11 +320,15 @@ statement: declare SEMICOLON {
             quads[currentInstruction] = *quad;
             currentInstruction++;
         }
-		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc CLOSEHOOK {flag--;} {
+		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M CLOSEHOOK {flag--;} {
 
-            backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+            //backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $15);
             $$.nextlist = $7.boolean_expression.falselist;
+
+            backpatch(quads, currentInstruction+1, $16.continuelist, $17);
+            backpatch(quads, currentInstruction+1, $16.breaklist, $17+1);
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -322,20 +362,92 @@ statement: declare SEMICOLON {
         } */
         | ifstmtonly {
             $$.nextlist = $1.nextlist;
+            $$.continuelist = $1.continuelist; 
+            $$.breaklist = $1.breaklist; 
         }
         | ifstmt elsestmt {
-            $$.nextlist = $2.nextlist;
+            //$$.nextlist = $2.nextlist;
+            $$.nextlist = merge( $1.nextlist, $2.nextlist );
+            $$.continuelist = merge( $1.continuelist, $2.continuelist );
+            $$.breaklist = merge( $1.breaklist, $2.breaklist );
         }
+
+        //| IF OPENPARENTHESIS expression CLOSEPARENTHESIS  OPENHOOK  M bloc CLOSEHOOK N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK{
+            // S -> if ( B ) M_1 S_1 N else M_2 S_2
+            
+                //backpatch ( B: truelist ; M 1 : instr );
+                //backpatch ( B: falselist ; M 2 : instr );
+                //temp = merge ( S 1 : nextlist ; N: nextlist );
+                //S: nextlist = merge ( temp ; S 2 : nextlist );
+            
+            // check if $3 evaluates to true or false
+
+            // backpatching
+            // backpatch(quads, currentInstruction+1, $3.boolean_expression.truelist, $5); // backpatch it to M1.inst
+            // backpatch(quads, currentInstruction+1, $3.boolean_expression.falselist, $11); // backpatch it toM2.inst
+            // struct jump_indices* temp = merge($7.nextlist, $9.nextlist);
+
+            // $$.nextlist = merge(temp, $15.nextlist);
+        
+        
+        //}
         // caused some errors
 		//  | ifstmt elifstmt {yysuccess(1,"If elif statement.") ;}
 		/* | ifstmt elifstmt elsestmt {yysuccess(1,"If elif else statement.");}  */
 
         /* | RETURN expression SEMICOLON {yysuccess(1, "Return statement.");} */
         /* | ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call without params statement.");}
-		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call with params statement.");}
+		| ID OPENPARENTHESIS { checkif_globalsymbolexists(_yylval.ident); } call_param CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Call with params statement.");}*/
  
-        | BREAK SEMICOLON {if(flag<=0) yyerror("Break statement not allowed outside of a loop."); else yysuccess(1,"Break statement inside loop."); }
-        | CONTINUE SEMICOLON { if(flag<=0) yyerror("Continue statement not allowed outside of a loop."); else yysuccess(1,"Continue statement inside loop.");}
+        | BREAK SEMICOLON {
+            if(flag<=0) yyerror("Break statement not allowed outside of a loop."); 
+            else {
+                yysuccess(1,"Break statement inside loop."); 
+                printf("%d - break inside else\n", i); 
+
+                $$.breaklist = makelist(currentInstruction);
+
+                union operandValue* operand1_val = create_operand_value();
+                union operandValue* operand2_val = create_operand_value();
+                union operandValue* result_val = create_operand_value();
+                operand1_val->label = -1;
+
+                operand2_val->empty = 1;
+                result_val->empty = 1;
+                
+                 // gen quad
+                quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+                quads[currentInstruction] = *quad;
+                currentInstruction++;
+
+            }
+        }
+        | CONTINUE SEMICOLON { 
+            if(flag<=0) yyerror("Continue statement not allowed outside of a loop."); 
+            else {      
+                yysuccess(1,"Continue statement inside loop.");
+
+                
+
+                $$.continuelist = makelist(currentInstruction);
+                
+
+                union operandValue* operand1_val = create_operand_value();
+                union operandValue* operand2_val = create_operand_value();
+                union operandValue* result_val = create_operand_value();
+                operand1_val->label = -1;
+
+                operand2_val->empty = 1;
+                result_val->empty = 1;
+                
+                 // gen quad
+                quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+                quads[currentInstruction] = *quad;
+                currentInstruction++;
+            }
+        }/*
         | READ OPENPARENTHESIS ID { checkif_localsymbolexists(_yylval.ident); } CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Read input.");}
 		| WRITE OPENPARENTHESIS expression CLOSEPARENTHESIS SEMICOLON {yysuccess(1, "Print output.");}
          */
@@ -463,6 +575,9 @@ ifstmtonly: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSE
             backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
             $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
 
+            $$.continuelist = $7.continuelist;
+            $$.breaklist = $7.breaklist;
+
         }
       /* | IF error OPENHOOK bloc CLOSEHOOK {yyerror("wrong syntax inside if()."); yyerrok;}  */
       ;
@@ -474,14 +589,22 @@ ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK
             $$.boolean_expression.truelist = $3.boolean_expression.truelist;
             $$.boolean_expression.falselist = $3.boolean_expression.falselist;
             $$.m1 = $6;
+
+            $$.continuelist = $7.continuelist;
+            $$.breaklist = $7.breaklist;
+
+
     }
 elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             // yysuccess(1,"else stmt.");
 
-            // // I don't know what I'm doing x) I'm sorry
             backpatch(quads, currentInstruction+1, ($<ifstatement>0).boolean_expression.truelist, ($<ifstatement>0).m1); // backpatch it to M1.inst
             backpatch(quads, currentInstruction+1, ($<ifstatement>0).boolean_expression.falselist, $3); // backpatch it toM2.inst
             struct jump_indices* temp = merge(($<ifstatement>0).nextlist, $1.nextlist);
+
+            $$.continuelist = $7.continuelist;
+            $$.breaklist = $7.breaklist;
+
 
             $$.nextlist = merge(temp, $7.nextlist);
         }

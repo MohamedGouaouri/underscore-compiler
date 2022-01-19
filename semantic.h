@@ -25,6 +25,9 @@ struct statement
     /*S: nextlist is a list of all conditional and unconditional jumps
     to the instruction following the code for statement S in execution order*/
     struct jump_indices *nextlist;
+    struct jump_indices *breaklist;
+    struct jump_indices *continuelist;
+    
 };
 
 struct boolean_expression
@@ -64,6 +67,8 @@ struct expression
 
 struct ifstatement
 {
+    struct jump_indices *breaklist;
+    struct jump_indices *continuelist;
     struct boolean_expression boolean_expression;
     struct jump_indices *nextlist;
     int m1;

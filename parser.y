@@ -211,7 +211,7 @@ comma_params: %empty
             ;
 
 
-param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!"); else set_attr(_yylval.ident, "type", $1); } ;
+param: type_declare ID { if(_yylval.ident == NULL) yyerror_semantic("ID already declared!"); else set_attr(_yylval.ident, "type", $1); } ;
 
 
 
@@ -240,7 +240,7 @@ statement: declare SEMICOLON {
 
         }
         | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-if (!$4.is_boolean){yyerror("expression in loop() should be boolean! ");}
+if (!$4.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $8.nextlist, $2);
             backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
             $$.nextlist = $4.boolean_expression.falselist;
@@ -261,7 +261,7 @@ if (!$4.is_boolean){yyerror("expression in loop() should be boolean! ");}
 
         }
 		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-if (!$7.is_boolean){yyerror("expression in loop() should be boolean! ");}
+if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
@@ -284,7 +284,7 @@ if (!$7.is_boolean){yyerror("expression in loop() should be boolean! ");}
             currentInstruction++;
         }
 		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-if (!$7.is_boolean){yyerror("expression in loop() should be boolean! ");}
+if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
@@ -328,7 +328,7 @@ type_declare: NUMBERDECLARE {strcpy($$ , _yylval.type); }
 			/*| STRUCTDECLARE {strcpy($$ , _yylval.type); } */
             ;
 just_declare: type_declare ID { 
-                if(_yylval.ident == NULL) yyerror("ID already declared!"); 
+                if(_yylval.ident == NULL) yyerror_semantic("ID already declared!"); 
                 else set_attr(_yylval.ident, "type", $1);
             }
             ;
@@ -346,12 +346,12 @@ init_declare: just_declare ASSIGNMENT expression {
                             if(strcmp(node->name,"type")== 0){
                             if($3.is_boolean){
                         if(strcmp(node->val,"boolean")== 0)			{type_checked=true;yysuccess(1,"boolean checked");}
-            else{yyerror("type mismatch");}
+            else{yyerror_semantic("type mismatch");}
             }
                             else if($3.is_string){
-            if( strcmp(node->val,"string")== 0){type_checked=true;yysuccess(1,"string checked");}else{yyerror("type mismatch");}}
+            if( strcmp(node->val,"string")== 0){type_checked=true;yysuccess(1,"string checked");}else{yyerror_semantic("type mismatch");}}
                             else if(strcmp(node->val,"number")== 0){type_checked=true;yysuccess(1,"number checked");}
-            else{yyerror("type mismatch");}
+            else{yyerror_semantic("type mismatch");}
                         }
                         node=node->next;
                         }	
@@ -455,7 +455,7 @@ assign: ID {
       ;
 
 ifstmtonly: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
-if (!$3.is_boolean){yyerror("expression in ?() should be boolean!");}
+if (!$3.is_boolean){yyerror_semantic("expression in ?() should be boolean!");}
             // yysuccess(1,"if stmt.");
             // Check if <expression> is boolean, otherwise throw a semantic error
 
@@ -598,7 +598,7 @@ expression:
             currentInstruction++;
 
 	}
-	else{yyerror(" = takes Expressions of same type");}
+	else{yyerror_semantic(" = takes Expressions of same type");}
 
     }
     | expression NONEQUAL expression{
@@ -657,11 +657,11 @@ expression:
             currentInstruction++;
 
         }
-	else{yyerror(" != takes Expressions of same type");}
+	else{yyerror_semantic(" != takes Expressions of same type");}
     }
 
     | expression INFERIOR expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this operation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
             $$.is_boolean = true;
@@ -713,10 +713,10 @@ expression:
             currentInstruction++;
 
         }
-	else{yyerror(" < takes Expressions of same type");}
+	else{yyerror_semantic(" < takes Expressions of same type");}
     }
     | expression INFERIOREQUAL expression{
-        if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+        if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
             $$.is_boolean = true;
@@ -767,11 +767,11 @@ expression:
             currentInstruction++;
 
         }
-	else{yyerror(" <= takes Expressions of same type");}
+	else{yyerror_semantic(" <= takes Expressions of same type");}
 
     }
     | expression SUPERIOR expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
             $$.is_boolean = true;
@@ -823,11 +823,11 @@ expression:
             currentInstruction++;
 
         }
-	else{yyerror(" > takes Expressions of same type");}
+	else{yyerror_semantic(" > takes Expressions of same type");}
 
     }
     | expression SUPERIOREQUAL expression{
-        if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+        if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
             $$.is_boolean = true;
@@ -880,13 +880,13 @@ expression:
             
 
         }
-	else{yyerror(" >= takes Expressions of same type");}
+	else{yyerror_semantic(" >= takes Expressions of same type");}
 
     }
 
     // Arithmetic expressions
     | expression ADD expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
         $$.is_boolean = false;
@@ -930,11 +930,11 @@ expression:
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
         strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);}
-	else{yyerror(" >= takes Expressions of same type");}
+	else{yyerror_semantic(" >= takes Expressions of same type");}
 
     }
     | expression SUB expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
         $$.is_boolean = false;
@@ -975,11 +975,11 @@ expression:
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
         strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);}
-	else{yyerror(" >= takes Expressions of same type");}
+	else{yyerror_semantic(" >= takes Expressions of same type");}
 
     }
     | expression MULT expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
         $$.is_boolean = false;
@@ -1020,10 +1020,10 @@ expression:
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
         strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);}
-	else{yyerror(" >= takes Expressions of same type");}
+	else{yyerror_semantic(" >= takes Expressions of same type");}
     }
     | expression DIV expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
         $$.is_boolean = false;
@@ -1064,7 +1064,7 @@ expression:
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
         strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);}
-	else{yyerror(" >= takes Expressions of same type");}
+	else{yyerror_semantic(" >= takes Expressions of same type");}
     }
 
     // Frozen for the moment since we don't have quad ops for these high level operations
@@ -1113,7 +1113,7 @@ expression:
 
     }
     | expression POWER expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror("invalid type for this opperation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this opperation");}
 
 	else if ($1.arithmetic_expression.is_litteral && $3.arithmetic_expression.is_litteral){
         $$.is_boolean = false;
@@ -1157,7 +1157,7 @@ expression:
         currentInstruction++;
         $$.arithmetic_expression.is_litteral = false;
         strcpy($$.arithmetic_expression.sym, tempnames[indicator-1]);}
-	else{yyerror(" >= takes Expressions of same type");}
+	else{yyerror_semantic(" >= takes Expressions of same type");}
 
     }
 /* 
@@ -1264,6 +1264,10 @@ N: %empty {
 
 void yyerror(char *s){
     fprintf(stdout, "File '%s', line %d, character %d : syntax error: " RED " %s " RESET "\n", currentFileName, yylineno, currentColumn, s);
+    //fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
+}
+void yyerror_semantic(char *s){
+    fprintf(stdout, "File '%s', line %d, character %d : semantic error: " RED " %s " RESET "\n", currentFileName, yylineno, currentColumn, s);
     //fprintf(stdout, "%d: " RED " %s " RESET " \n", yylineno, s);
 }
 

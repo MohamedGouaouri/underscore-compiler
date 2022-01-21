@@ -51,22 +51,27 @@ struct jump_indices *makelist(int i)
 
 struct jump_indices *merge(struct jump_indices *q1, struct jump_indices *q2)
 {
-    if (q1 != NULL)
+    struct jump_indices *merge_result = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+    struct jump_indices *p = merge_result;
+
+    while (q1 != NULL)
     {
-        struct jump_indices *prev = q1;
-        struct jump_indices *ptr = q1;
-        while (ptr->next != NULL)
-        {
-            prev = ptr;
-            ptr = ptr->next;
-        }
-        prev->next = q2;
-        return q1;
+        p->index = q1->index;
+        struct jump_indices *next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+        p->next = next;
+        p = p->next;
+        q1 = q1->next;
     }
-    else
+
+    while (q2 != NULL)
     {
-        return q2;
+        p->index = q2->index;
+        struct jump_indices *next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+        p->next = next;
+        p = p->next;
+        q2 = q2->next;
     }
+    return merge_result;
 }
 
 void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int to)

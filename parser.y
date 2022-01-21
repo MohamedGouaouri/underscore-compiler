@@ -166,6 +166,8 @@
 
     int i=0;
 
+    struct statement currentBloc;
+
 %}
 
 %%
@@ -241,23 +243,21 @@ bloc: bloc statement  M {
                 $$.continuelist = NULL;
             }
 
-
         }
     
      | %empty {
-        /*yysuccess(1, "Emptyness.");*/
-
+        $$.breaklist = NULL;
+        $$.nextlist = NULL;
+        $$.continuelist = NULL;
      } 
      ;
 
 statement: declare SEMICOLON {
-            /*yysuccess(1, "Simple declaration / with assign.");*/
             $$.nextlist = NULL;
         }
 
 
 		| assign SEMICOLON {
-            /*yysuccess(1, "Assignment.");*/
 
         }
         | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
@@ -300,14 +300,8 @@ statement: declare SEMICOLON {
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
 
-            // if($16.breaklist == NULL) {
-            //     yyerror("breaklist null");
-            // }
-            // if($16.continuelist == NULL) {
-            //     yyerror("breaklist null");
-            // }
-            // backpatch(quads, currentInstruction+1, $15.continuelist, $17);
-            // backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
+            backpatch(quads, currentInstruction+1, $15.continuelist, $17);
+            backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -332,8 +326,8 @@ statement: declare SEMICOLON {
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
 
-            // backpatch(quads, currentInstruction+1, $16.continuelist, $17);
-            // backpatch(quads, currentInstruction+1, $16.breaklist, $17+1);
+            backpatch(quads, currentInstruction+1, $15.continuelist, $17);
+            backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -373,18 +367,9 @@ statement: declare SEMICOLON {
 
             $$.nextlist = $2.nextlist;
             
-            if ($2.breaklist != NULL){
-                yyerror("break ifelse not null");
-                $$.breaklist = $2.breaklist ;
-            }else{
-                yyerror("break else null");
-                $$.breaklist = NULL;
-            }
-            if ($2.continuelist != NULL){
-                $$.continuelist = $2.continuelist ;
-            }else{
-                $$.continuelist = NULL;
-            }
+            $$.breaklist = merge($1.breaklist, $2.breaklist);           
+            $$.continuelist = merge($1.continuelist, $2.continuelist) ;
+           
             
         }
 
@@ -595,22 +580,23 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             $$.nextlist = merge(temp, $7.nextlist);
 
             //Merging breaklist with nextlist without understanding why :)
-            $$.nextlist = merge($$.nextlist, $7.breaklist);
+            // $$.nextlist = merge($$.nextlist, $7.breaklist);
 
-            // if ($7.breaklist != NULL){
-            //     temp = merge(($<ifstatement>0).breaklist, $7.breaklist);
-            //     $$.breaklist = temp;
-            //     yyerror("break else not null");
-            // }else{
-            //     $$.breaklist = NULL;
-            //     yyerror("break else null");
-            // }
-            // if ($7.continuelist != NULL){
-            //     temp = merge(($<ifstatement>0).continuelist, $7.continuelist);
-            //     $$.continuelist = temp;
-            // }else{
-            //     $$.continuelist = NULL;
-            // }
+            if ($7.breaklist != NULL){
+                temp = merge(($<ifstatement>0).breaklist, $7.breaklist);
+                $$.breaklist = temp;
+                yyerror("break else not null");
+            }else{
+                $$.breaklist = NULL;
+                yyerror("break else null");
+            }
+            if ($7.continuelist != NULL){
+                temp = merge(($<ifstatement>0).continuelist, $7.continuelist);
+                $$.continuelist = temp;
+            }else{
+                $$.continuelist = NULL;
+            }
+            // $$.breaklist = $7.breaklist;
 
 };
         

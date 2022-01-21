@@ -1,66 +1,26 @@
-#_
-()_ g()
-{
-    #$_ x;
-    $_ y;
-    y <- 100;
-    $_ z <- 0;
+# from asyncore import loop
 
-    continue; #error
-
-    loop (x < 10){
-        y <- y + 1;
-        x <- x + 1;
-        loop (i <- 0; x > 10; i <- i+1){
-            ? (x = 2){
-                x <- x+1;
-            } 
-            : (){
-                loop (i <- 1; i < 3; i <- i+1){
-                    x <- x + 1;
-                    ? (x = 3){
-                        continue;
-                    }
-                }
-                
-            }
-        }
-        break;
-    }
-
-    break; #error
-}
-_#
 
 ()_ f(){
 
-    $_ x <- 110;
-    loop ( x < 200 ) {
-        x <- 0;
-
-        ? ( x = 120 ) {
+    $_ x;
+    # loop ( x <- 0; x < 10; x <- x + 2 ) {
+        ?( x > 0 && ( x = 9 || x > 9 ) && true ){
             x <- 1;
-            break;
-        } 
-
-        loop(x <- 2; x <= 3; x<-x+4) {
-            x <- 5;
-            ? (true) {
-                x <- 6;
-                break;
-                continue;
-                x <- 7;
-            }
-            :() {
-                x <- 8;
-                break;
-            }
+            # break;
+        } : (){
+            x <- x * 3;
         }
-        
-        
-        x <- 9;
-    }
+        # continue;
+    # }
+    # $_ y;
+    # loop(true){
+    #     ? ( ( (true && ( false && false )) ) ){
+    #         x <- x * 3;
+    #         break;
+    #     }
+    #     break;
+    # }
 
-    $_ y <- 10;
 }
 

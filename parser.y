@@ -118,17 +118,18 @@
 //Comparison
 %left COMMA
 %nonassoc ASSIGNMENT
-%left OR
-%left AND
-%nonassoc EQUAL NONEQUAL
-%nonassoc INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
+%right OR
+%right AND
+%left NON
+
+%nonassoc EQUAL NONEQUAL INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
 %left ADD SUB
 %left MULT DIV MOD
-%nonassoc NON
+
 %nonassoc ADDRESSVALUE POINTERVALUE
 %left DOT OPENBRACKET CLOSEBRACKET
 %left POWER
-%left OPENPARENTHESIS CLOSEPARENTHESIS
+%left OPENPARENTHESIS
 
 %type <string> ret
 
@@ -222,18 +223,14 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror("ID already declared!
 
 bloc: bloc statement  M {
             yysuccess(1, "Block.");
-           if ($2.nextlist != NULL){
+            if ($2.nextlist != NULL){
                 backpatch(quads, currentInstruction+1, $2.nextlist, $3);
                 $$.nextlist = $2.nextlist;
-           } 
-           if ($2.continuelist != NULL){
-               yyerror("not null");
-               $$.continuelist = merge($1.continuelist, $2.continuelist);
-           }
-           if ($2.breaklist != NULL){
-               yyerror("not null break");
-               $$.breaklist = merge($1.breaklist, $2.breaklist);
-           }
+            } 
+
+            $$.continuelist = merge($1.continuelist, $2.continuelist);
+            $$.breaklist = merge($1.breaklist, $2.breaklist);
+
         }
     
      | %empty {
@@ -253,13 +250,15 @@ statement: declare SEMICOLON {
         }
         | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M CLOSEHOOK {flag--;} {
 
-            //backpatch(quads, currentInstruction+1, $9.nextlist, $2);
+            // struct jumps_indices *temp = merge($9.nextlist, NULL);
+            // backpatch(quads, currentInstruction+1, $9.nextlist, $2);
 
-            if ($9.continuelist == NULL){
-               yyerror("continue list null");
+            if ($9.continuelist != NULL){
+                // backpatch(quads, currentInstruction+1, $9.continuelist, $2);
             }
-            if ($9.breaklist == NULL){
-               yyerror("break list null");
+            if ($9.breaklist != NULL){
+                // printf("BREAK LIST NOT NULL %d \n", $9.breaklist->index);
+                // backpatch(quads, currentInstruction+1, $9.breaklist, $10+1);
             }
             
             backpatch(quads, currentInstruction+1, $9.continuelist, $2);
@@ -267,6 +266,7 @@ statement: declare SEMICOLON {
         
             backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $8);
             $$.nextlist = $4.boolean_expression.falselist;
+
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -285,7 +285,7 @@ statement: declare SEMICOLON {
         }
 		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M CLOSEHOOK {flag--;} {
             
-            //backpatch(quads, currentInstruction+1, $16.nextlist, $6);
+            backpatch(quads, currentInstruction+1, $16.nextlist, $6);
 
             yyerror("hi");
 
@@ -364,10 +364,13 @@ statement: declare SEMICOLON {
             $$.nextlist = $1.nextlist;
             $$.continuelist = $1.continuelist; 
             $$.breaklist = $1.breaklist; 
+
+            scheduled($$.nextlist);
         }
         | ifstmt elsestmt {
-            //$$.nextlist = $2.nextlist;
-            $$.nextlist = merge( $1.nextlist, $2.nextlist );
+            $$.nextlist = $2.nextlist;
+            // $$.nextlist = merge( $1.nextlist, $2.nextlist );
+            scheduled( merge( $1.nextlist, $2.nextlist ));
             $$.continuelist = merge( $1.continuelist, $2.continuelist );
             $$.breaklist = merge( $1.breaklist, $2.breaklist );
         }
@@ -573,7 +576,7 @@ ifstmtonly: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSE
             // Check if <expression> is boolean, otherwise throw a semantic error
 
             backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
-            $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+            $$.nextlist = merge($7.nextlist, $3.boolean_expression.falselist);
 
             $$.continuelist = $7.continuelist;
             $$.breaklist = $7.breaklist;
@@ -585,7 +588,8 @@ ifstmtonly: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSE
 ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
             // backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
             // backpatch(quads,currentInstruction+1, $3.boolean_expression.falselist, $6);
-            // $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+            // $$.nextlist = merge($7.nextlist, $3.boolean_expression.falselist);
+            $$.nextlist = $7.nextlist;
             $$.boolean_expression.truelist = $3.boolean_expression.truelist;
             $$.boolean_expression.falselist = $3.boolean_expression.falselist;
             $$.m1 = $6;
@@ -607,6 +611,8 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
 
 
             $$.nextlist = merge(temp, $7.nextlist);
+            // $$.nextlist = merge(($<ifstatement>0).nextlist, $7.nextlist);
+            // scheduled(merge(temp, $7.nextlist));
         }
         ;
 
@@ -621,6 +627,10 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.falselist = $2.boolean_expression.falselist;
             $$.boolean_expression.truelist = $2.boolean_expression.truelist;
+            // $$.boolean_expression = $2.boolean_expression;
+            // printf("Hi1 !\n");
+            // scheduled($$.boolean_expression.truelist);
+            // scheduled($2.boolean_expression.truelist);
         }
         else if($2.arithmetic_expression.is_litteral){
             $$.arithmetic_expression.value = $2.arithmetic_expression.value;
@@ -639,6 +649,7 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.truelist = $2.boolean_expression.falselist;
             $$.boolean_expression.falselist = $2.boolean_expression.truelist;
+            printf("Hi2 !\n");
 
         }
     }

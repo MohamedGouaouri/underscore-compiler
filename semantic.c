@@ -80,7 +80,6 @@ void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int
         {
             int where = q->index;
             quads[where].op1->value.label = to;
-            printf("Chaining done : %d to %d\n", where, to);
             q = q->next;
         }
     }
@@ -98,26 +97,33 @@ void migrate(quadruplets_node quads[], int i1, int i2, int j1, int j2)
     {
         part1[i] = quads[i1 + i];
     }
-    printf("hello\n");
+
     for (size_t i = 0; i < j2 - j1 + 1; i++)
     {
         /* code */
         part2[i] = quads[j1 + i];
     }
-    printf("hello\n");
     int j = i1;
     for (size_t i = 0; i < j2 - j1 + 1; i++)
     {
         quads[j] = part2[i];
         j++;
     }
-    printf("hello\n");
     for (size_t i = 0; i < i2 - i1 + 1; i++)
     {
         /* code */
         quads[j] = part1[i];
         j++;
     }
-    // printf(print_quadruplets_node[]);
-    print_quadruplets_node(&quads[0]);
+}
+
+void scheduled(struct jump_indices *p)
+{
+    while (p != NULL)
+    {
+        /* code */
+        printf("%d -> ", p->index);
+        p = p->next;
+    }
+    printf("NULL \n");
 }

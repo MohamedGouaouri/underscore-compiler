@@ -117,17 +117,18 @@
 //Comparison
 %left COMMA
 %nonassoc ASSIGNMENT
-%left OR
-%left AND
-%nonassoc EQUAL NONEQUAL
-%nonassoc INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
+%right OR
+%right AND
+%left NON
+
+%nonassoc EQUAL NONEQUAL INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
 %left ADD SUB
 %left MULT DIV MOD
-%nonassoc NON
+
 %nonassoc ADDRESSVALUE POINTERVALUE
 %left DOT OPENBRACKET CLOSEBRACKET
 %left POWER
-%left OPENPARENTHESIS CLOSEPARENTHESIS
+%left OPENPARENTHESIS
 
 %type <string> ret
 
@@ -150,6 +151,9 @@
     char save[50];
     int currentColumn = 1;
     int showsuccess = 0;
+
+    // flag for entering loops
+    int flag=0;
     
     _YYSTYPE _yylval;
 
@@ -157,9 +161,10 @@
     quadruplets_node quads[MAXCODE];
     int currentInstruction = 0;
 
-    // temp name storage just for testing
-    // cuz they must be stored in the semtable
+    // temp name storage
     char tempnames[255][255]; int indicator;
+
+    int i=0;
 
 %}
 
@@ -215,12 +220,16 @@ param: type_declare ID { if(_yylval.ident == NULL) yyerror_semantic("ID already 
 
 
 
-bloc: bloc  statement  M {
+bloc: bloc statement  M {
             yysuccess(1, "Block.");
-           if ($2.nextlist != NULL){
+            if ($2.nextlist != NULL){
                 backpatch(quads, currentInstruction+1, $2.nextlist, $3);
                 $$.nextlist = $2.nextlist;
-           }
+            } 
+
+            $$.continuelist = merge($1.continuelist, $2.continuelist);
+            $$.breaklist = merge($1.breaklist, $2.breaklist);
+
         }
     
      | %empty {
@@ -244,6 +253,7 @@ if (!$4.is_boolean){yyerror_semantic("expression in loop() should be boolean! ")
             backpatch(quads, currentInstruction+1, $8.nextlist, $2);
             backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
             $$.nextlist = $4.boolean_expression.falselist;
+
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -265,6 +275,16 @@ if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ")
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
+
+            if($16.breaklist == NULL) {
+                yyerror("breaklist null");
+            }
+            if($16.continuelist == NULL) {
+                yyerror("breaklist null");
+            }
+
+            backpatch(quads, currentInstruction+1, $16.continuelist, $17);
+            backpatch(quads, currentInstruction+1, $16.breaklist, $17+1);
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -275,7 +295,7 @@ if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ")
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $9, $11-1, $14, currentInstruction-1);
+            migrate(quads, $9, $11-1, $15, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -288,6 +308,9 @@ if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ")
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
             $$.nextlist = $7.boolean_expression.falselist;
+
+            backpatch(quads, currentInstruction+1, $16.continuelist, $17);
+            backpatch(quads, currentInstruction+1, $16.breaklist, $17+1);
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -298,7 +321,7 @@ if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ")
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $9, $11-1, $14, currentInstruction-1);
+            migrate(quads, $9, $11-1, $15, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -314,6 +337,10 @@ if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ")
         }
          | ifstmt elsestmt {
             $$.nextlist = $2.nextlist;
+            // $$.nextlist = merge( $1.nextlist, $2.nextlist );
+            scheduled( merge( $1.nextlist, $2.nextlist ));
+            $$.continuelist = merge( $1.continuelist, $2.continuelist );
+            $$.breaklist = merge( $1.breaklist, $2.breaklist );
         }
         ;
 
@@ -460,18 +487,25 @@ if (!$3.is_boolean){yyerror_semantic("expression in ?() should be boolean!");}
             // Check if <expression> is boolean, otherwise throw a semantic error
 
             backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
-            // printf("False list: %d", $3.boolean_expression.falselist->index);
-            $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
-            
+            $$.nextlist = merge($7.nextlist, $3.boolean_expression.falselist);
+
+            $$.continuelist = $7.continuelist;
+            $$.breaklist = $7.breaklist;
 
         }
 ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK {
             // backpatch(quads,currentInstruction+1, $3.boolean_expression.truelist, $6);
             // backpatch(quads,currentInstruction+1, $3.boolean_expression.falselist, $6);
-            // $$.nextlist = merge($3.boolean_expression.falselist, $7.nextlist);
+            // $$.nextlist = merge($7.nextlist, $3.boolean_expression.falselist);
+            $$.nextlist = $7.nextlist;
             $$.boolean_expression.truelist = $3.boolean_expression.truelist;
             $$.boolean_expression.falselist = $3.boolean_expression.falselist;
             $$.m1 = $6;
+
+            $$.continuelist = $7.continuelist;
+            $$.breaklist = $7.breaklist;
+
+
     }
 elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             yysuccess(1,"else stmt.");
@@ -479,6 +513,10 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             backpatch(quads, currentInstruction+1, ($<ifstatement>0).boolean_expression.truelist, ($<ifstatement>0).m1); // backpatch it to M1.inst
             backpatch(quads, currentInstruction+1, ($<ifstatement>0).boolean_expression.falselist, $3); // backpatch it toM2.inst
             struct jump_indices* temp = merge(($<ifstatement>0).nextlist, $1.nextlist);
+
+            $$.continuelist = $7.continuelist;
+            $$.breaklist = $7.breaklist;
+
 
             $$.nextlist = merge(temp, $7.nextlist);
         };
@@ -492,6 +530,10 @@ expression:
             $$.is_boolean = true;
             $$.boolean_expression.falselist = $2.boolean_expression.falselist;
             $$.boolean_expression.truelist = $2.boolean_expression.truelist;
+            // $$.boolean_expression = $2.boolean_expression;
+            // printf("Hi1 !\n");
+            // scheduled($$.boolean_expression.truelist);
+            // scheduled($2.boolean_expression.truelist);
         }
         else if($2.arithmetic_expression.is_litteral){
             $$.arithmetic_expression.value = $2.arithmetic_expression.value;

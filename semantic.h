@@ -25,6 +25,8 @@ struct statement
     /*S: nextlist is a list of all conditional and unconditional jumps
     to the instruction following the code for statement S in execution order*/
     struct jump_indices *nextlist;
+    struct jump_indices *breaklist;
+    struct jump_indices *continuelist;
 };
 
 struct boolean_expression
@@ -62,6 +64,8 @@ struct expression
 
 struct ifstatement
 {
+    struct jump_indices *breaklist;
+    struct jump_indices *continuelist;
     struct boolean_expression boolean_expression;
     struct jump_indices *nextlist;
     int m1;
@@ -95,4 +99,6 @@ void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int
 
 // swap instruction positions
 void migrate(quadruplets_node quads[], int i1, int i2, int j1, int j2);
+
+void scheduled(struct jump_indices *p);
 #endif

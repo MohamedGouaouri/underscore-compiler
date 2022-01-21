@@ -1,142 +1,10 @@
-<<<<<<< HEAD
-
-#_
- ()_ $_ f(){
-
-    $_ x; 
-    $_ i;
-
-    {}_ P{ $_x };
-    {}_ G{ $_x };
-
-    {}_ F {''_ name, ""[]_ modules};
-
-    $_wall;
-    
-    {}_ student {""_ name, $_ matricule, $_ gpa, _teacher fav};
-
-
-    _student s <- f();
-
-    s.nam <- "sity";
-
-    $_ one;
-
-    $_ i;
-
-    ~_ $_ cste;
-
-
-    $_ duplicate <- sumifcond;
-
-    
-}
-_#
-
-#_
-()_ $_ f() {
-    
-}
-_#
-
-#_
-()_ $_ g($_ sumifcond, $_ sumifcond1, $_ lastresortsum){
-
-    ""_ name;
-    $[]_ array;
-
-    arry[1] <- 0;
-
-    $_ thatMethod;
-
-    loop(cond) {
-        sum <- someMethod();
-        student.sum <- 20;
-        ? (cond1) {
-            #break;
-        }
-        : () {
-            #continue;
-        }
-    }
-
-    READ(u);
-
-    #thatMethod(sum, difference);
-
-    thatOtherMethod(;
-
-    -> sum ;
-    #break; ## Syntax error normally
-
-}
-
-
-()_ thatMothod($_ s, $_ d) {
-
-    READ(s);
-
-    WRITE(s);
-
-    s <- s;
-
-    -> d;
-
-}
-
-#_
-()_ thatMothod() {
-
-    x <- 10;
-    y <- 20;
-    ? (10){
-        x <- 10;
-        x <- 10;
-    }
-    -> 100;
-   
-}
-_#
-
-()_ f(){
-    ""_ x<-5;    
-    ""_ t<-("hello");
-
-    $_ y<-"hhh";
-    $_ z<-50;
-
-    ?_ h<-5;
-
-    $[]_ modules;
-
-    modules[5]<-"hhhh";
-
-    ? ("hhhhhh"){
-        x <- 10;
-    }
-
-    ? (400){
-        x <- 10;
-    }
-
-    loop("hhh") {
-        
-        x <- 10;
-    }
-}
-=======
-# from asyncore import loop
-
-
 ()_ f(){
 
     $_ x;
     # loop ( x <- 0; x < 10; x <- x + 2 ) {
-        ?( x > 0 && ( x = 9 || x > 9 ) && true ){
+        ?( true && true && x = 9  || ( x = 9 ) || (x > 10)  || x < 10 ){
             x <- 1;
             # break;
-        } : (){
-            x <- x * 3;
         }
         # continue;
     # }
@@ -151,4 +19,3 @@ _#
 
 }
 
->>>>>>> bugfix/backpatching

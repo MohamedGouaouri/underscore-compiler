@@ -164,6 +164,8 @@
     // temp name storage
     char tempnames[255][255]; int indicator;
 
+    struct jump_indices* jump_indices_stack[100]; int jump_indices_top = -1;
+
     int i=0;
 
     struct statement currentBloc;
@@ -236,7 +238,8 @@ bloc: bloc statement  M {
                 // $$.breaklist = merge($1.breaklist, $2.breaklist);
 
                 struct jump_indices* temp = merge($1.breaklist, $2.breaklist);
-                loop_breaklist = merge(temp, loop_breaklist);
+                jump_indices_stack[jump_indices_top] = merge(temp, jump_indices_stack[jump_indices_top]);
+
 
             }else{
                 yyerror("break block null");
@@ -267,14 +270,14 @@ statement: declare SEMICOLON {
 		| assign SEMICOLON {
 
         }
-        | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
-        if (!$4.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
-            backpatch(quads, currentInstruction+1, $8.nextlist, $2);
-            printf("truelist \n");
-            scheduled($4.boolean_expression.truelist);
-            printf("To %d\n", $7);
-            backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
-            $$.nextlist = $4.boolean_expression.falselist;
+        | inc LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK dec {
+        if (!$5.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
+            backpatch(quads, currentInstruction+1, $9.nextlist, $3);
+            // printf("truelist \n");
+            // scheduled($4.boolean_expression.truelist);
+            // printf("To %d\n", $7);
+            backpatch(quads, currentInstruction+1, $5.boolean_expression.truelist, $8);
+            $$.nextlist = $5.boolean_expression.falselist;
 
             // if($8.breaklist == NULL) {
             //     yyerror("breaklist null");
@@ -290,16 +293,16 @@ statement: declare SEMICOLON {
             // }
             // else backpatch(quads, currentInstruction+1, $8.continuelist, $2);
             printf("break list \n");
-            backpatch(quads, currentInstruction+1, loop_breaklist, $9+1);
-            scheduled(loop_breaklist);
-            printf("To %d\n", $9+1);
-            loop_breaklist = NULL;
+            backpatch(quads, currentInstruction+1, jump_indices_stack[jump_indices_top], $10+1);
+            scheduled(jump_indices_stack[jump_indices_top]);
+            printf("To %d\n", $10+1);
+            // loop_breaklist = NULL;
             
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
             union operandValue* result_val = create_operand_value();
-            operand1_val->label = $2;
+            operand1_val->label = $3;
 
             operand2_val->empty = 1;
             result_val->empty = 1;
@@ -311,7 +314,7 @@ statement: declare SEMICOLON {
             currentInstruction++;
 
         }
-		| LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
+		/* |inc LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK dec{
         if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
@@ -338,7 +341,7 @@ statement: declare SEMICOLON {
             quads[currentInstruction] = *quad;
             currentInstruction++;
         }
-		| LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
+		| inc LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK dec {
         if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $15.nextlist, $6);
             backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
@@ -365,7 +368,7 @@ statement: declare SEMICOLON {
                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
             quads[currentInstruction] = *quad;
             currentInstruction++;
-        }
+        } */
         
         
         | ifstmtonly {
@@ -1390,6 +1393,15 @@ N: %empty {
     quads[currentInstruction] = *quad;
     currentInstruction++;
 }
+
+inc: %empty {
+    jump_indices_top++;
+    printf("STACK TOP IND: %d\n", jump_indices_top);
+    }
+dec: %empty {
+    jump_indices_top--;
+    printf("STACK TOP IND: %d\n", jump_indices_top);
+    }
 %%
 
 

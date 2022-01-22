@@ -270,7 +270,7 @@ statement: declare SEMICOLON {
 		| assign SEMICOLON {
 
         }
-        | inc LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK dec {
+        | inc LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK  {
         if (!$5.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $9.nextlist, $3);
             // printf("truelist \n");
@@ -313,62 +313,66 @@ statement: declare SEMICOLON {
             quads[currentInstruction] = *quad;
             currentInstruction++;
 
-        }
-		/* |inc LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK dec{
-        if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
-            backpatch(quads, currentInstruction+1, $15.nextlist, $6);
-            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
-            $$.nextlist = $7.boolean_expression.falselist;
+            jump_indices_top--;
 
-            backpatch(quads, currentInstruction+1, $15.continuelist, $17);
-            backpatch(quads, currentInstruction+1, loop_breaklist, $17+1);
+        }
+		|inc LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK{
+        if (!$8.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
+            backpatch(quads, currentInstruction+1, $16.nextlist, $7);
+            backpatch(quads, currentInstruction+1, $8.boolean_expression.truelist, $15);
+            $$.nextlist = $8.boolean_expression.falselist;
+
+            backpatch(quads, currentInstruction+1, $16.continuelist, $18);
+            backpatch(quads, currentInstruction+1, loop_breaklist, $18+1);
             loop_breaklist = NULL;
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
             union operandValue* result_val = create_operand_value();
-            operand1_val->label = $6;
+            operand1_val->label = $7;
 
             operand2_val->empty = 1;
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $9, $11-1, $14, currentInstruction-1);
+            migrate(quads, $10, $12-1, $15, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
             quads[currentInstruction] = *quad;
             currentInstruction++;
+            jump_indices_top--;
         }
-		| inc LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK dec {
-        if (!$7.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
-            backpatch(quads, currentInstruction+1, $15.nextlist, $6);
-            backpatch(quads, currentInstruction+1, $7.boolean_expression.truelist, $14);
-            $$.nextlist = $7.boolean_expression.falselist;
+		| inc LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
+        if (!$8.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
+            backpatch(quads, currentInstruction+1, $16.nextlist, $7);
+            backpatch(quads, currentInstruction+1, $8.boolean_expression.truelist, $15);
+            $$.nextlist = $8.boolean_expression.falselist;
 
-            backpatch(quads, currentInstruction+1, $15.continuelist, $17);
-            // backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
-            backpatch(quads, currentInstruction+1, loop_breaklist, $17+1);
+            backpatch(quads, currentInstruction+1, $16.continuelist, $18);
+            // backpatch(quads, currentInstruction+1, $16.breaklist, $18+1);
+            backpatch(quads, currentInstruction+1, loop_breaklist, $18+1);
             loop_breaklist = NULL;
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
             union operandValue* result_val = create_operand_value();
-            operand1_val->label = $6;
+            operand1_val->label = $7;
 
             operand2_val->empty = 1;
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $9, $11-1, $14, currentInstruction-1);
+            migrate(quads, $10, $12-1, $15, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
             quads[currentInstruction] = *quad;
             currentInstruction++;
-        } */
+            jump_indices_top--;
+        }
         
         
         | ifstmtonly {
@@ -1398,10 +1402,7 @@ inc: %empty {
     jump_indices_top++;
     printf("STACK TOP IND: %d\n", jump_indices_top);
     }
-dec: %empty {
-    jump_indices_top--;
-    printf("STACK TOP IND: %d\n", jump_indices_top);
-    }
+
 %%
 
 

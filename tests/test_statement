@@ -1,15 +1,11 @@
 ()_ f(){
 
     $_ x;
-    loop ( x < 10 || (x > 2 || x < 100)) {
+    loop ( x = 10 ) {
         x <- 1;
         break;
         loop(false){
-            x <- 10;
-            loop(true){
-                break;
-                x <- 100;
-            }
+            break;
         }
         x <- 1000;
     }

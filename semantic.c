@@ -60,31 +60,64 @@ struct jump_indices *merge(struct jump_indices *q1, struct jump_indices *q2)
     {
         return NULL;
     }
-
-    while (p1 != NULL)
+    else if (q1 == NULL)
     {
-        p->index = p1->index;
-        p1 = p1->next;
-        if (p1 != NULL)
+        while (p2 != NULL)
         {
-
-            next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
-            p->next = next;
-            p = p->next;
+            p->index = p2->index;
+            p2 = p2->next;
+            if (p2 != NULL)
+            {
+                next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+                p->next = next;
+                p = p->next;
+            }
+        }
+        // p->next = NULL;
+        // return merge_result;
+    }
+    else if (q2 == NULL)
+    {
+        // printf("hello\n");
+        while (p1 != NULL)
+        {
+            p->index = p1->index;
+            p1 = p1->next;
+            if (p1 != NULL)
+            {
+                next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+                p->next = next;
+                p = p->next;
+            }
         }
     }
-    next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
-    p->next = next;
-    p = p->next;
-    while (p2 != NULL)
+    else
     {
-        p->index = p2->index;
-        p2 = p2->next;
-        if (p2 != NULL)
+        while (p1 != NULL)
         {
-            next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
-            p->next = next;
-            p = p->next;
+            p->index = p1->index;
+            p1 = p1->next;
+            if (p1 != NULL)
+            {
+
+                next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+                p->next = next;
+                p = p->next;
+            }
+        }
+        next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+        p->next = next;
+        p = p->next;
+        while (p2 != NULL)
+        {
+            p->index = p2->index;
+            p2 = p2->next;
+            if (p2 != NULL)
+            {
+                next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+                p->next = next;
+                p = p->next;
+            }
         }
     }
     // p->next = NULL;

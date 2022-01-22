@@ -35,11 +35,11 @@ int main()
     // //    add_quadruplet(&quadrupletsTable, quad);
 
     //     print_quadruplets_table(quadrupletsTable);
-    struct jump_indices *j1 = makelist(1);
+    struct jump_indices *j1;
     struct jump_indices *j2 = makelist(2);
     struct jump_indices *j3 = makelist(3);
     struct jump_indices *j4 = makelist(4);
-    struct jump_indices *m = merge(j1, merge(j2, merge(j3, j4)));
+    struct jump_indices *m = merge(j2, NULL);
     while (m != NULL)
     {
         printf("%d -> ", m->index);

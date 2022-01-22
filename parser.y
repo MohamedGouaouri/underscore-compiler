@@ -118,7 +118,7 @@
 %left COMMA
 %nonassoc ASSIGNMENT
 %right OR
-%right AND
+%left AND
 %left NON
 
 %nonassoc EQUAL NONEQUAL INFERIOR  SUPERIOR INFERIOREQUAL SUPERIOREQUAL
@@ -233,7 +233,7 @@ bloc: bloc statement  M {
             }
             if ($1.breaklist != NULL || $2.breaklist != NULL){
                 yyerror("break block not null");
-                $$.breaklist = merge($1.breaklist, $2.breaklist);
+                // $$.breaklist = merge($1.breaklist, $2.breaklist);
 
                 struct jump_indices* temp = merge($1.breaklist, $2.breaklist);
                 loop_breaklist = merge(temp, loop_breaklist);
@@ -255,6 +255,7 @@ bloc: bloc statement  M {
         $$.breaklist = NULL;
         $$.nextlist = NULL;
         $$.continuelist = NULL;
+        // loop_breaklist = NULL;
      } 
      ;
 
@@ -269,22 +270,30 @@ statement: declare SEMICOLON {
         | LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
         if (!$4.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $8.nextlist, $2);
+            printf("truelist \n");
+            scheduled($4.boolean_expression.truelist);
+            printf("To %d\n", $7);
             backpatch(quads, currentInstruction+1, $4.boolean_expression.truelist, $7);
             $$.nextlist = $4.boolean_expression.falselist;
 
-            if($8.breaklist == NULL) {
-                yyerror("breaklist null");
-            }
-            else {
-                printf("IN LOOP\n");
-                // scheduled($8.breaklist);
-                backpatch(quads, currentInstruction+1, $8.breaklist, $9+1);
-                $$.breaklist = NULL;
-            } 
-            if($8.continuelist == NULL) {
-                yyerror("continue null");
-            }
-            else backpatch(quads, currentInstruction+1, $8.continuelist, $2);
+            // if($8.breaklist == NULL) {
+            //     yyerror("breaklist null");
+            // }
+            // else {
+            //     printf("IN LOOP\n");
+            //     // scheduled($8.breaklist);
+            //     // backpatch(quads, currentInstruction+1, $8.breaklist, $9+1);
+            //     $$.breaklist = NULL;
+            // } 
+            // if($8.continuelist == NULL) {
+            //     yyerror("continue null");
+            // }
+            // else backpatch(quads, currentInstruction+1, $8.continuelist, $2);
+            printf("break list \n");
+            backpatch(quads, currentInstruction+1, loop_breaklist, $9+1);
+            scheduled(loop_breaklist);
+            printf("To %d\n", $9+1);
+            loop_breaklist = NULL;
             
             
             union operandValue* operand1_val = create_operand_value();
@@ -336,7 +345,9 @@ statement: declare SEMICOLON {
             $$.nextlist = $7.boolean_expression.falselist;
 
             backpatch(quads, currentInstruction+1, $15.continuelist, $17);
-            backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
+            // backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
+            backpatch(quads, currentInstruction+1, loop_breaklist, $17+1);
+            loop_breaklist = NULL;
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -360,18 +371,18 @@ statement: declare SEMICOLON {
         | ifstmtonly {
             $$.nextlist = $1.nextlist;
 
-            if ($1.breaklist != NULL){
-                $$.breaklist = $1.breaklist;
+            // if ($1.breaklist != NULL){
+            //     // $$.breaklist = $1.breaklist;
                 loop_breaklist = merge(loop_breaklist, $1.breaklist);
-            }else{
-                $$.breaklist = NULL;
-            }
-            if ($1.continuelist != NULL){
-                $$.continuelist = $1.continuelist;
-            }else{
-                $$.continuelist = NULL;
-            }
-            printf("IN IF STATEMENT\n");
+            // }else{
+            //     $$.breaklist = NULL;
+            // }
+            // if ($1.continuelist != NULL){
+            //     $$.continuelist = $1.continuelist;
+            // }else{
+            //     $$.continuelist = NULL;
+            // }
+            // printf("IN IF STATEMENT\n");
             // scheduled($$.breaklist);
             
         }
@@ -379,8 +390,8 @@ statement: declare SEMICOLON {
 
             $$.nextlist = $2.nextlist;
             
-            $$.breaklist = merge($2.breaklist, $1.breaklist);
-            // loop_breaklist = merge(loop_breaklist, merge($2.breaklist, $1.breaklist));        
+            // $$.breaklist = merge($2.breaklist, $1.breaklist);
+            loop_breaklist = merge(loop_breaklist, merge($2.breaklist, $1.breaklist));        
             $$.continuelist = merge($1.continuelist, $2.continuelist) ;
            
             
@@ -658,7 +669,8 @@ expression:
         if ($1.is_boolean && $4.is_boolean){
             $$.is_boolean = true;
             backpatch(quads ,currentInstruction+1, $1.boolean_expression.falselist, $3);
-            $$.boolean_expression.truelist = merge($4.boolean_expression.truelist, $1.boolean_expression.truelist);
+            $$.boolean_expression.truelist = merge($1.boolean_expression.truelist, $4.boolean_expression.truelist);
+            // scheduled($$.boolean_expression.truelist);
             $$.boolean_expression.falselist = $4.boolean_expression.falselist;
         }
 	    else if (!$1.is_boolean){
@@ -1419,6 +1431,8 @@ int main(int argc, char **argv) {
 
     fprintf(stdout, "" MAGENTA "========= Stream of tokens found =========" RESET "\n");
 
+    
+    /* loop_breaklist = makelist(5); */
     yyparse();
 
 

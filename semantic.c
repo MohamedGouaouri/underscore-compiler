@@ -53,39 +53,79 @@ struct jump_indices *merge(struct jump_indices *q1, struct jump_indices *q2)
 {
     struct jump_indices *merge_result = (struct jump_indices *)malloc(sizeof(struct jump_indices));
     struct jump_indices *p = merge_result;
-
-    while (q1 != NULL)
+    struct jump_indices *p1 = q1;
+    struct jump_indices *p2 = q2;
+    struct jump_indices *next;
+    if (q1 == NULL && q2 == NULL)
     {
-        p->index = q1->index;
-        struct jump_indices *next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
-        p->next = next;
-        p = p->next;
-        q1 = q1->next;
+        return NULL;
     }
 
-    while (q2 != NULL)
+    while (p1 != NULL)
     {
-        p->index = q2->index;
-        struct jump_indices *next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
-        p->next = next;
-        p = p->next;
-        q2 = q2->next;
+        p->index = p1->index;
+        p1 = p1->next;
+        if (p1 != NULL)
+        {
+
+            next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+            p->next = next;
+            p = p->next;
+        }
     }
+    next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+    p->next = next;
+    p = p->next;
+    while (p2 != NULL)
+    {
+        p->index = p2->index;
+        p2 = p2->next;
+        if (p2 != NULL)
+        {
+            next = (struct jump_indices *)malloc(sizeof(struct jump_indices));
+            p->next = next;
+            p = p->next;
+        }
+    }
+    // p->next = NULL;
     return merge_result;
+
+    // if (q1 != NULL)
+    // {
+    //     merge_result = q1;
+    //     struct jump_indices *prev = q1;
+    //     struct jump_indices *ptr = q1;
+    //     while (ptr->next != NULL)
+    //     {
+    //         prev = ptr;
+    //         ptr = ptr->next;
+    //     }
+    //     prev->next = q2;
+    //     return q1;
+    // }
+    // else
+    // {
+    //     merge_result = q2;
+    //     return q2;
+    // }
 }
 
 void backpatch(quadruplets_node quads[], int length, struct jump_indices *q, int to)
 {
     // update by index
+    struct jump_indices *p = q;
 
     if (to <= length)
     {
 
-        while (q != NULL)
+        while (p != NULL)
         {
-            int where = q->index;
-            quads[where].op1->value.label = to;
-            q = q->next;
+            int where = p->index;
+            if (quads[where].op1->value.label == -1)
+            {
+                quads[where].op1->value.label = to;
+            }
+            p = p->next;
         }
     }
 }

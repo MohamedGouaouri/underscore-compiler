@@ -167,6 +167,7 @@
     int i=0;
 
     struct statement currentBloc;
+    struct jump_indices *loop_breaklist;
 
 %}
 
@@ -233,6 +234,10 @@ bloc: bloc statement  M {
             if ($1.breaklist != NULL || $2.breaklist != NULL){
                 yyerror("break block not null");
                 $$.breaklist = merge($1.breaklist, $2.breaklist);
+
+                struct jump_indices* temp = merge($1.breaklist, $2.breaklist);
+                loop_breaklist = merge(temp, loop_breaklist);
+
             }else{
                 yyerror("break block null");
                 $$.breaklist = NULL;
@@ -242,6 +247,7 @@ bloc: bloc statement  M {
             }else{
                 $$.continuelist = NULL;
             }
+            // printf("IN BLOC\n"); scheduled($$.breaklist);
 
         }
     
@@ -270,6 +276,8 @@ statement: declare SEMICOLON {
                 yyerror("breaklist null");
             }
             else {
+                printf("IN LOOP\n");
+                // scheduled($8.breaklist);
                 backpatch(quads, currentInstruction+1, $8.breaklist, $9+1);
                 $$.breaklist = NULL;
             } 
@@ -301,7 +309,8 @@ statement: declare SEMICOLON {
             $$.nextlist = $7.boolean_expression.falselist;
 
             backpatch(quads, currentInstruction+1, $15.continuelist, $17);
-            backpatch(quads, currentInstruction+1, $15.breaklist, $17+1);
+            backpatch(quads, currentInstruction+1, loop_breaklist, $17+1);
+            loop_breaklist = NULL;
             
             union operandValue* operand1_val = create_operand_value();
             union operandValue* operand2_val = create_operand_value();
@@ -353,6 +362,7 @@ statement: declare SEMICOLON {
 
             if ($1.breaklist != NULL){
                 $$.breaklist = $1.breaklist;
+                loop_breaklist = merge(loop_breaklist, $1.breaklist);
             }else{
                 $$.breaklist = NULL;
             }
@@ -361,13 +371,16 @@ statement: declare SEMICOLON {
             }else{
                 $$.continuelist = NULL;
             }
+            printf("IN IF STATEMENT\n");
+            // scheduled($$.breaklist);
             
         }
          | ifstmt elsestmt {
 
             $$.nextlist = $2.nextlist;
             
-            $$.breaklist = merge($1.breaklist, $2.breaklist);           
+            $$.breaklist = merge($2.breaklist, $1.breaklist);
+            // loop_breaklist = merge(loop_breaklist, merge($2.breaklist, $1.breaklist));        
             $$.continuelist = merge($1.continuelist, $2.continuelist) ;
            
             
@@ -582,21 +595,21 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             //Merging breaklist with nextlist without understanding why :)
             // $$.nextlist = merge($$.nextlist, $7.breaklist);
 
-            if ($7.breaklist != NULL){
-                temp = merge(($<ifstatement>0).breaklist, $7.breaklist);
-                $$.breaklist = temp;
-                yyerror("break else not null");
-            }else{
-                $$.breaklist = NULL;
-                yyerror("break else null");
-            }
-            if ($7.continuelist != NULL){
-                temp = merge(($<ifstatement>0).continuelist, $7.continuelist);
-                $$.continuelist = temp;
-            }else{
-                $$.continuelist = NULL;
-            }
-            // $$.breaklist = $7.breaklist;
+            // if ($7.breaklist != NULL){
+            //     temp = merge($7.breaklist, ($<ifstatement>0).breaklist);
+            //     $$.breaklist = temp;
+            //     yyerror("break else not null");
+            // }else{
+            //     $$.breaklist = NULL;
+            //     yyerror("break else null");
+            // }
+            // if ($7.continuelist != NULL){
+            //     temp = merge($7.continuelist, ($<ifstatement>0).continuelist);
+            //     $$.continuelist = temp;
+            // }else{
+            //     $$.continuelist = NULL;
+            // }
+            $$.breaklist = $7.breaklist;
 
 };
         
@@ -635,8 +648,8 @@ expression:
             $$.boolean_expression.falselist = $2.boolean_expression.truelist;
         }
 	    else{
-                yyerror("Expression after ! need to be boolean");
-            }
+            yyerror("Expression after ! need to be boolean");
+        }
     }
 
 
@@ -645,7 +658,7 @@ expression:
         if ($1.is_boolean && $4.is_boolean){
             $$.is_boolean = true;
             backpatch(quads ,currentInstruction+1, $1.boolean_expression.falselist, $3);
-            $$.boolean_expression.truelist = merge($1.boolean_expression.truelist, $4.boolean_expression.truelist);
+            $$.boolean_expression.truelist = merge($4.boolean_expression.truelist, $1.boolean_expression.truelist);
             $$.boolean_expression.falselist = $4.boolean_expression.falselist;
         }
 	    else if (!$1.is_boolean){

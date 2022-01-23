@@ -5,52 +5,55 @@
     loop ( x = 0 ) {
         x <- 1;
         break;
-        loop(false){
+        loop( x = 2 ){
             x <- 3;
-            ? (true) {
+            ? ( x = 3 ) {
                 x <- 4;
-                break;
+                continue;
             }
+            x <- 5;
         }
-        x <- 5;
+        x <- 6;
     }
-    x <- 6;
+    x <- 7;
 
-    loop(x <- 0; x > 0; x <- x*x) {
-        continue;
-        ?(false) {
-            break;
-        }
-    }
-    loop($_x <- 0; x > 0; x <- x*x) {
-        continue;
-        ?(false) {
-            break;
-        }
-    }
+    # loop(x <- 0; x > 0; x <- x*x) {
+    #     continue;
+    #     ?(false) {
+    #         break;
+    #     }
+    # }
+    # loop($_x <- 0; x > 0; x <- x*x) {
+    #     continue;
+    #     ?(false) {
+    #         break;
+    #     }
+    # }
 
 
-    ? (true) {
-        break;
-    }
+    # ? (true) {
+    #     break;
+    # }
 
-    loop ( ( ( x > 0  || ( x < 10 ) && ( x< 10) ) ) )  {
-        x <- 1;
-        ?( x = 2 ){
-            x <- 3;
-            ?( x = 4 ){
-                break;
-                break;
-            }
-            : () {
-                x <- 5;
-                break;
-                break;
-            }
-            x <- 6;
-        }
-        x <- 7;
-    }
+    # loop ( ( ( x > 0  || ( x < 10 ) && ( x< 10) ) ) )  {
+    #     x <- 1;
+    #     ?( x = 2 ){
+    #         x <- 3;
+    #         continue;
+    #         ?( x = 4 ){
+    #             break;
+    #             continue;
+    #         }
+    #         : () {
+    #             x <- 5;
+    #             continue;
+    #             break;
+    #         }
+    #         x <- 6;
+    #     }
+    #     x <- 7;
+    # }
+
     # x <- 1 + (3 + (5 * 4 * (4 * 4 * ( 2 + 1))));
     # $_y;
     # loop(true){

@@ -164,7 +164,8 @@
     // temp name storage
     char tempnames[255][255]; int indicator;
 
-    struct jump_indices* jump_indices_stack[100]; int jump_indices_top = -1;
+    struct jump_indices* breaklist_stack[100]; int breaklist_stack_top = -1;
+    struct jump_indices* continuelist_stack[100]; int continuelist_stack_top = -1;
 
 
     struct statement currentBloc;
@@ -236,14 +237,17 @@ bloc: bloc statement  M {
             if ($1.breaklist != NULL || $2.breaklist != NULL){
 
                 struct jump_indices* temp = merge($1.breaklist, $2.breaklist);
-                jump_indices_stack[jump_indices_top] = merge(temp, jump_indices_stack[jump_indices_top]);
+                breaklist_stack[breaklist_stack_top] = merge(temp, breaklist_stack[breaklist_stack_top]);
 
 
             }else{
                 $$.breaklist = NULL;
             }
             if ($1.continuelist != NULL || $2.continuelist != NULL){
-                $$.continuelist = merge($1.continuelist, $2.continuelist);
+                
+                struct jump_indices* temp = merge($1.continuelist, $2.continuelist);
+                continuelist_stack[continuelist_stack_top] = merge(temp, continuelist_stack[continuelist_stack_top]);
+
             }else{
                 $$.continuelist = NULL;
             }
@@ -276,8 +280,8 @@ statement: declare SEMICOLON {
             $$.nextlist = $5.boolean_expression.falselist;
 
             
-            backpatch(quads, currentInstruction+1, jump_indices_stack[jump_indices_top], $11+1);
-            
+            backpatch(quads, currentInstruction+1, breaklist_stack[breaklist_stack_top], $11+1);
+            backpatch(quads, currentInstruction+1, continuelist_stack[continuelist_stack_top], $3);
             
             
             
@@ -295,7 +299,8 @@ statement: declare SEMICOLON {
             quads[currentInstruction] = *quad;
             currentInstruction++;
 
-            jump_indices_top--;
+            breaklist_stack_top--;
+            continuelist_stack_top--;
 
         }
 		|inc LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag ++;} M bloc M {flag--;} CLOSEHOOK{
@@ -324,7 +329,9 @@ statement: declare SEMICOLON {
                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
             quads[currentInstruction] = *quad;
             currentInstruction++;
-            jump_indices_top--;
+
+            breaklist_stack_top--;
+            continuelist_stack_top--;
         }
 		| inc LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M {flag--;} CLOSEHOOK {
         if (!$8.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
@@ -352,7 +359,9 @@ statement: declare SEMICOLON {
                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
             quads[currentInstruction] = *quad;
             currentInstruction++;
-            jump_indices_top--;
+            
+            breaklist_stack_top--;
+            continuelist_stack_top--;
         }
         
         
@@ -396,7 +405,23 @@ statement: declare SEMICOLON {
         }
         | CONTINUE SEMICOLON {
             if(flag <= 0) yyerror_semantic("Continue statement not allowed outside a loop.");
-            else yysuccess(1, "Continue statement");
+            else {
+                yysuccess(1, "Continue statement");
+                union operandValue* operand1_val = create_operand_value();
+                union operandValue* operand2_val = create_operand_value();
+                union operandValue* result_val = create_operand_value();
+                operand1_val->label = -1;
+
+                operand2_val->empty = 1;
+                result_val->empty = 1;
+
+                // gen quad
+                quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+                quads[currentInstruction] = *quad;
+                $$.continuelist = makelist(currentInstruction);
+                currentInstruction++;
+            }
         }
         ;
 
@@ -1351,7 +1376,8 @@ N: %empty {
 }
 
 inc: %empty {
-    jump_indices_top++;
+        breaklist_stack_top++;
+        continuelist_stack_top++;
     }
 
 %%

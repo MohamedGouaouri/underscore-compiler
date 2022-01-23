@@ -43,7 +43,7 @@
 %token BREAK "break"
 %token CONTINUE "continue"
 
-%token <string> ID
+%token <expression> ID
 %type <string> type_declare
 %type <string> just_declare
 /* %type <string> struct_fields */
@@ -166,7 +166,6 @@
 
     struct jump_indices* jump_indices_stack[100]; int jump_indices_top = -1;
 
-    int i=0;
 
     struct statement currentBloc;
     struct jump_indices *loop_breaklist;
@@ -188,10 +187,11 @@ func: FUNCTIONDECLARE ret ID {
         } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { 
             insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();
             yysuccess(1,"function ended.");
+            fprintf(stdout, "\n" MAGENTA "========= Quadruplets =========" RESET "\n\n");
             for(int i = 0; i < currentInstruction; i++){
                 print_quadruplets_node(&quads[i]);
             }
-            printf("NB INST: %d\n", currentInstruction);
+            printf("\nNB INST: %d\n", currentInstruction);
             print_tempnames();
         }
 
@@ -234,15 +234,12 @@ bloc: bloc statement  M {
                 $$.nextlist = NULL;
             }
             if ($1.breaklist != NULL || $2.breaklist != NULL){
-                yyerror("break block not null");
-                // $$.breaklist = merge($1.breaklist, $2.breaklist);
 
                 struct jump_indices* temp = merge($1.breaklist, $2.breaklist);
                 jump_indices_stack[jump_indices_top] = merge(temp, jump_indices_stack[jump_indices_top]);
 
 
             }else{
-                yyerror("break block null");
                 $$.breaklist = NULL;
             }
             if ($1.continuelist != NULL || $2.continuelist != NULL){
@@ -250,15 +247,15 @@ bloc: bloc statement  M {
             }else{
                 $$.continuelist = NULL;
             }
-            // printf("IN BLOC\n"); scheduled($$.breaklist);
 
         }
     
      | %empty {
+         yysuccess(1, "emptyness");
         $$.breaklist = NULL;
         $$.nextlist = NULL;
         $$.continuelist = NULL;
-        // loop_breaklist = NULL;
+        
      } 
      ;
 
@@ -273,30 +270,15 @@ statement: declare SEMICOLON {
         | inc LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK  {
         if (!$5.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
             backpatch(quads, currentInstruction+1, $9.nextlist, $3);
-            // printf("truelist \n");
-            // scheduled($4.boolean_expression.truelist);
-            // printf("To %d\n", $7);
+            
+            
             backpatch(quads, currentInstruction+1, $5.boolean_expression.truelist, $8);
             $$.nextlist = $5.boolean_expression.falselist;
 
-            // if($8.breaklist == NULL) {
-            //     yyerror("breaklist null");
-            // }
-            // else {
-            //     printf("IN LOOP\n");
-            //     // scheduled($8.breaklist);
-            //     // backpatch(quads, currentInstruction+1, $8.breaklist, $9+1);
-            //     $$.breaklist = NULL;
-            // } 
-            // if($8.continuelist == NULL) {
-            //     yyerror("continue null");
-            // }
-            // else backpatch(quads, currentInstruction+1, $8.continuelist, $2);
-            printf("break list \n");
+            
             backpatch(quads, currentInstruction+1, jump_indices_stack[jump_indices_top], $10+1);
-            scheduled(jump_indices_stack[jump_indices_top]);
-            printf("To %d\n", $10+1);
-            // loop_breaklist = NULL;
+            
+            
             
             
             union operandValue* operand1_val = create_operand_value();
@@ -351,7 +333,6 @@ statement: declare SEMICOLON {
             $$.nextlist = $8.boolean_expression.falselist;
 
             backpatch(quads, currentInstruction+1, $16.continuelist, $18);
-            // backpatch(quads, currentInstruction+1, $16.breaklist, $18+1);
             backpatch(quads, currentInstruction+1, loop_breaklist, $18+1);
             loop_breaklist = NULL;
             
@@ -378,26 +359,13 @@ statement: declare SEMICOLON {
         | ifstmtonly {
             $$.nextlist = $1.nextlist;
 
-            // if ($1.breaklist != NULL){
-            //     // $$.breaklist = $1.breaklist;
-                loop_breaklist = merge(loop_breaklist, $1.breaklist);
-            // }else{
-            //     $$.breaklist = NULL;
-            // }
-            // if ($1.continuelist != NULL){
-            //     $$.continuelist = $1.continuelist;
-            // }else{
-            //     $$.continuelist = NULL;
-            // }
-            // printf("IN IF STATEMENT\n");
-            // scheduled($$.breaklist);
+            loop_breaklist = merge(loop_breaklist, $1.breaklist);
             
         }
          | ifstmt elsestmt {
 
             $$.nextlist = $2.nextlist;
             
-            // $$.breaklist = merge($2.breaklist, $1.breaklist);
             loop_breaklist = merge(loop_breaklist, merge($2.breaklist, $1.breaklist));        
             $$.continuelist = merge($1.continuelist, $2.continuelist) ;
            
@@ -588,10 +556,8 @@ ifstmt: IF OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK M bloc CLOSEHOOK
 
             if ($7.breaklist != NULL){
                 $$.breaklist = $7.breaklist;
-                yyerror("break ifstmt not null");
             }else{
                 $$.breaklist = NULL;
-                yyerror("break ifstmt null");
             }
             if ($7.continuelist != NULL){
                 $$.continuelist = $7.continuelist;
@@ -610,23 +576,7 @@ elsestmt: N ELSE M OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {
             struct jump_indices* temp = merge(($<ifstatement>0).nextlist, $1.nextlist);
             $$.nextlist = merge(temp, $7.nextlist);
 
-            //Merging breaklist with nextlist without understanding why :)
-            // $$.nextlist = merge($$.nextlist, $7.breaklist);
-
-            // if ($7.breaklist != NULL){
-            //     temp = merge($7.breaklist, ($<ifstatement>0).breaklist);
-            //     $$.breaklist = temp;
-            //     yyerror("break else not null");
-            // }else{
-            //     $$.breaklist = NULL;
-            //     yyerror("break else null");
-            // }
-            // if ($7.continuelist != NULL){
-            //     temp = merge($7.continuelist, ($<ifstatement>0).continuelist);
-            //     $$.continuelist = temp;
-            // }else{
-            //     $$.continuelist = NULL;
-            // }
+            
             $$.breaklist = $7.breaklist;
 
 };
@@ -666,8 +616,8 @@ expression:
             $$.boolean_expression.falselist = $2.boolean_expression.truelist;
         }
 	    else{
-            yyerror("Expression after ! need to be boolean");
-        }
+                yyerror("Expression after ! needs to be boolean!");
+            }
     }
 
 
@@ -677,14 +627,14 @@ expression:
             $$.is_boolean = true;
             backpatch(quads ,currentInstruction+1, $1.boolean_expression.falselist, $3);
             $$.boolean_expression.truelist = merge($1.boolean_expression.truelist, $4.boolean_expression.truelist);
-            // scheduled($$.boolean_expression.truelist);
+            
             $$.boolean_expression.falselist = $4.boolean_expression.falselist;
         }
 	    else if (!$1.is_boolean){
-            yyerror("Expression before || need to be boolean");
+            yyerror("Expression before || needs to be boolean!");
         }
 	    else{
-            yyerror("Expression after || need to be boolean");
+            yyerror("Expression after || needs to be boolean!");
         }
     }
     | expression AND M expression {
@@ -695,10 +645,10 @@ expression:
             $$.boolean_expression.falselist = merge($1.boolean_expression.falselist, $4.boolean_expression.falselist);
         }
 	    else if (!$1.is_boolean){
-            yyerror("Expression before && need to be boolean");
+            yyerror("Expression before && needs to be boolean!");
         }
 	    else{
-            yyerror("Expression after && need to be boolean");
+            yyerror("Expression after && needs to be boolean!");
         }
     }
     | expression EQUAL expression{
@@ -821,7 +771,7 @@ expression:
     }
 
     | expression INFERIOR expression {
-	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("invalid type for this operation");}
+	if ($1.is_string || $3.is_string || $1.is_boolean || $3.is_boolean){yyerror_semantic("Invalid type for this operation");}
 
 	else{
             $$.is_boolean = true;
@@ -1372,8 +1322,7 @@ expression:
         ; 
 
 
- var_exp : 
-	 ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression {if($<expression>4.is_string || $<expression>4.is_boolean){yyerror("array index is not an integer !!!");}
+ var_exp : ID {checkif_localsymbolexists(_yylval.ident);} OPENBRACKET expression {if($<expression>4.is_string || $<expression>4.is_boolean){yyerror("array index is not an integer !!!");}
 	   else	{yysuccess(1,"EXPRESSION : ARRAY ACCESS");}} CLOSEBRACKET
 	;
 
@@ -1400,7 +1349,6 @@ N: %empty {
 
 inc: %empty {
     jump_indices_top++;
-    printf("STACK TOP IND: %d\n", jump_indices_top);
     }
 
 %%
@@ -1432,7 +1380,7 @@ int main(int argc, char **argv) {
 
     if (argc>=3 && sscanf (argv[2], "%i", &showsuccess) != 1) {
         fprintf(stderr, "error - not an integer");
-    }
+    }    
     if(showsuccess != 0) showsuccess = 1;
 
     // alocate the global symbols table
@@ -1442,13 +1390,13 @@ int main(int argc, char **argv) {
     symt = allocateSymTable();
 
 
-    fprintf(stdout, "" MAGENTA "========= Stream of tokens found =========" RESET "\n");
+    fprintf(stdout, "" MAGENTA "========= Lexical and Syntax Analysis =========" RESET "\n");
 
     
     /* loop_breaklist = makelist(5); */
     yyparse();
 
-
+    fprintf(stdout, "\n" MAGENTA "========= Global symtable =========" RESET "");
     printGlobalSymTable(gSymT);
      
 
@@ -1520,7 +1468,6 @@ void checkif_localsymbolexists(SymTableNode* insertedNode) {
         deleteEntry(symt, symt->tail->symName);
     }
 
-    /* yyerror("Id is declared, all is good"); */
 }
 
 void checkif_fieldisvalid(char precedent[50], char fieldname[50]) { /*Works with variable.field*/

@@ -35,16 +35,16 @@ void print_operand(operand *the_operand)
     switch (the_operand->category)
     {
     case Empty:
-        printf(" ,");
+        printf(" ");
         break;
     case Variable:
-        printf("%s ,", the_operand->value.variable);
+        printf("%s", the_operand->value.variable);
         break;
     case Integers:
-        printf("%d ,", the_operand->value.integer);
+        printf("%d", the_operand->value.integer);
         break;
     case Labels:
-        printf("%d ,", the_operand->value.label);
+        printf("%d", the_operand->value.label);
         break;
     default:
         break;
@@ -99,12 +99,13 @@ void *add_quadruplet(quadruplets_table **quadrupletsTable, quadruplets_node *qua
 
 void print_quadruplets_node(quadruplets_node *quadrupletsNode)
 {
-    printf(" %d - ( %s , ", quadrupletsNode->label, quadrupletsNode->operator);
+    printf(" %d" MAGENTA " -" RESET " ( %s , ", quadrupletsNode->label, quadrupletsNode->operator);
     print_operand(quadrupletsNode->op1);
+    printf(" , ");
     print_operand(quadrupletsNode->op2);
-
+    printf(" , ");
     print_operand(quadrupletsNode->result);
-    printf(")\n");
+    printf(" )\n");
 }
 
 void print_quadruplets_table(quadruplets_table *quadrupletsTable)

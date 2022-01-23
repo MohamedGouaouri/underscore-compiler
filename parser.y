@@ -267,16 +267,16 @@ statement: declare SEMICOLON {
 		| assign SEMICOLON {
 
         }
-        | inc LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK  {
+        | inc LOOP M OPENPARENTHESIS  expression  CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M {flag--;} CLOSEHOOK {
         if (!$5.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
-            backpatch(quads, currentInstruction+1, $9.nextlist, $3);
+            backpatch(quads, currentInstruction+1, $10.nextlist, $3);
             
             
-            backpatch(quads, currentInstruction+1, $5.boolean_expression.truelist, $8);
+            backpatch(quads, currentInstruction+1, $5.boolean_expression.truelist, $9);
             $$.nextlist = $5.boolean_expression.falselist;
 
             
-            backpatch(quads, currentInstruction+1, jump_indices_stack[jump_indices_top], $10+1);
+            backpatch(quads, currentInstruction+1, jump_indices_stack[jump_indices_top], $11+1);
             
             
             
@@ -298,13 +298,13 @@ statement: declare SEMICOLON {
             jump_indices_top--;
 
         }
-		|inc LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK{
+		|inc LOOP M OPENPARENTHESIS assign SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag ++;} M bloc M {flag--;} CLOSEHOOK{
         if (!$8.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
-            backpatch(quads, currentInstruction+1, $16.nextlist, $7);
-            backpatch(quads, currentInstruction+1, $8.boolean_expression.truelist, $15);
+            backpatch(quads, currentInstruction+1, $17.nextlist, $7);
+            backpatch(quads, currentInstruction+1, $8.boolean_expression.truelist, $16);
             $$.nextlist = $8.boolean_expression.falselist;
 
-            backpatch(quads, currentInstruction+1, $16.continuelist, $18);
+            backpatch(quads, currentInstruction+1, $17.continuelist, $18);
             backpatch(quads, currentInstruction+1, loop_breaklist, $18+1);
             loop_breaklist = NULL;
             
@@ -317,7 +317,7 @@ statement: declare SEMICOLON {
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $10, $12-1, $15, currentInstruction-1);
+            migrate(quads, $10, $12-1, $16, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -326,13 +326,13 @@ statement: declare SEMICOLON {
             currentInstruction++;
             jump_indices_top--;
         }
-		| inc LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK M bloc M CLOSEHOOK {
+		| inc LOOP M OPENPARENTHESIS init_declare SEMICOLON M expression SEMICOLON M assign M CLOSEPARENTHESIS OPENHOOK {flag++;} M bloc M {flag--;} CLOSEHOOK {
         if (!$8.is_boolean){yyerror_semantic("expression in loop() should be boolean! ");}
-            backpatch(quads, currentInstruction+1, $16.nextlist, $7);
-            backpatch(quads, currentInstruction+1, $8.boolean_expression.truelist, $15);
+            backpatch(quads, currentInstruction+1, $17.nextlist, $7);
+            backpatch(quads, currentInstruction+1, $8.boolean_expression.truelist, $16);
             $$.nextlist = $8.boolean_expression.falselist;
 
-            backpatch(quads, currentInstruction+1, $16.continuelist, $18);
+            backpatch(quads, currentInstruction+1, $17.continuelist, $18);
             backpatch(quads, currentInstruction+1, loop_breaklist, $18+1);
             loop_breaklist = NULL;
             
@@ -345,7 +345,7 @@ statement: declare SEMICOLON {
             result_val->empty = 1;
 
             // migrate instructions
-            migrate(quads, $10, $12-1, $15, currentInstruction-1);
+            migrate(quads, $10, $12-1, $16, currentInstruction-1);
 
              // gen quad
             quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
@@ -374,26 +374,29 @@ statement: declare SEMICOLON {
 
         | BREAK SEMICOLON {
 
-            yysuccess(1, "Break statement");
-            union operandValue* operand1_val = create_operand_value();
-            union operandValue* operand2_val = create_operand_value();
-            union operandValue* result_val = create_operand_value();
-            operand1_val->label = -1;
+            if(flag <= 0) yyerror_semantic("Break statement not allowed outside a loop.");
+            else {
+                yysuccess(1, "Break statement");
+                union operandValue* operand1_val = create_operand_value();
+                union operandValue* operand2_val = create_operand_value();
+                union operandValue* result_val = create_operand_value();
+                operand1_val->label = -1;
 
-            operand2_val->empty = 1;
-            result_val->empty = 1;
+                operand2_val->empty = 1;
+                result_val->empty = 1;
 
-             // gen quad
-            quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
-                                               create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
-            quads[currentInstruction] = *quad;
-            $$.breaklist = makelist(currentInstruction);
-            currentInstruction++;
+                // gen quad
+                quadruplets_node* quad = create_quadruplet(currentInstruction, quadruplets_operators_names[BR],
+                                                create_operand(Labels, operand1_val), create_operand(Empty,operand2_val), create_operand(Empty, result_val));
+                quads[currentInstruction] = *quad;
+                $$.breaklist = makelist(currentInstruction);
+                currentInstruction++;
+            }
 
         }
         | CONTINUE SEMICOLON {
-
-            yysuccess(1, "Continue statement");
+            if(flag <= 0) yyerror_semantic("Continue statement not allowed outside a loop.");
+            else yysuccess(1, "Continue statement");
         }
         ;
 

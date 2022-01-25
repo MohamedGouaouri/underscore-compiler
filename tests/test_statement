@@ -1,34 +1,64 @@
 
 ()_ f(){
 
-    $_ x;
-    loop ( x = 0 ) {
-        x <- 1;
-        break;
-        loop( x = 2 ){
-            x <- 3;
-            ? ( x = 3 ) {
-                x <- 4;
-                continue;
-            }
-            x <- 5;
-        }
-        x <- 6;
-    }
-    x <- 7;
 
-    # loop(x <- 0; x > 0; x <- x*x) {
-    #     continue;
-    #     ?(false) {
-    #         break;
-    #     }
+
+    $_ x;
+
+    # x <- 2 * -1 ;
+
+
+    # loop( x != 2 ){
+    #     x <- 3;
     # }
-    # loop($_x <- 0; x > 0; x <- x*x) {
+
+    # loop("hi") {
+    #     x <- 1;
     #     continue;
-    #     ?(false) {
-    #         break;
-    #     }
+        
+    #     x <- 6;
     # }
+    # x <- 7;
+
+
+
+    # $_ y;
+    # x <- x+y+(-1)/(y*x)+(-1)^x*x  ;
+
+    # $_ a;
+    # $_ b;
+    # $_ c;
+    # $_ d;
+
+    # a <- a+b*((d+a)/(d+b))*c;
+
+    x <- 0;
+
+    # $_ a;
+
+    # ?_ success <- (true || false) && true || false ;
+
+    ""_ chaine <- "souaad";
+
+    x <- x + 1;
+
+
+        # loop(x <- 0; x > 0; x <- x + 1) {
+
+        #     x <- 1;
+        #     loop(x <- 0; x <= 2; x <- x*x) {
+
+        #         ?(false) {
+        #             x <- 0;
+        #         }
+        #         x <- 3;
+
+        #     }
+        #     x <- 4;
+
+        # }
+
+    
 
 
     # ? (true) {

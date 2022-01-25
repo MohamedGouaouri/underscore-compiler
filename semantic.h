@@ -7,9 +7,9 @@
 #include "quadruplets.h"
 
 #define MAXSTRING 255
-#define MAXCODE 100
-#define true 1;
-#define false 0;
+#define MAXCODE 1000
+#define true 1
+#define false 0
 typedef int bool;
 
 struct jump_indices
@@ -58,6 +58,7 @@ struct expression
     /* data */
     bool is_string;
     bool is_boolean; // tells weather the current expression is boolean or not
+    bool is_number;
     struct arithmetic_expression arithmetic_expression;
     struct boolean_expression boolean_expression;
 };

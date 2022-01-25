@@ -30,7 +30,6 @@
 }
 
 %token UNDERSCORE
-%token ENTRY
 
 %token LOOP "loop"
 %token IF "?"
@@ -164,8 +163,7 @@ underscore: %empty
         ;
 
 func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); char str[5]; sprintf(str, "%d", declared_size); if(declared_size!=-1) set_attr(_yylval.ident, "size", str); declared_size=-1; } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
-    | FUNCTIONDECLARE ret ENTRY OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK
-
+    
 
 ret: %empty {strcpy($$ , "void");}
     | srt // simple return type 
@@ -195,8 +193,8 @@ param: simple_type_declare ID { setupNewSimpleVariable($1); } ;
      | complex_type_declare ID { setupNewComplexVariable($1); }
 
 
-bloc: statement bloc {yysuccess(1, "Block.");}
-     | %empty {yysuccess(1, "Emptyness.");} 
+bloc: statement bloc {/*yysuccess(1, "Block.");*/}
+     | %empty {/*yysuccess(1, "Emptyness.");*/}
      | error bloc {yyerror("wrong statement inside block."); yyerrok;}
      ;
 
@@ -247,11 +245,11 @@ just_declare: simple_type_declare ID { setupNewSimpleVariable($1); }
 init_declare: just_declare ASSIGNMENT expression 
             | just_declare ASSIGNMENT OPENBRACKET values_array CLOSEBRACKET
             ;
-values_eps: %empty 
+/* values_eps: %empty 
           | call_param 
-          ;
+          ; */
 values_array: %empty { if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); declared_size=-1; }
-          | values_array /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
+          | array_value /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
           ;
             
 declare: just_declare 
@@ -379,7 +377,6 @@ int main(int argc, char **argv) {
     fprintf(stdout, "" MAGENTA "========= Stream of tokens found =========" RESET "\n");
 
     yyparse();
-
 
     printGlobalSymTable(gSymT);
      

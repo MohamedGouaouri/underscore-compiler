@@ -25,7 +25,6 @@ UNDERSCORE "_"
 LOOP loop
 READ READ
 WRITE WRITE
-ENTRY entry
 
 IF \?
 ELSE :
@@ -130,10 +129,6 @@ INLINECOMMENT #[^_]{ANYTHING}
     return WRITE;
 }
 
-{ENTRY} {
-    yysuccess(0,"the main entry");
-    return ENTRY;
-}
 
 {IF} {
     yysuccess(0,"IF condition / Boolean symbol");
@@ -447,7 +442,7 @@ INLINECOMMENT #[^_]{ANYTHING}
 
 . {
     
-    yyerror("Unrecognized character");
+    // yyerror("Unrecognized character");
     showLexicalError();
     yyterminate();
 }

@@ -164,6 +164,7 @@ underscore: %empty
         ;
 
 func: FUNCTIONDECLARE ret ID { _yylval.ident->symType = FUNCTIONDECLARE; set_attr(_yylval.ident, "typeretour", $<string>2); char str[5]; sprintf(str, "%d", declared_size); if(declared_size!=-1) set_attr(_yylval.ident, "size", str); declared_size=-1; } OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK { insertNewGlobalEntry(gSymT, symt); symt = allocateSymTable();   yysuccess(1,"function ended.");}
+    | FUNCTIONDECLARE ret ENTRY OPENPARENTHESIS params_eps CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK
 
 
 ret: %empty {strcpy($$ , "void");}
@@ -244,10 +245,13 @@ just_declare: simple_type_declare ID { setupNewSimpleVariable($1); }
             | complex_type_declare ID { setupNewComplexVariable($1); }
             ;
 init_declare: just_declare ASSIGNMENT expression 
-            | just_declare ASSIGNMENT OPENBRACKET values_eps CLOSEBRACKET
+            | just_declare ASSIGNMENT OPENBRACKET values_array CLOSEBRACKET
             ;
-values_eps: %empty { if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); declared_size=-1; }
-          | call_param /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
+values_eps: %empty 
+          | call_param 
+          ;
+values_array: %empty { if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); declared_size=-1; }
+          | values_array /*static initialization of an array [ exp1, exp2, exp3, ... ]*/
           ;
             
 declare: just_declare 
@@ -273,8 +277,10 @@ elifstmt: ELSE OPENPARENTHESIS expression CLOSEPARENTHESIS OPENHOOK bloc CLOSEHO
 elsestmt: ELSE OPENPARENTHESIS CLOSEPARENTHESIS OPENHOOK bloc CLOSEHOOK {yysuccess(1,"else stmt.");}
         ;
 
-call_param: expression {effective_size++; if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); effective_size=0; declared_size=-1; }
-		  | expression {effective_size++;} COMMA call_param 
+call_param: expression 
+		  | expression COMMA call_param 
+array_value: expression {effective_size++; if(declared_size<effective_size) yywarning("Excess of elements in array initializer."); effective_size=0; declared_size=-1; }
+		  | expression {effective_size++;} COMMA array_value 
 
 
 //General formula for experession
@@ -469,7 +475,7 @@ void checkif_fieldisvalid(char precedent[50], char fieldname[50]) { /*Works with
         SymTableNode* structnode = lookup(symt, str); /*Lookup the node where the struct type is declared (we need to remove the _ from the type string first)*/
 
         if (structnode == NULL) {
-            printf("\n\nType wasn't found %s\n\n", str);
+            yyerror("Type wasn't found");
             return;
         } 
 

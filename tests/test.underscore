@@ -13,7 +13,7 @@
 
 
 # Sum of array elements
-()_ $_ sum($_[]_ array, $_ length){
+()_ $_ sumfunction($[]_ array, $_ length){
     $_ sum <- 0;
     loop ($_ i <- 0; i < length; i <- i+1){
         sum <- sum + array[i];
@@ -22,6 +22,7 @@
 }
 
 # Recursive factorial function
+#_
 ()_ $_ fact($_ n){
     ? (n <= 1){
         -> 1;
@@ -29,7 +30,7 @@
     :() {
         -> n * fact(n - 1);
     }
-}
+}_#
 
 # Check if string is palindrome
 ()_ ?_ checkIsPlaindrome(""_ string, $_ length){
@@ -49,19 +50,16 @@
 
 # Struct example
 ()_ structs(){
-    {}_ student1 {
+    
+    {}_ student {
         $_ id,
         ""_ name,
         $_ age,
-        $_ default <- 10
+        $_ default 
     };
 
-    {}_ student2 {
-        $_ id,
-        ""_ name,
-        $_ age,
-        $_ default <- 10
-    };
+    _student student1;
+    _student student2;
 
     student1.id <- 1;
     student1.name <- "a";
@@ -71,16 +69,6 @@
 
 }
 
-()_  pointers(){
-    @$_ a;
-    @a <- 100;
-    $_ @b;
-    @b <- 200;
-
-    @a <- @b;
-
-    WRITE(@a);
-}
 
 
 

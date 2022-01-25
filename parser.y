@@ -472,7 +472,7 @@ init_declare: just_declare ASSIGNMENT {flag_assign=true;} expression {flag_assig
 
 		    if(type_checked==1){
 				
-                    if (!$4.is_boolean){
+                    if ($4.is_number){
 			
                         union operandValue* operand1_val = create_operand_value();
                         union operandValue* operand2_val = create_operand_value();
@@ -514,8 +514,9 @@ declare: just_declare
 
 // TODO change this to var_exp
 assign: ID {
-            // strcpy($<string>$ , _yylval.ident->symName);
-            char saveName[255];   
+
+            if(!checkif_localsymbolexists(_yylval.ident)) return;
+ 
             if(_yylval.ident == NULL) { 
                 strcpy($<string>$, save); 
             } else { 
@@ -523,7 +524,45 @@ assign: ID {
             }
             
         } ASSIGNMENT expression {
-            if (!$4.is_boolean){
+
+
+            char sym[255];
+		    char val[255];	
+		    bool type_checked=false;
+
+                    // get symbole from symtable
+                        AttrNode *node = lookup(symt, save)->rootAttr;
+
+                        
+
+                        while(node != NULL){
+                            
+                            if(strcmp(node->name,"type")== 0){
+                                
+                                
+                                if($4.is_boolean){
+
+                                    if(strcmp(node->val,"boolean")== 0)	{
+                                        type_checked=true; yysuccess(1,"boolean checked");
+                                    }
+                                    else{yyerror_semantic("Type mismatch"); return;}
+                                }
+                                else if($4.is_string){
+
+                                    if( strcmp(node->val,"string")== 0){ type_checked=true;yysuccess(1,"string checked");}
+                                    else{yyerror_semantic("type mismatch"); return;}
+                                }
+                                else if(strcmp(node->val,"number")== 0){ type_checked=true;yysuccess(1,"number checked");}
+                                    else{yyerror_semantic("Type mismatch"); return;}
+                            } 
+                            node=node->next;
+                        }
+
+		    if(type_checked==1){
+                
+				
+                    if ($4.is_number){
+
                 union operandValue* operand1_val = create_operand_value();
                 union operandValue* operand2_val = create_operand_value();
                 union operandValue* result_val = create_operand_value();
@@ -554,7 +593,8 @@ assign: ID {
                                                     operand1, operand2, result);
                 quads[currentInstruction] = *quad;
                 currentInstruction++;
-            }
+                }
+            } 
       }
 	  /* | ADDRESSVALUE var ASSIGNMENT expression
 	  | POINTERVALUE var ASSIGNMENT expression */
@@ -1391,14 +1431,13 @@ expression:
         $$.arithmetic_expression.value  = _yylval.ival;
     }
     | ID {
-        checkif_localsymbolexists(_yylval.ident);
 
-        char sym[255];
-        char val[255];	
+        if(!checkif_localsymbolexists(_yylval.ident)) { return; }
+
+        	
 
             // get symbole from symtable
-            strcpy(sym, symt->tail->symName);
-            AttrNode *node = symt->tail->rootAttr;
+            AttrNode *node = lookup(symt, save)->rootAttr;
             while(node != NULL){
                 if(strcmp(node->name,"type")== 0){
                     if(strcmp(node->val,"boolean")== 0){
@@ -1572,14 +1611,17 @@ void checkif_globalsymbolexists(SymTableNode* currentNode) {
     deleteEntry(symt, symt->tail->symName);
 } 
 
-void checkif_localsymbolexists(SymTableNode* insertedNode) {
+bool checkif_localsymbolexists(SymTableNode* insertedNode) {
     /*Scanner returns NULL if it finds symbol already inserted in the symTable*/
     /*In this case, NULL means good, it means we're using a variable that's been declared before*/
 
     if(insertedNode != NULL) {
         yyerror("ID is not declared.");
         deleteEntry(symt, symt->tail->symName);
+        return false;
     }
+
+    return true;
 
 }
 

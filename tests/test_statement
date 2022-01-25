@@ -1,4 +1,105 @@
 
+()_ g() {
+
+    $_ a;
+    $_ b;
+    $_ c;
+    $_ d;
+    $_ e;
+    $_ f;
+    $_ g;
+
+    # Test1 arithmetic expression
+    a <- (a + b * c) + ( ( d + b * c ) - f * g ) + f * g * d;
+
+    # Test2 arithmetic expression
+    # $_ n <- 2;
+    # a <- a + b * d ^ (3 * n);
+
+    # Test3 arithmetic expression
+    # a <- a - c * d % 2;
+
+
+    # Test4 if statement
+    # ? ( ( a < 2 || a > 1 ) &&  (a-b) > 0 ){
+    #     a <- a * 2;
+    # }
+
+
+    # Test5 if-else statement
+    # ? (a > 10 && b < 2){
+    #     a <- a * 2;
+    # }
+    # : (){
+    #     a <- a / 2;
+    # }
+
+    # Test6 while loop
+
+    # loop(a > 0 || c < a){
+    #      a <- a * 3 + b;
+    # }
+
+    # Test7 while loop avec break
+
+    # loop(a > 0 || c < a){
+    #     a <- a * 3 + b;
+    #     ? (a = 0){
+    #         break;
+    #     }
+    #     a <- a - 1;
+    # }
+
+    # Test8 while loop avec continue
+    # loop(a > 0 || c < a){
+    #     a <- a * 3 + b;
+    #     ? (a = 0){
+    #         continue;
+    #     }
+    #     a <- a - 1;
+    # }
+
+    # Test9 for loop: Success
+    # loop(a <- 0; a < 10; a <- a + 1){
+    #     a <- b + c;
+    # }
+
+    # Test10 put every thing together x)
+
+    # loop(true && (a < 0 || a > 10) && (a > (b - c))){
+    #     a <- a ^ (a + 2) - b + c;
+    #     ? ( a > 0 ){
+    #         a <- b - 1;
+    #     }
+    #     :() {
+    #         break;
+    #     }
+
+    #     loop(a <- 0; a < b + c; a <- a * 2){
+    #         b <- b + a ^ 2;
+    #     }
+    # }
+
+
+    # Test11 type mismatch: Fail
+    # ""_ greeting = "Hello";
+    # a <- b + greeting;
+
+    # Test12 boolean typed expression as control flow condition
+    # ? (greeting){
+    #     a <- b;
+    # }
+
+    # Test12 break and continue outside loop
+    # ? (a = 2){
+    #     break;
+    # }
+    # ? (a < 0){
+    #     continue;
+    # }
+}
+
+#_
 ()_ f(){
 
 
@@ -32,11 +133,12 @@
 
     # a <- a+b*((d+a)/(d+b))*c;
 
-    x <- 0;
+    # x <- 0;
 
     # $_ a;
 
-    # ?_ success <- (true || false) && true || false ;
+    ?_ success <- (true || false) && true || false ;
+
 
     ""_ chaine <- "souaad";
 
@@ -105,3 +207,4 @@
 
 }
 
+_#
